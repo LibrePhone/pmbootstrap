@@ -43,7 +43,7 @@ apk_tools_static_min_version = "2.7.1-r0"
 # overriden on the commandline)
 defaults = {
     "alpine_version": "edge",  # alternatively: latest-stable
-    "aports": os.path.normpath(pmb_src + "/../aports"),
+    "aports": os.path.normpath(pmb_src + "/aports"),
     "config": os.path.expanduser("~") + "/.config/pmbootstrap.cfg",
     "device": "samsung-i9100",
     "log": "$WORK/log.txt",
