@@ -15,28 +15,28 @@ After that, you can run any command. All dependencies (e.g. chroots) will be ins
 Here are some examples:
 
 
-`pmbootstrap --help`:
+`./pmbootstrap.py --help`:
 List all available commands
 
-`pmbootstrap log`:
+`./pmbootstrap.py log`:
 Run tail -f on the logfile, which contains detailed output. Do this in a second terminal, while executing another `pmbootstrap` command to get all the details.
 
-`pmbootstrap chroot`:
+`./pmbootstrap.py chroot`:
 Open a shell inside a native Alpine Linux chroot (~6 MB install size).
 
-`pmbootstrap chroot --suffix=buildroot_armhf`:
+`./pmbootstrap.py chroot --suffix=buildroot_armhf`:
 Open a shell inside an `armhf` Alpine Linux chroot, with qemu user mode emulation and binfmt support automatically set up.
 
-`pmbootstrap build heimdall`:
+`./pmbootstrap.py build heimdall`:
 Build the "heimdall" package (specify any package from the `aports`-folder here).
 
-`pmbootstrap build heimdall --arch=armhf`:
+`./pmbootstrap.py build heimdall --arch=armhf`:
 Build the "heimdall" package for `armhf` inside the `armhf` chroot, with the cross-compiler installed in the native chroot (chroots are connected via distcc).
 
-`pmbootstrap install`:
+`./pmbootstrap.py install`:
 Generate a system image file with a full postmarketOS installation. All required packages get built first, if they do not exist yet. You will get asked for the "user" password and the root partition password.
 
-`pmbootstrap install --sdcard=/dev/mmcblk0`:
+`./pmbootstrap.py install --sdcard=/dev/mmcblk0`:
 Format and partition the SD card `/dev/mmcblk0`, and put a full postmarketOS installation on it
 
 
