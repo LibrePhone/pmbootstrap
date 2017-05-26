@@ -1,5 +1,5 @@
 # pmbootstrap
-Sophisticated chroot/build/flash tool, to develop and install [postmarketos](https://ollieparanoid.github.io/post/postmarketOS).
+Sophisticated chroot/build/flash tool to develop and install [postmarketOS](https://ollieparanoid.github.io/post/postmarketOS).
 
 
 ## Requirements
@@ -41,4 +41,4 @@ Format and partition the SD card `/dev/mmcblk0`, and put a full postmarketOS ins
 
 
 ## Testsuite
-Simply install pytest (via your package manager or via pip) and run it inside the pmbootstrap folder.
+Simply install `pytest` (via your package manager or via pip) and run it inside the pmbootstrap folder.
