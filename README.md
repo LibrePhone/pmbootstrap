@@ -9,7 +9,7 @@ Sophisticated chroot/build/flash tool to develop and install [postmarketOS](http
 
 
 ## Usage
-Run `pmbootstrap init` first, to select a target device and the work folder, which will contain all the chroots and other data.
+Run `./pmbootstrap.py init` first, to select a target device and the work folder, which will contain all the chroots and other data.
 After that, you can run any command. All dependencies (e.g. chroots) will be installed automatically, if they are not available yet.
 
 Here are some examples:
