@@ -5,7 +5,7 @@ Sophisticated chroot/build/flash tool to develop and install [postmarketOS](http
 ## Requirements
 * GNU/Linux
 * Python 3
-* openssh
+* OpenSSL
 
 
 ## Usage
