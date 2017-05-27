@@ -18,6 +18,7 @@ along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
 import os
 import logging
+import glob
 
 import pmb.config
 import pmb.chroot
@@ -46,8 +47,9 @@ def init(args, suffix="native"):
                         suffix)
 
         # Copy package signing key to /etc/apk/keys
-        pmb.chroot.root(args, ["cp", "/home/user/.abuild/*.pub",
-                               "/etc/apk/keys/"], suffix)
+        for key in glob.glob(chroot + "/home/user/.abuild/*.pub"):
+            key = key[len(chroot):]
+            pmb.chroot.root(args, ["cp", key, "/etc/apk/keys/"], suffix)
 
     # Add gzip wrapper, that converts '-9' to '-1'
     if not os.path.exists(chroot + "/usr/local/bin/gzip"):
