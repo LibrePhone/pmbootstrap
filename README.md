@@ -2,6 +2,8 @@
 Sophisticated chroot/build/flash tool to develop and install [postmarketOS](https://ollieparanoid.github.io/post/postmarketOS).
 
 
+[Static code analysis](https://github.com/postmarketOS/pmbootstrap/blob/master/test/static_code_analysis.sh) status: ![travis badge](https://api.travis-ci.org/postmarketOS/pmbootstrap.png?branch=master)
+
 ## Requirements
 * GNU/Linux
 * Python 3
@@ -44,3 +46,4 @@ Format and partition the SD card `/dev/mmcblk0`, and put a full postmarketOS ins
 
 ## Testsuite
 Simply install `pytest` (via your package manager or via pip) and run it inside the pmbootstrap folder.
+
