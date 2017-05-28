@@ -16,7 +16,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
-import urllib.request
 import os
 import logging
 import shutil
@@ -158,7 +157,6 @@ def init(args):
     """
     Download, verify, extract $WORK/apk.static.
     """
-    base_url = args.mirror_alpine + "edge/main/" + args.arch_native
     apkindex = download(args, "APKINDEX.tar.gz")
     index_data = pmb.parse.apkindex.read(args, "apk-tools-static", apkindex)
     version = index_data["version"]

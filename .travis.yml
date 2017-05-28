@@ -1,0 +1,11 @@
+language: "python"
+python: "3.6"
+addons:
+  apt:
+    sources:
+    - debian-sid
+    packages:
+    - shellcheck
+install: "pip install flake8"
+script: "test/static_code_analysis.sh"
+

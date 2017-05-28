@@ -2,13 +2,17 @@
 Sophisticated chroot/build/flash tool to develop and install [postmarketOS](https://ollieparanoid.github.io/post/postmarketOS).
 
 
+[Static code analysis](https://github.com/postmarketOS/pmbootstrap/blob/master/test/static_code_analysis.sh) status: [![travis badge](https://api.travis-ci.org/postmarketOS/pmbootstrap.png?branch=master)](https://travis-ci.org/postmarketOS/pmbootstrap)
+
 ## Requirements
 * GNU/Linux
 * Python 3
-* openssh
+* OpenSSL
 
 
 ## Usage
+**Check out the [porting guide](https://github.com/postmarketOS/pmbootstrap/wiki/Porting-to-a-new-device) for a practical start!**
+
 Run `./pmbootstrap.py init` first, to select a target device and the work folder, which will contain all the chroots and other data.
 After that, you can run any command. All dependencies (e.g. chroots) will be installed automatically, if they are not available yet.
 
@@ -42,3 +46,4 @@ Format and partition the SD card `/dev/mmcblk0`, and put a full postmarketOS ins
 
 ## Testsuite
 Simply install `pytest` (via your package manager or via pip) and run it inside the pmbootstrap folder.
+
