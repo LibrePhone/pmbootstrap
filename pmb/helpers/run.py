@@ -32,20 +32,22 @@ def core(args, cmd, log_message, log, return_stdout, check=True):
         ret = None
         if log:
             if return_stdout:
-                ret = subprocess.run(cmd, stdout=subprocess.PIPE,
-                                     check=check).stdout.decode('utf-8')
+                ret = subprocess.check_output(cmd).decode("utf-8")
                 args.logfd.write(ret)
             else:
-                subprocess.run(cmd, stdout=args.logfd, stderr=args.logfd,
-                               check=check)
+                subprocess.check_call(cmd, stdout=args.logfd,
+                                      stderr=args.logfd)
             args.logfd.flush()
         else:
             logging.debug("*** output passed to pmbootstrap stdout, not" +
                           " to this log ***")
-            subprocess.run(cmd, check=check)
+            subprocess.check_call(cmd)
 
     except subprocess.CalledProcessError as exc:
-        raise RuntimeError("Command failed: " + log_message) from exc
+        if check:
+            raise RuntimeError("Command failed: " + log_message) from exc
+        else:
+            pass
     return ret
 
 

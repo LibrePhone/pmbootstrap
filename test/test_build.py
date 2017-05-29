@@ -27,13 +27,13 @@ import pmb.aportgen
 
 
 @pytest.fixture
-def args(tmpdir):
+def args(tmpdir, request):
     import pmb.parse
     sys.argv = ["pmbootstrap.py", "chroot"]
     args = pmb.parse.arguments()
     setattr(args, "logfd", open("/dev/null", "a+"))
-    yield args
-    args.logfd.close()
+    request.addfinalizer(args.logfd.close)
+    return args
 
 
 def test_build(args):

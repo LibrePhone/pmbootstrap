@@ -32,7 +32,7 @@ def executables_absolute_path():
     """
     ret = {}
     for binary in ["sh", "chroot"]:
-        path = shutil.which(binary)
+        path = shutil.which(binary, path=pmb.config.chroot_host_path)
         if not path:
             raise RuntimeError("Could not find the '" + binary +
                                "' executable. Make sure, that it is in" " your current user's PATH.")
