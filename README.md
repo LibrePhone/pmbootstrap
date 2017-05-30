@@ -13,6 +13,8 @@ Sophisticated chroot/build/flash tool to develop and install [postmarketOS](http
 ## Usage
 **Check out the [porting guide](https://github.com/postmarketOS/pmbootstrap/wiki/Porting-to-a-new-device) for a practical start!**
 
+**Porting progess: Wiki/[Devices](https://github.com/postmarketOS/pmbootstrap/wiki/Devices)**
+
 Run `./pmbootstrap.py init` first, to select a target device and the work folder, which will contain all the chroots and other data.
 After that, you can run any command. All dependencies (e.g. chroots) will be installed automatically, if they are not available yet.
 
