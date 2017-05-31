@@ -45,6 +45,10 @@ def core(args, cmd, log_message, log, return_stdout, check=True):
 
     except subprocess.CalledProcessError as exc:
         if check:
+            if log:
+                logging.debug("^" * 70)
+                logging.info("NOTE: The failed command's output is above"
+                             " the ^^^ line in the logfile: " + args.log)
             raise RuntimeError("Command failed: " + log_message) from exc
         else:
             pass
