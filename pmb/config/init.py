@@ -39,7 +39,7 @@ def init(args):
     logging.info("Location of the 'work' path. Multiple chroots (native,"
                  " device arch, device rootfs) will be created in there.")
     cfg["pmbootstrap"]["work"] = pmb.helpers.cli.ask(args, "Work path",
-                                                     None, args.work)
+                                                     None, args.work, False)
     os.makedirs(cfg["pmbootstrap"]["work"], 0o700, True)
 
     # Parallel job count

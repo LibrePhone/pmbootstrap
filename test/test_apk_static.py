@@ -30,38 +30,59 @@ import pmb.parse.apkindex
 
 
 @pytest.fixture
-def args():
+def args(request):
     import pmb.parse
     sys.argv = ["pmbootstrap.py", "chroot"]
     args = pmb.parse.arguments()
     setattr(args, "logfd", open("/dev/null", "a+"))
-    yield args
-    args.logfd.close()
+    request.addfinalizer(args.logfd.close)
+    return args
 
 
-def test_read_signature_info(tmpdir):
-    with tarfile.open(tmpdir + "/test.apk", "w:gz") as tar:
-        # No signature found
+def test_read_signature_info(args):
+    # Tempfolder inside chroot for fake apk files
+    tmp_path = "/tmp/test_read_signature_info"
+    tmp_path_chroot = args.work + "/chroot_native" + tmp_path
+    if os.path.exists(tmp_path_chroot):
+        pmb.chroot.root(args, ["rm", "-r", tmp_path])
+    pmb.chroot.user(args, ["mkdir", "-p", tmp_path])
+
+    # No signature found
+    pmb.chroot.user(args, ["tar", "-czf", tmp_path + "/no_sig.apk",
+                           "/etc/issue"])
+    with tarfile.open(tmp_path_chroot + "/no_sig.apk", "r:gz") as tar:
         with pytest.raises(RuntimeError) as e:
             pmb.chroot.apk_static.read_signature_info(tar)
         assert "Could not find signature" in str(e.value)
 
-        # Add signature file with invalid name
-        tar.add(__file__, "sbin/apk.static.SIGN.RSA.invalid.pub")
+    # Signature file with invalid name
+    pmb.chroot.user(args, ["mkdir", "-p", tmp_path + "/sbin"])
+    pmb.chroot.user(args, ["cp", "/etc/issue", tmp_path +
+                           "/sbin/apk.static.SIGN.RSA.invalid.pub"])
+    pmb.chroot.user(args, ["tar", "-czf", tmp_path + "/invalid_sig.apk",
+                           "sbin/apk.static.SIGN.RSA.invalid.pub"],
+                    working_dir=tmp_path)
+    with tarfile.open(tmp_path_chroot + "/invalid_sig.apk", "r:gz") as tar:
         with pytest.raises(RuntimeError) as e:
             pmb.chroot.apk_static.read_signature_info(tar)
         assert "Invalid signature key" in str(e.value)
 
-    # Add signature file with realistic name
+    # Signature file with realistic name
     path = glob.glob(pmb_src + "/keys/*.pub")[0]
     name = os.path.basename(path)
     path_archive = "sbin/apk.static.SIGN.RSA." + name
-    with tarfile.open(tmpdir + "/test2.apk", "w:gz") as tar:
-        tar.add(__file__, path_archive)
+    pmb.chroot.user(args, ["mv", tmp_path + "/sbin/apk.static.SIGN.RSA.invalid.pub",
+                           tmp_path + "/" + path_archive])
+    pmb.chroot.user(args, ["tar", "-czf", tmp_path + "/realistic_name_sig.apk",
+                           path_archive], working_dir=tmp_path)
+    with tarfile.open(tmp_path_chroot + "/realistic_name_sig.apk", "r:gz") as tar:
         sigfilename, sigkey_path = pmb.chroot.apk_static.read_signature_info(
             tar)
-    assert sigfilename == path_archive
-    assert sigkey_path == path
+        assert sigfilename == path_archive
+        assert sigkey_path == path
+
+    # Clean up
+    pmb.chroot.user(args, ["rm", "-r", tmp_path])
 
 
 def test_successful_extraction(args, tmpdir):

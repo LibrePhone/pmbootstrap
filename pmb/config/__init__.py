@@ -75,6 +75,11 @@ chroot_path = ":".join([
     "/bin"
 ])
 
+# The PATH variable used on the host, to find the "chroot" and "sh"
+# executables. As pmbootstrap runs as user, not as root, the location
+# for the chroot executable may not be in the PATH (Debian).
+chroot_host_path = os.environ["PATH"] + ":/usr/sbin/"
+
 # Folders, that get mounted inside the chroot
 # $WORK gets replaced with args.work
 # $ARCH gets replaced with the chroot architecture (eg. x86_64, armhf)

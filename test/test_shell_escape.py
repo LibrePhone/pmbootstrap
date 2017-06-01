@@ -29,13 +29,13 @@ import pmb.chroot.user
 
 
 @pytest.fixture
-def args():
+def args(request):
     import pmb.parse
     sys.argv = ["pmbootstrap.py", "chroot"]
     args = pmb.parse.arguments()
     setattr(args, "logfd", open("/dev/null", "a+"))
-    yield args
-    args.logfd.close()
+    request.addfinalizer(args.logfd.close)
+    return args
 
 
 def test_shell_escape(args):

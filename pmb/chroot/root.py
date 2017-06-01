@@ -26,6 +26,20 @@ import pmb.chroot.binfmt
 import pmb.helpers.run
 
 
+def executables_absolute_path():
+    """
+    Get the absolute paths to the sh and chroot executables.
+    """
+    ret = {}
+    for binary in ["sh", "chroot"]:
+        path = shutil.which(binary, path=pmb.config.chroot_host_path)
+        if not path:
+            raise RuntimeError("Could not find the '" + binary +
+                               "' executable. Make sure, that it is in" " your current user's PATH.")
+        ret[binary] = path
+    return ret
+
+
 def root(args, cmd, suffix="native", working_dir="/", log=True,
          auto_init=True, return_stdout=False, check=True):
     """
@@ -43,20 +57,19 @@ def root(args, cmd, suffix="native", working_dir="/", log=True,
 
     # Run the args with sudo chroot, and with cleaned environment
     # variables
-    sh_bin = shutil.which("sh")
-    chroot_bin = shutil.which("chroot")
+    executables = executables_absolute_path()
     for i in range(len(cmd)):
         cmd[i] = shlex.quote(cmd[i])
-
     cmd_inner_shell = ("cd " + shlex.quote(working_dir) + ";" +
                        " ".join(cmd))
-    cmd_full = ["sudo", sh_bin, "-c",
+
+    cmd_full = ["sudo", executables["sh"], "-c",
                 "unset $(env | cut -d= -f1);" +  # unset all
                 " CHARSET=UTF-8" +
                 " PATH=" + pmb.config.chroot_path +
                 " SHELL=/bin/ash" +
                 " HISTFILE=~/.ash_history" +
-                " " + chroot_bin +
+                " " + executables["chroot"] +
                 " " + chroot +
                 " sh -c " + shlex.quote(cmd_inner_shell)
                 ]
