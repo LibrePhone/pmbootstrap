@@ -74,3 +74,5 @@ def init(args):
     log_handler._args = args
     handler.setFormatter(formatter)
     root_logger.addHandler(handler)
+
+    logging.debug('*' * 40)
