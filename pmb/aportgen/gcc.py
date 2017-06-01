@@ -57,10 +57,6 @@ def generate(args, pkgname):
         # Do not package libstdc++
         '*subpackages="$subpackages libstdc++:libcxx:*':
             '       subpackages="$subpackages g++$_target:gpp"',
-
-        # Do not move gdb.py
-        '*-gdb.py*': None,
-        '*/usr/share/gdb/python/auto-load/usr/lib/*': None,
     }
 
     pmb.aportgen.core.rewrite(
