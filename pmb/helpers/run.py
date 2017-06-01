@@ -65,7 +65,7 @@ def _execute(loop, args, cmd, log_message, log, return_stdout, check=True):
     transport.close()
 
     return_code = transport.get_returncode()
-    if return_code != 0 and False:
+    if return_code != 0:
         if check:
             raise RuntimeError("Command failed: \n" + protocol.error)
     args.logfd.write('Program exited with: {}\n'.format(transport.get_returncode()))
