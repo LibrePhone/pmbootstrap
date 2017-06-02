@@ -55,7 +55,7 @@ def menuconfig(args, pkgname, arch):
         cmd += [key + "=" + value]
     cmd += ["abuild", "-d", "menuconfig"]
     logging.info("(native) run menuconfig")
-    pmb.chroot.user(args, cmd, "native", "/home/user/build", log=False)
+    pmb.chroot.user(args, cmd, "native", "/home/user/build", log=False, passthrough=True)
 
     # Update config + checksums
     logging.info("copy kernel config back to aport-folder")

@@ -19,6 +19,7 @@ along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 import logging
 import asyncio
 import locale
+import subprocess
 
 
 @asyncio.coroutine
@@ -77,7 +78,7 @@ def _execute(loop, args, cmd, log_message, log, return_stdout, check=True):
         return return_code
 
 
-def core(args, cmd, log_message, log, return_stdout, check=True):
+def core(args, cmd, log_message, log, return_stdout, check=True, passthrough=False):
     logging.debug(log_message)
     """
     Run the command and write the output to the log.
@@ -86,15 +87,18 @@ def core(args, cmd, log_message, log, return_stdout, check=True):
     :param log: send output to log instead of stdout
     :param return_stdout: return the stdout from the called process
     """
-    loop = asyncio.get_event_loop()
-    loop.set_debug(False)
-    task = _execute(loop, args, cmd, log_message, log, return_stdout, check)
-    result = loop.run_until_complete(task)
+    if passthrough:
+        result = subprocess.check_call(cmd)
+    else:
+        loop = asyncio.get_event_loop()
+        loop.set_debug(False)
+        task = _execute(loop, args, cmd, log_message, log, return_stdout, check)
+        result = loop.run_until_complete(task)
     return result
 
 
 def user(args, cmd, log=True, working_dir=None, return_stdout=False,
-         check=True):
+         check=True, passthrough=False):
     """
     :param working_dir: defaults to args.work
     """
@@ -102,13 +106,13 @@ def user(args, cmd, log=True, working_dir=None, return_stdout=False,
         working_dir = args.work
 
     # TODO: maintain and check against a whitelist
-    return core(args, cmd, "% " + " ".join(cmd), log, return_stdout, check)
+    return core(args, cmd, "% " + " ".join(cmd), log, return_stdout, check, passthrough)
 
 
 def root(args, cmd, log=True, working_dir=None, return_stdout=False,
-         check=True):
+         check=True, passthrough=False):
     """
     :param working_dir: defaults to args.work
     """
     cmd = ["sudo"] + cmd
-    return user(args, cmd, log, working_dir, return_stdout, check)
+    return user(args, cmd, log, working_dir, return_stdout, check, passthrough)
