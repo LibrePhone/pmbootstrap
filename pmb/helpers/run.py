@@ -68,8 +68,7 @@ def _execute(loop, args, cmd, log_message, log, return_stdout, check=True):
     if return_code != 0 and False:
         if check:
             raise RuntimeError("Command failed: \n" + protocol.error)
-    args.logfd.write('Program exited with: {}\n'.format(transport.get_returncode()))
-    args.logfd.flush()
+    print('Program exited with: {}'.format(transport.get_returncode()))
 
     if return_stdout:
         return protocol.output
