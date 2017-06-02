@@ -76,7 +76,12 @@ def create_and_mount_image(args):
         raise RuntimeError("Aborted.")
 
     pmb.chroot.user(args, ["mkdir", "-p", "/home/user/rootfs"])
-    pmb.chroot.root(args, ["fallocate", "-l", size, img_path])
+    pmb.chroot.root(args, ["fallocate", "-l", size, img_path], check=False)
+    if not os.path.exists(img_path_outside):
+        logging.debug("WARNING: fallocate failed, falling back to truncate."
+                      " More info: https://github.com/postmarketOS/pmbootstrap/issues/28")
+        pmb.chroot.apk.install(args, ["coreutils"])
+        pmb.chroot.root(args, ["truncate", "-s", size, img_path])
 
     # Mount to /dev/install
     logging.info("(native) mount /dev/install (" + args.device + ".img)")
