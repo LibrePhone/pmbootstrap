@@ -20,7 +20,7 @@ import pmb.chroot.root
 
 
 def user(args, cmd, suffix="native", working_dir="/", log=True,
-         auto_init=True, return_stdout=False, check=True, passthrough=False):
+         auto_init=True, return_stdout=False, check=True):
     """
     Run a command inside a chroot as "user"
 
@@ -29,4 +29,4 @@ def user(args, cmd, suffix="native", working_dir="/", log=True,
     """
     cmd = ["su", "user", "-c", " ".join(cmd)]
     return pmb.chroot.root(args, cmd, suffix, working_dir, log,
-                           auto_init, return_stdout, check, passthrough)
+                           auto_init, return_stdout, check)

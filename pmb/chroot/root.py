@@ -41,7 +41,7 @@ def executables_absolute_path():
 
 
 def root(args, cmd, suffix="native", working_dir="/", log=True,
-         auto_init=True, return_stdout=False, check=True, passthrough=False):
+         auto_init=True, return_stdout=False, check=True):
     """
     Run a command inside a chroot as root.
 
@@ -82,4 +82,4 @@ def root(args, cmd, suffix="native", working_dir="/", log=True,
 
     # Run the command
     return pmb.helpers.run.core(args, cmd_full, log_message, log,
-                                return_stdout, check, passthrough)
+                                return_stdout, check)
