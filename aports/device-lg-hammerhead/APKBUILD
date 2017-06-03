@@ -1,0 +1,24 @@
+pkgname=device-lg-hammerhead
+pkgver=1
+pkgrel=1
+pkgdesc="Google Nexus 5"
+url="https://github.com/postmarketOS"
+arch="noarch"
+license="FIXME"
+depends="linux-lg-hammerhead"
+makedepends=""
+install=""
+subpackages=""
+source="deviceinfo"
+options="!check"
+
+build() {
+	return 0
+}
+
+package() {
+	install -D -m644 "$srcdir"/deviceinfo \
+		"$pkgdir"/etc/deviceinfo
+}
+
+sha512sums="d9b34cde62f1de25a8635012ce1cc3a623a238ffb2237c997b74645d4e0df98f98f589c1f9c9f8d2519718d9345dee24b969b6efaa3533e5928a69272d9d997f  deviceinfo"
