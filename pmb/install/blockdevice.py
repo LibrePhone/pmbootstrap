@@ -23,7 +23,6 @@ import pmb.helpers.mount
 import pmb.install.losetup
 import pmb.helpers.cli
 import pmb.config
-import fnmatch
 
 
 def mount_sdcard(args):

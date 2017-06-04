@@ -39,8 +39,8 @@ def partitions_mount(args):
     if not partition_prefix:
         raise RuntimeError("Unable to find the partition prefix,"
                            " expected the first partition of " +
-                           prefix + " to be located at " + prefix
-                           + "1 or " + prefix + "p1!")
+                           prefix + " to be located at " + prefix +
+                           "1 or " + prefix + "p1!")
 
     for i in [1, 2]:
         source = prefix + partition_prefix + str(i)
