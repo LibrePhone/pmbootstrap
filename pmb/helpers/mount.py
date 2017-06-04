@@ -31,6 +31,8 @@ def ismount(folder):
             words = line.split()
             if len(words) >= 2 and words[1] == folder:
                 return True
+            if words[0] == folder:
+                return True
     return False
 
 

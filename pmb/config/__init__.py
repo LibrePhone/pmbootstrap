@@ -166,10 +166,6 @@ install_device_packages = [
 install_size_image = "835M"
 install_size_boot = "100M"
 
-# fnmatch-patterns, that the sdcard patch must match. Otherwise the
-# installer will refuse to format the device.
-install_valid_sdcard_devices = ["/dev/mmcblk*", "/dev/loop*"]
-
 
 #
 # FLASH

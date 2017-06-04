@@ -16,6 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
+import os
 import logging
 import pmb.chroot
 import pmb.config
@@ -30,9 +31,21 @@ def partitions_mount(args):
     if not args.sdcard:
         img_path = "/home/user/rootfs/" + args.device + ".img"
         prefix = pmb.install.losetup.device_by_back_file(args, img_path)
-    for suffix in ["p1", "p2"]:
-        pmb.helpers.mount.bind_blockdevice(args, prefix + suffix,
-                                           args.work + "/chroot_native/dev/install" + suffix)
+
+    partition_prefix = None
+    for symbol in ["p", ""]:
+        if os.path.exists(prefix + symbol + "1"):
+            partition_prefix = symbol
+    if not partition_prefix:
+        raise RuntimeError("Unable to find the partition prefix,"
+                           " expected the first partition of " +
+                           prefix + " to be located at " + prefix
+                           + "1 or " + prefix + "p1!")
+
+    for i in [1, 2]:
+        source = prefix + partition_prefix + str(i)
+        target = args.work + "/chroot_native/dev/installp" + str(i)
+        pmb.helpers.mount.bind_blockdevice(args, source, target)
 
 
 def partition(args):
