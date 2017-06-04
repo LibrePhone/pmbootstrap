@@ -35,7 +35,7 @@ def download(args, url, prefix, cache=True):
     # Check if file exists in cache
     prefix = prefix.replace("/", "_")
     path = (args.work + "/cache_http/" + prefix + "_" +
-            hashlib.sha512(url.encode("utf-8")).hexdigest())
+            hashlib.sha256(url.encode("utf-8")).hexdigest())
     if os.path.exists(path):
         if cache:
             return path
