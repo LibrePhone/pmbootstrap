@@ -55,9 +55,12 @@ def main():
         if args.action == "aportgen":
             pmb.aportgen.generate(args, args.package)
         elif args.action == "build":
-            pmb.build.package(args, args.package, args.arch, args.force, False)
+            pmb.build.package(args, args.package, args.arch, args.force, False,
+                              args.buildinfo)
         elif args.action == "build_init":
             pmb.build.init(args, args.suffix)
+        elif args.action == "challenge":
+            pmb.build.challenge(args, args.apk)
         elif args.action == "checksum":
             pmb.build.checksum(args, args.package)
         elif args.action == "chroot":

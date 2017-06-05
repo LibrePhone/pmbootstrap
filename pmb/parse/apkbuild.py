@@ -37,7 +37,7 @@ def replace_variables(apkbuild):
         replaced.append(subpackage.replace("$pkgname", ret["pkgname"]))
     ret["subpackages"] = replaced
 
-    # makedepend: $makedepends_host, $makedepends_build, $_llvmver
+    # makedepends: $makedepends_host, $makedepends_build, $_llvmver
     replaced = []
     for makedepend in ret["makedepends"]:
         if makedepend.startswith("$"):

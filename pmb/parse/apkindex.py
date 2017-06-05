@@ -74,6 +74,17 @@ def read(args, package, path, must_exist=True):
                         if not ret or compare_version(current["version"],
                                                       ret["version"]) == 1:
                             ret = current
+                    if "provides" in current:
+                        for alias in current["provides"]:
+                            split = alias.split("=")
+                            if len(split) == 1:
+                                continue
+                            name = split[0]
+                            version = split[1]
+                            if name == package:
+                                if not ret or compare_version(current["version"],
+                                                              version) == 1:
+                                    ret = current
                     current = {}
                 if line.startswith("P:"):  # package
                     current["pkgname"] = line[2:-1]
@@ -85,8 +96,17 @@ def read(args, package, path, must_exist=True):
                         current["depends"] = depends.split(" ")
                     else:
                         current["depends"] = []
+                if line.startswith("p:"):  # provides
+                    provides = line[2:-1]
+                    current["provides"] = provides.split(" ")
     if not ret and must_exist:
         raise RuntimeError("Package " + package + " not found in " + path)
+
+    if ret:
+        for key in ["depends", "provides"]:
+            if key not in ret:
+                ret[key] = []
+
     return ret
 
 

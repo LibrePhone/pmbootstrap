@@ -17,7 +17,6 @@ You should have received a copy of the GNU General Public License
 along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
 import logging
-import os
 import pmb.chroot
 import pmb.parse.apkindex
 
@@ -58,19 +57,43 @@ def install(args, packages, suffix="native", build=True):
     pmb.chroot.root(args, ["apk", "--no-progress", "add"] + packages_todo,
                     suffix)
 
-# Update all packages installed in a chroot
-
 
 def update(args, suffix="native"):
+    """
+    Update all packages installed in a chroot
+    """
     pmb.chroot.init(args, suffix)
     pmb.chroot.root(args, ["apk", "update"], suffix)
 
-# Get all explicitly installed packages
+
+def package_split(package):
+    """
+    FIXME: move to pmb.parse
+    """
+    split = package.split("-")
+    pkgrel = split[-1][1:]
+    pkgver = split[-2]
+    version = "-" + pkgver + "-r" + pkgrel
+    pkgname = package[:-1 * len(version)]
+    return {"pkgname": pkgname,
+            "pkgrel": pkgrel,
+            "pkgver": pkgver,
+            "package": package}
 
 
 def installed(args, suffix="native"):
-    world = args.work + "/chroot_" + suffix + "/etc/apk/world"
-    if not os.path.exists(world):
-        return []
-    with open(world, encoding="utf-8") as handle:
-        return handle.read().splitlines()
+    """
+    Get all installed packages and their versions.
+    :returns: { "hello-world": {"package": "hello-world-1-r2", "pkgrel": "2",
+        "pkgver": "1", "pkgname": "hello-world"}, ...}
+    """
+    ret = {}
+    list = pmb.chroot.user(args, ["apk", "info", "-vv"], suffix,
+                           return_stdout=True)
+    for line in list.split("\n"):
+        if not line.rstrip():
+            continue
+        package = line.split(" - ")[0]
+        split = package_split(package)
+        ret[split["pkgname"]] = split
+    return ret

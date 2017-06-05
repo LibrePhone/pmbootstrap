@@ -120,8 +120,14 @@ def arguments():
                            " specific architecture")
     build.add_argument("--arch")
     build.add_argument("--force", action="store_true")
+    build.add_argument("--buildinfo", action="store_true")
     for action in [checksum, build, menuconfig, parse_apkbuild, aportgen]:
         action.add_argument("package")
+
+    # Action: challenge
+    challenge = sub.add_parser("challenge",
+                               help="rebuild a package and diff its contents")
+    challenge.add_argument("apk")
 
     # Use defaults from the user's config file
     args = parser.parse_args()
