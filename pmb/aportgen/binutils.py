@@ -50,6 +50,7 @@ def generate(args, pkgname):
                 --enable-ld=default \\
                 --enable-gold=yes \\
                 --enable-plugins \\
+                --enable-deterministic-archives \\
                 --disable-multilib \\
                 --disable-werror \\
                 --disable-nls \\

@@ -18,6 +18,7 @@ along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
 import os
 import json
+import logging
 import pmb.chroot
 import pmb.chroot.apk
 import pmb.parse.apkindex
@@ -35,8 +36,11 @@ def get_depends_recursively(args, pkgnames, arch=None):
         pkgname = todo.pop(0)
         index_data = pmb.parse.apkindex.read_any_index(args, pkgname, arch)
         if not index_data:
-            raise RuntimeError("Could not find dependency " + pkgname +
-                               " of packages " + str(pkgnames) + " in any APKINDEX")
+            logging.debug(
+                "NOTE: Could not find dependency " +
+                pkgname +
+                " in any APKINDEX.")
+            continue
         pkgname = index_data["pkgname"]
         if pkgname not in pkgnames and pkgname not in ret:
             ret.append(pkgname)
