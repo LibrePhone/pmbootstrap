@@ -76,5 +76,10 @@ def init(args, suffix="native"):
     # Add user to group abuild
     pmb.chroot.root(args, ["adduser", "user", "abuild"], suffix)
 
+    # abuild.conf: Don't clean the build folder after building, so we can
+    # inspect it afterwards for debugging
+    pmb.chroot.root(args, ["sed", "-i", "-e", "s/^CLEANUP=.*/CLEANUP=''/",
+                           "/etc/abuild.conf"], suffix)
+
     # Mark the chroot as initialized
     pmb.chroot.root(args, ["touch", marker], suffix)
