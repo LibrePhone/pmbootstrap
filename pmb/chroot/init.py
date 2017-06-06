@@ -105,6 +105,10 @@ def init(args, suffix="native"):
                                         str(dev[2]),  # major
                                         str(dev[3]),  # minor
                                         ])
+            if not os.path.exists(path):
+                raise RuntimeError("Failed to create device node in chroot for " +
+                                   dev[4] + "! (This might be caused by setting the work folder" +
+                                   " to an eCryptfs folder.)")
 
     # Non-native chroot: install qemu-user-binary, run apk fix
     if suffix != "native":
