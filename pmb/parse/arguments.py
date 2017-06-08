@@ -108,6 +108,8 @@ def arguments():
                          " eg. /dev/mmcblk0")
     install.add_argument("--cipher", help="cryptsetup cipher used to"
                          " encrypt the system partition, eg. aes-xts-plain64")
+    install.add_argument("--add", help="comma separated list of packages to be"
+                         " added to the rootfs (e.g. 'vim,gcc')")
 
     # Action: build / checksum / menuconfig / parse_apkbuild / aportgen
     menuconfig = sub.add_parser("menuconfig", help="run menuconfig on"
