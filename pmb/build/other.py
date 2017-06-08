@@ -97,10 +97,13 @@ def is_necessary(args, suffix, carch, apkbuild):
         return False
     return True
 
-# When arch is not defined, reindex all repos
-
 
 def index_repo(args, arch=None):
+    """
+    :param arch: when not defined, re-index all repos
+    """
+    pmb.build.init(args)
+
     if arch:
         paths = [args.work + "/packages/" + arch]
     else:
