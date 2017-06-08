@@ -34,7 +34,7 @@ pmb_src = os.path.normpath(os.path.realpath(__file__) + "/../../..")
 apk_keys_path = pmb_src + "/keys"
 
 # Update this frequently to prevent a MITM attack with an outdated version
-# (which may contain a vulnerable apk/libressl, and allows and attacker to
+# (which may contain a vulnerable apk/libressl, and allows an attacker to
 # exploit the system!)
 apk_tools_static_min_version = "2.7.1-r0"
 
@@ -109,7 +109,7 @@ chroot_device_nodes = [
 # BUILD
 #
 
-# Packages, that will be installed in a chroot before it build packages
+# Packages, that will be installed in a chroot before it builds packages
 # for the first time
 build_packages = ["abuild", "build-base", "ccache"]
 
