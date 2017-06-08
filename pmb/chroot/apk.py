@@ -58,17 +58,23 @@ def install(args, packages, suffix="native", build=True):
     pmb.chroot.root(args, ["apk", "--no-progress", "add"] + packages_todo,
                     suffix)
 
-# Update all packages installed in a chroot
 
-
-def update(args, suffix="native"):
+def upgrade(args, suffix="native", update_index=True):
+    """
+    Upgrade all packages installed in a chroot
+    """
     pmb.chroot.init(args, suffix)
-    pmb.chroot.root(args, ["apk", "update"], suffix)
+    if update_index:
+        pmb.chroot.root(args, ["apk", "update"], suffix)
 
-# Get all explicitly installed packages
+        # -a: also update previously downgraded (and therefore pinned) packages
+    pmb.chroot.root(args, ["apk", "upgrade", "-a"], suffix)
 
 
 def installed(args, suffix="native"):
+    """
+    Get all explicitly installed packages
+    """
     world = args.work + "/chroot_" + suffix + "/etc/apk/world"
     if not os.path.exists(world):
         return []

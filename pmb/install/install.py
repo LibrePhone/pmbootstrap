@@ -82,12 +82,17 @@ def install(args, show_flash_msg=True):
     pmb.chroot.apk.install(args, pmb.config.install_native_packages,
                            build=False)
 
-    # Install all packages to device rootfs chroot
+    # Explicitly call build on the install packages, to re-build it or any
+    # dependency, in case the version increased
     logging.info("*** (2/5) CREATE DEVICE ROOTFS (" + args.device + ") ***")
+    install_packages = pmb.config.install_device_packages + ["device-" + args.device]
+    for pkgname in install_packages:
+        pmb.build.package(args, pkgname, args.deviceinfo["arch"])
+
+    # Install all packages to device rootfs chroot
     suffix = "rootfs_" + args.device
-    pmb.chroot.apk.install(args, pmb.config.install_device_packages +
-                           ["device-" + args.device], suffix)
-    pmb.chroot.apk.update(args, suffix)
+    pmb.chroot.apk.install(args, install_packages, suffix)
+    pmb.chroot.apk.upgrade(args, suffix)
     set_user_password(args)
 
     # Partition and fill image/sdcard
