@@ -59,10 +59,9 @@ def arguments_initfs(subparser):
                             " '" + pmb.config.initfs_hook_prefix + "' prefix, for example: 'usb-shell'")
 
     # ls, build, extract
-    ls = sub.add_parser("ls", help="list initfs contents")
+    ls = sub.add_parser("ls", help="list initramfs contents")
     build = sub.add_parser("build", help="(re)build the initramfs")
-    extract = sub.add_parser("extract", help="extract the initramfs to a temporary folder"
-                             " inside the (native) chroot")
+    extract = sub.add_parser("extract", help="extract the initramfs to a temporary folder")
     for action in [ls, build, extract]:
         action.add_argument(
             "--flavor",
