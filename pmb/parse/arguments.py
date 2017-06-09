@@ -41,6 +41,38 @@ def arguments_flasher(subparser):
     return ret
 
 
+def arguments_initfs(subparser):
+    ret = subparser.add_parser(
+        "initfs", help="do something with the initramfs")
+    sub = ret.add_subparsers(dest="action_initfs")
+
+    # hook ls
+    sub.add_parser(
+        "hook_ls",
+        help="list available and installed hook packages")
+
+    # hook add/del
+    hook_add = sub.add_parser("hook_add", help="add a hook package")
+    hook_del = sub.add_parser("hook_del", help="uninstall a hook package")
+    for action in [hook_add, hook_del]:
+        action.add_argument("hook", help="name of the hook aport, without the"
+                            " '" + pmb.config.initfs_hook_prefix + "' prefix, for example: 'usb-shell'")
+
+    # ls, build, extract
+    ls = sub.add_parser("ls", help="list initfs contents")
+    build = sub.add_parser("build", help="(re)build the initramfs")
+    extract = sub.add_parser("extract", help="extract the initramfs to a temporary folder"
+                             " inside the (native) chroot")
+    for action in [ls, build, extract]:
+        action.add_argument(
+            "--flavor",
+            default=None,
+            help="name of the kernel flavor (run 'pmbootstrap flasher list_flavors'"
+            " to get a list of all installed flavors")
+
+    return ret
+
+
 def arguments():
     parser = argparse.ArgumentParser(prog="pmbootstrap")
 
@@ -77,6 +109,7 @@ def arguments():
     sub.add_parser("index", help="re-index all repositories with custom built"
                    " packages (do this after manually removing package files)")
     arguments_flasher(sub)
+    arguments_initfs(sub)
 
     # Action: log
     log = sub.add_parser("log", help="follow the pmbootstrap logfile")

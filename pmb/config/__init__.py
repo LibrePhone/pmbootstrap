@@ -143,6 +143,12 @@ apkbuild_attributes = {
 }
 
 #
+# INITFS
+#
+initfs_hook_prefix = "postmarketos-mkinitfs-hook-"
+
+
+#
 # INSTALL
 #
 

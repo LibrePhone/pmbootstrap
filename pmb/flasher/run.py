@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
 import pmb.flasher
+import pmb.chroot.initfs
 
 
 def run(args, action, kernel=None, ramdisk=None, image=None):
@@ -42,7 +43,7 @@ def run(args, action, kernel=None, ramdisk=None, image=None):
         "$PAGE_SIZE": args.deviceinfo["flash_pagesize"],
     }
 
-    # Each action has multiple commands
+    # Run the commands of each action
     for command in cfg["actions"][action]:
         # Variable replacement
         for key, value in vars.items():

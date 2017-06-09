@@ -29,6 +29,7 @@ import pmb.aportgen
 import pmb.build
 import pmb.config
 import pmb.chroot
+import pmb.chroot.initfs
 import pmb.chroot.other
 import pmb.flasher
 import pmb.helpers.logging
@@ -64,6 +65,8 @@ def main():
             pmb.chroot.root(args, args.command, args.suffix, log=False)
         elif args.action == "index":
             pmb.build.index_repo(args)
+        elif args.action == "initfs":
+            pmb.chroot.initfs.frontend(args)
         elif args.action == "install":
             pmb.install.install(args)
         elif args.action == "flasher":

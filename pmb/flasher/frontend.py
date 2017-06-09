@@ -21,23 +21,32 @@ import os
 
 import pmb.flasher
 import pmb.install
+import pmb.chroot.apk
+import pmb.chroot.initfs
 import pmb.chroot.other
 
 
 def kernel(args):
-    # Parse the kernel flavor
+    # Make sure, that at least one kernel is installed
     suffix = "rootfs_" + args.device
+    pmb.chroot.apk.install(args, ["device-" + args.device], suffix)
+
+    # Parse the kernel flavor
     flavor = args.flavor
-    flavors = pmb.chroot.other.installed_kernel_flavors(args, suffix)
+    flavors = pmb.chroot.other.kernel_flavors_installed(args, suffix)
     if flavor:
         if flavor not in flavors:
             raise RuntimeError("No kernel installed with flavor " + flavor + "!" +
                                " Run 'pmbootstrap flasher list_flavors' to get a list.")
     elif not len(flavors):
         raise RuntimeError(
-            "No kernel flavors installed in chroot " + suffix + "!")
+            "No kernel flavors installed in chroot " + suffix + "! Please let"
+            " your device package depend on a package starting with 'linux-'.")
     else:
         flavor = flavors[0]
+
+    # Rebuild the initramfs, just to make sure (see #69)
+    pmb.chroot.initfs.build(args, flavor, "rootfs_" + args.device)
 
     # Generate the paths and run the flasher
     pmb.flasher.init(args)
@@ -48,14 +57,14 @@ def kernel(args):
         logging.info("(native) boot " + flavor + " kernel")
         pmb.flasher.run(args, "boot", kernel, ramdisk)
     else:
-        logging.info("(native) flash kernel '" + flavor + "'")
+        logging.info("(native) flash kernel " + flavor)
         pmb.flasher.run(args, "flash_kernel", kernel, ramdisk)
 
 
 def list_flavors(args):
     suffix = "rootfs_" + args.device
     logging.info("(" + suffix + ") installed kernel flavors:")
-    for flavor in pmb.chroot.other.installed_kernel_flavors(args, suffix):
+    for flavor in pmb.chroot.other.kernel_flavors_installed(args, suffix):
         logging.info("* " + flavor)
 
 

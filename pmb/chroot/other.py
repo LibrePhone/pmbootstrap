@@ -18,9 +18,10 @@ along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
 import os
 import glob
+import pmb.chroot.apk
 
 
-def installed_kernel_flavors(args, suffix):
+def kernel_flavors_installed(args, suffix):
     prefix = "vmlinuz-"
     prefix_len = len(prefix)
     pattern = args.work + "/chroot_" + suffix + "/boot/" + prefix + "*"
@@ -28,3 +29,12 @@ def installed_kernel_flavors(args, suffix):
     for file in glob.glob(pattern):
         ret.append(os.path.basename(file)[prefix_len:])
     return ret
+
+
+def kernel_flavor_autodetect(args, suffix):
+    """
+    Make sure, that there is at least one kernel installed, return the first
+    kernel that can be found.
+    """
+    pmb.chroot.apk.install(args, ["device-" + args.device], suffix)
+    return kernel_flavors_installed(args, suffix)[0]

@@ -22,6 +22,8 @@ import glob
 
 import pmb.chroot
 import pmb.chroot.apk
+import pmb.chroot.other
+import pmb.chroot.initfs
 import pmb.config
 import pmb.helpers.run
 import pmb.install.blockdevice
@@ -97,8 +99,14 @@ def install(args, show_flash_msg=True):
     for pkgname in install_packages:
         pmb.build.package(args, pkgname, args.deviceinfo["arch"])
 
-    # Install all packages to device rootfs chroot
+    # Install all packages to device rootfs chroot (and rebuild the initramfs,
+    # because that doesn't always happen automatically yet, e.g. when the user
+    # installed a hook without pmbootstrap - see #69 for more info)
     pmb.chroot.apk.install(args, install_packages, suffix)
+    for flavor in pmb.chroot.other.kernel_flavors_installed(args, suffix):
+        pmb.chroot.initfs.build(args, flavor, suffix)
+
+    # Finally set the user password
     set_user_password(args)
 
     # Partition and fill image/sdcard
