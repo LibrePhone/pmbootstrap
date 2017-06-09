@@ -41,6 +41,37 @@ def arguments_flasher(subparser):
     return ret
 
 
+def arguments_initfs(subparser):
+    ret = subparser.add_parser(
+        "initfs", help="do something with the initramfs")
+    sub = ret.add_subparsers(dest="action_initfs")
+
+    # hook ls
+    sub.add_parser(
+        "hook_ls",
+        help="list available and installed hook packages")
+
+    # hook add/del
+    hook_add = sub.add_parser("hook_add", help="add a hook package")
+    hook_del = sub.add_parser("hook_del", help="uninstall a hook package")
+    for action in [hook_add, hook_del]:
+        action.add_argument("hook", help="name of the hook aport, without the"
+                            " '" + pmb.config.initfs_hook_prefix + "' prefix, for example: 'usb-shell'")
+
+    # ls, build, extract
+    ls = sub.add_parser("ls", help="list initramfs contents")
+    build = sub.add_parser("build", help="(re)build the initramfs")
+    extract = sub.add_parser("extract", help="extract the initramfs to a temporary folder")
+    for action in [ls, build, extract]:
+        action.add_argument(
+            "--flavor",
+            default=None,
+            help="name of the kernel flavor (run 'pmbootstrap flasher list_flavors'"
+            " to get a list of all installed flavors")
+
+    return ret
+
+
 def arguments():
     parser = argparse.ArgumentParser(prog="pmbootstrap")
 
@@ -73,12 +104,23 @@ def arguments():
     # Actions
     sub = parser.add_subparsers(title="action", dest="action")
     sub.add_parser("init", help="initialize config file")
-    sub.add_parser("log", help="follow the pmbootstrap logfile")
-    sub.add_parser("log_distccd", help="follow the distccd logfile")
     sub.add_parser("shutdown", help="umount, unregister binfmt")
     sub.add_parser("index", help="re-index all repositories with custom built"
                    " packages (do this after manually removing package files)")
     arguments_flasher(sub)
+    arguments_initfs(sub)
+
+    # Action: log
+    log = sub.add_parser("log", help="follow the pmbootstrap logfile")
+    log_distccd = sub.add_parser(
+        "log_distccd",
+        help="follow the distccd logfile")
+    for action in [log, log_distccd]:
+        action.add_argument(
+            "-n",
+            "--lines",
+            default="30",
+            help="count of initial output lines")
 
     # Action: zap
     zap = sub.add_parser("zap", help="safely delete chroot"
@@ -108,6 +150,8 @@ def arguments():
                          " eg. /dev/mmcblk0")
     install.add_argument("--cipher", help="cryptsetup cipher used to"
                          " encrypt the system partition, eg. aes-xts-plain64")
+    install.add_argument("--add", help="comma separated list of packages to be"
+                         " added to the rootfs (e.g. 'vim,gcc')")
 
     # Action: build / checksum / menuconfig / parse_apkbuild / aportgen
     menuconfig = sub.add_parser("menuconfig", help="run menuconfig on"

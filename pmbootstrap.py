@@ -29,6 +29,7 @@ import pmb.aportgen
 import pmb.build
 import pmb.config
 import pmb.chroot
+import pmb.chroot.initfs
 import pmb.chroot.other
 import pmb.flasher
 import pmb.helpers.logging
@@ -64,6 +65,8 @@ def main():
             pmb.chroot.root(args, args.command, args.suffix, log=False)
         elif args.action == "index":
             pmb.build.index_repo(args)
+        elif args.action == "initfs":
+            pmb.chroot.initfs.frontend(args)
         elif args.action == "install":
             pmb.install.install(args)
         elif args.action == "flasher":
@@ -78,10 +81,11 @@ def main():
         elif args.action == "stats":
             pmb.build.ccache_stats(args, args.arch)
         elif args.action == "log":
-            pmb.helpers.run.user(args, ["tail", "-f", args.log], log=False)
+            pmb.helpers.run.user(args, ["tail", "-f", args.log,
+                                        "-n", args.lines], log=False)
         elif args.action == "log_distccd":
-            pmb.chroot.user(args, ["tail", "-f", "/home/user/distccd.log"],
-                            log=False)
+            pmb.chroot.user(args, ["tail", "-f", "/home/user/distccd.log",
+                                   "-n", args.lines], log=False)
         elif args.action == "zap":
             pmb.chroot.zap(args)
         else:
