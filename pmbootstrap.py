@@ -79,10 +79,10 @@ def main():
             pmb.build.ccache_stats(args, args.arch)
         elif args.action == "log":
             pmb.helpers.run.user(args, ["tail", "-f", args.log,
-                                 "-n", args.lines], log=False)
+                                        "-n", args.lines], log=False)
         elif args.action == "log_distccd":
             pmb.chroot.user(args, ["tail", "-f", "/home/user/distccd.log",
-                            "-n", args.lines], log=False)
+                                   "-n", args.lines], log=False)
         elif args.action == "zap":
             pmb.chroot.zap(args)
         else:

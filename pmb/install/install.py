@@ -85,7 +85,8 @@ def install(args, show_flash_msg=True):
     # List all packages to be installed (including the ones specified by --add)
     # and upgrade the installed packages/apkindexes
     logging.info("*** (2/5) CREATE DEVICE ROOTFS (" + args.device + ") ***")
-    install_packages = (pmb.config.install_device_packages + ["device-" + args.device])
+    install_packages = (pmb.config.install_device_packages +
+                        ["device-" + args.device])
     suffix = "rootfs_" + args.device
     pmb.chroot.apk.upgrade(args, suffix)
 

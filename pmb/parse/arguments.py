@@ -80,9 +80,15 @@ def arguments():
 
     # Action: log
     log = sub.add_parser("log", help="follow the pmbootstrap logfile")
-    log_distccd = sub.add_parser("log_distccd", help="follow the distccd logfile")
+    log_distccd = sub.add_parser(
+        "log_distccd",
+        help="follow the distccd logfile")
     for action in [log, log_distccd]:
-        action.add_argument("-n", "--lines", default="30", help="count of initial output lines")
+        action.add_argument(
+            "-n",
+            "--lines",
+            default="30",
+            help="count of initial output lines")
 
     # Action: zap
     zap = sub.add_parser("zap", help="safely delete chroot"
