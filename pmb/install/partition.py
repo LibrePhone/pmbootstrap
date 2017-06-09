@@ -36,7 +36,7 @@ def partitions_mount(args):
     for symbol in ["p", ""]:
         if os.path.exists(prefix + symbol + "1"):
             partition_prefix = symbol
-    if not partition_prefix:
+    if partition_prefix is None:
         raise RuntimeError("Unable to find the partition prefix,"
                            " expected the first partition of " +
                            prefix + " to be located at " + prefix +
