@@ -21,6 +21,7 @@ import logging
 
 import pmb.build
 import pmb.build.autodetect
+import pmb.build.buildinfo
 import pmb.build.crosscompiler
 import pmb.chroot
 import pmb.chroot.apk
@@ -29,11 +30,12 @@ import pmb.parse
 import pmb.parse.arch
 
 
-def package(args, pkgname, carch, force=False, recurse=True):
+def package(args, pkgname, carch, force=False, recurse=True, buildinfo=False):
     """
     Build a package with Alpine Linux' abuild.
 
     :param force: even build, if not necessary
+    :returns: output path relative to the packages folder
     """
     # Get aport, skip upstream only packages
     aport = pmb.build.find_aport(args, pkgname, False)
@@ -109,6 +111,14 @@ def package(args, pkgname, carch, force=False, recurse=True):
     if not os.path.exists(path):
         raise RuntimeError("Package not found after build: " + path)
 
+    # Create .buildinfo.json file
+    if buildinfo:
+        logging.info("(" + suffix + ") generate " + output + ".buildinfo.json")
+        pmb.build.buildinfo.write(args, output, carch_buildenv, suffix,
+                                  apkbuild)
+
     # Symlink noarch packages
     if "noarch" in apkbuild["arch"]:
         pmb.build.symlink_noarch_package(args, output)
+
+    return output

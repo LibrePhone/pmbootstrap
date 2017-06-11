@@ -61,7 +61,9 @@ def arguments_initfs(subparser):
     # ls, build, extract
     ls = sub.add_parser("ls", help="list initramfs contents")
     build = sub.add_parser("build", help="(re)build the initramfs")
-    extract = sub.add_parser("extract", help="extract the initramfs to a temporary folder")
+    extract = sub.add_parser(
+        "extract",
+        help="extract the initramfs to a temporary folder")
     for action in [ls, build, extract]:
         action.add_argument(
             "--flavor",
@@ -164,8 +166,14 @@ def arguments():
                            " specific architecture")
     build.add_argument("--arch")
     build.add_argument("--force", action="store_true")
+    build.add_argument("--buildinfo", action="store_true")
     for action in [checksum, build, menuconfig, parse_apkbuild, aportgen]:
         action.add_argument("package")
+
+    # Action: challenge
+    challenge = sub.add_parser("challenge",
+                               help="rebuild a package and diff its contents")
+    challenge.add_argument("apk")
 
     # Use defaults from the user's config file
     args = parser.parse_args()
