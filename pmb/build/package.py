@@ -59,8 +59,8 @@ def package(args, pkgname, carch, force=False, recurse=True, buildinfo=False):
             package(args, depend, carch)
 
     # Skip already built versions
-    if not force and not pmb.build.is_necessary(args, suffix,
-                                                carch_buildenv, apkbuild):
+    if not force and not pmb.build.is_necessary(
+            args, carch_buildenv, apkbuild):
         return
 
     # Install build tools and makedepends
