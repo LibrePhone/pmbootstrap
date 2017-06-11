@@ -25,6 +25,7 @@ import filecmp
 import shutil
 import pmb.build
 import pmb.parse.apkbuild
+import pmb.parse.other
 
 
 def diff_files(tar_a, tar_b, member_a, member_b, name):
@@ -112,7 +113,7 @@ def challenge(args, apk_path):
     # Parse and install all packages listed in versions
     versions = {}
     for package in buildinfo["versions"]:
-        split = pmb.chroot.apk.package_split(package)
+        split = pmb.parse.other.package_split(package)
         pkgname = split["pkgname"]
         versions[pkgname] = split
     pmb.chroot.apk.install(args, versions.keys())
