@@ -21,8 +21,8 @@ DIR="$(cd "$(dirname "$0")" && pwd -P)"
 cd "$DIR"/..
 
 # Shell: shellcheck
-sh_files="test/static_code_analysis.sh"
-echo "Test $sh_files with shellcheck..."
+sh_files="test/static_code_analysis.sh $(find . -name '*.trigger')"
+echo "Test with shellcheck: $sh_files"
 for file in ${sh_files}; do
 	shellcheck "${file}"
 done
@@ -31,7 +31,7 @@ done
 # E501: max line length
 # F401: imported, but not used, does not make sense in __init__ files
 # E402: module import not on top of file, not possible for testcases
-echo "Test *.py files with flake8..."
+echo "Test with flake8: *.py"
 echo "NOTE: Run 'autopep8 -ria $PWD' to fix code style issues"
 py_files="$(find . -name '*.py')"
 _ignores="E501,E402"
