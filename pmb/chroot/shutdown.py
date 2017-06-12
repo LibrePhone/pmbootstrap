@@ -26,6 +26,25 @@ import pmb.chroot
 import pmb.chroot.distccd
 
 
+def shutdown_cryptsetup_device(args, name):
+    """
+    :param name: cryptsetup device name, usually "pm_crypt" in pmbootstrap
+    """
+    if not os.path.exists(args.work + "/chroot_native/dev/mapper/" + name):
+        return
+    pmb.chroot.apk.install(args, ["cryptsetup"])
+    status = pmb.chroot.root(args, ["cryptsetup", "status", name], check=False,
+                             return_stdout=True)
+    if status.startswith("/dev/mapper/" + name + " is active."):
+        pmb.chroot.root(args, ["cryptsetup", "luksClose", name])
+    elif status.startswith("/dev/mapper/" + name + " is inactive."):
+        # When "cryptsetup status" fails, the device is not mounted and we
+        # have a left over file (#83)
+        pmb.chroot.root(args, ["rm", "/dev/mapper/" + name])
+    else:
+        raise RuntimeError("Failed to parse 'cryptsetup status' output!")
+
+
 def shutdown(args, only_install_related=False):
     pmb.chroot.distccd.stop(args)
 
@@ -34,8 +53,7 @@ def shutdown(args, only_install_related=False):
                                  "/chroot_native/mnt/install/boot")
     pmb.helpers.mount.umount_all(args, args.work +
                                  "/chroot_native/mnt/install")
-    if os.path.exists(args.work + "/chroot_native/dev/mapper/pm_crypt"):
-        pmb.chroot.root(args, ["cryptsetup", "luksClose", "pm_crypt"])
+    shutdown_cryptsetup_device(args, "pm_crypt")
 
     # Umount all losetup mounted images
     chroot = args.work + "/chroot_native"
