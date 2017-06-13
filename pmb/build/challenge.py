@@ -26,6 +26,7 @@ import shutil
 import pmb.build
 import pmb.parse.apkbuild
 import pmb.parse.other
+import pmb.helpers.repo
 
 
 def diff_files(tar_a, tar_b, member_a, member_b, name):
@@ -51,7 +52,6 @@ def diff_files(tar_a, tar_b, member_a, member_b, name):
 
 
 def diff(args, apk_a, apk_b):
-    logging.info("Challenge " + apk_a)
     with tarfile.open(apk_a, "r:gz") as tar_a:
         with tarfile.open(apk_b, "r:gz") as tar_b:
             # List of files must be the same
@@ -128,8 +128,27 @@ def challenge(args, apk_path):
                                " (installed: " + package_installed + ","
                                " buildinfo: " + package_buildinfo + ")!")
     # Build the package
-    output = pmb.build.package(args, buildinfo["pkgname"], buildinfo["carch"],
-                               force=True)
+    repo_before = pmb.helpers.repo.files(args)
+    pmb.build.package(args, buildinfo["pkgname"], buildinfo["carch"],
+                      force=True)
+    repo_diff = pmb.helpers.repo.diff(args, repo_before)
 
     # Diff the apk contents
-    diff(args, apk_path, args.work + "/packages/" + output)
+    staging_path = os.path.abspath(os.path.dirname(apk_path) + "/../")
+    for file in repo_diff:
+        if file.endswith(".apk"):
+            logging.info("Verify " + file)
+            diff(
+                args,
+                staging_path +
+                "/" +
+                file,
+                args.work +
+                "/packages/" +
+                file)
+
+    # Output the changed files from the repository
+    if args.output_repo_changes:
+        with open(args.output_repo_changes, "w") as handler:
+            for file in repo_diff:
+                handler.write(file + "\n")

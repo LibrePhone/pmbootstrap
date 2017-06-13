@@ -173,6 +173,10 @@ def arguments():
     # Action: challenge
     challenge = sub.add_parser("challenge",
                                help="rebuild a package and diff its contents")
+    challenge.add_argument("--output-repo-changes", dest="output_repo_changes",
+                           help="pass the path to a file here, to store a list"
+                                " of apk- and APKINDEX-files that have been"
+                                " changed during the build", default=None)
     challenge.add_argument("apk")
 
     # Use defaults from the user's config file
