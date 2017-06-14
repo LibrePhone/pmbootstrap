@@ -43,9 +43,13 @@ def test_aportgen(args):
     # Create aportgen folder -> code path where it still exists
     pmb.helpers.run.user(args, ["mkdir", "-p", args.work + "/aportgen"])
 
-    # Generate all valid packages (gcc-armhf twice, so the output folder
-    # exists)
-    for pkgname in ["binutils-armhf", "musl-armhf", "gcc-armhf", "gcc-armhf"]:
+    # Generate all valid packages
+    pkgnames = []
+    for arch in ["armhf", "aarch64"]:
+        # gcc twice, so the output folder already exists -> different code path
+        for pkgname in ["binutils", "musl", "gcc", "gcc"]:
+            pkgnames.append(pkgname + "-" + arch)
+    for pkgname in pkgnames:
         pmb.aportgen.generate(args, pkgname)
         path_new = args.aports + "/" + pkgname + "/APKBUILD"
         path_old = args._aports_real + "/" + pkgname + "/APKBUILD"

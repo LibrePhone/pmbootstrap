@@ -56,6 +56,7 @@ def alpine_to_debian(arch):
     mapping = {
         "x86_64": "amd64",
         "armhf": "arm",
+        "aarch64": "aarch64",
     }
     for pattern, arch_debian in mapping.items():
         if fnmatch.fnmatch(arch, pattern):

@@ -40,8 +40,9 @@ def test_build(args):
     pmb.build.package(args, "hello-world", args.arch_native, True)
 
 
-def test_build_armhf(args):
+def test_build_cross(args):
     """
-    Build in armhf chroot, with cross-compiler through distcc.
+    Build in non-native chroot, with cross-compiler through distcc.
     """
-    pmb.build.package(args, "hello-world", "armhf", True)
+    for arch in ["armhf", "aarch64"]:
+        pmb.build.package(args, "hello-world", arch, True)

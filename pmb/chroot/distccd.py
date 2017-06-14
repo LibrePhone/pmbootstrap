@@ -24,7 +24,7 @@ import pmb.config
 import pmb.chroot.apk
 
 
-def get_pid(args):
+def get_running_pid(args):
     pidfile = args.work + "/chroot_native/home/user/distccd.pid"
     if not os.path.exists(pidfile):
         return None
@@ -33,9 +33,26 @@ def get_pid(args):
     return int(lines[0][:-1])
 
 
+def get_running_arch(args):
+    """
+    :returns: the architecture string of the running distccd process (eg.
+              "armhf" or "aarch64") or "unknown" if the file does not exist.
+    """
+    file = args.work + "/chroot_native/tmp/distccd_running_arch"
+    if not os.path.exists(file):
+        return "unknown"
+    with open(file, "r") as handle:
+        lines = handle.readlines()
+    return lines[0][:-1]
+
+
 def is_running(args):
+    """
+    :returns: When not running: None
+              When running: the arch string, e.g. "armhf"
+    """
     # Get the PID
-    pid = get_pid(args)
+    pid = get_running_pid(args)
     if not pid:
         return False
 
@@ -47,16 +64,16 @@ def is_running(args):
             pmb.chroot.root(args, ["rm", "/home/user/distccd.pid"])
             return False
         elif err.errno == errno.EPERM:  # access denied
-            return True
+            return get_running_arch(args)
 
 
-def start(args):
-    if is_running(args):
+def start(args, arch):
+    if is_running(args) == arch:
         return
+    stop(args)
     pmb.chroot.apk.install(args, ["distcc", "gcc-cross-wrappers"])
 
     # Start daemon with cross-compiler in path
-    arch = args.deviceinfo["arch"]
     path = "/usr/lib/gcc-cross-wrappers/" + arch + "/bin:" + pmb.config.chroot_path
     daemon = ["PATH=" + path,
               "distccd",
@@ -70,12 +87,20 @@ def start(args):
               "--job-lifetime", "60",
               "--daemon"
               ]
-    logging.info("(native) start distccd (listen on 127.0.0.1:" +
-                 args.port_distccd + ")")
+    logging.info(
+        "(native) start distccd (" +
+        arch +
+        ") on 127.0.0.1:" +
+        args.port_distccd)
     pmb.chroot.user(args, daemon)
+
+    # Write down the running architecture
+    with open(args.work + "/chroot_native/tmp/distccd_running_arch", "w") as handle:
+        handle.write(arch + "\n")
 
 
 def stop(args):
-    if is_running(args):
-        logging.info("(native) stop distccd")
-        pmb.chroot.user(args, ["kill", str(get_pid(args))])
+    arch = is_running(args)
+    if arch:
+        logging.info("(native) stop distccd (" + arch + ")")
+        pmb.chroot.user(args, ["kill", str(get_running_pid(args))])

@@ -72,7 +72,7 @@ def package(args, pkgname, carch, force=False, recurse=True, buildinfo=False):
                                       "ccache-cross-symlinks"])
         if cross == "distcc":
             pmb.chroot.apk.install(args, ["distcc"], suffix=suffix)
-            pmb.chroot.distccd.start(args)
+            pmb.chroot.distccd.start(args, carch_buildenv)
 
     # Configure abuild.conf
     pmb.build.other.configure_abuild(args, suffix)
