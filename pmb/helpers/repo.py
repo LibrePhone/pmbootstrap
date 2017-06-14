@@ -53,8 +53,16 @@ def diff(args, files_a, files_b=None):
     ret = []
     for arch in files_b.keys():
         for file, timestamp in files_b[arch].items():
-            if (arch not in files_a or file not in files_a[arch] or
-                    timestamp is not files_a[arch][file]):
+            add = False
+            if arch not in files_a:
+                add = True
+            elif file not in files_a[arch]:
+                add = True
+            elif timestamp != files_a[arch][file]:
+                add = True
+            if add:
                 ret.append(arch + "/" + file)
+
+
 
     return sorted(ret)
