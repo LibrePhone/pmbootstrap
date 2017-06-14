@@ -63,6 +63,4 @@ def diff(args, files_a, files_b=None):
             if add:
                 ret.append(arch + "/" + file)
 
-
-
     return sorted(ret)

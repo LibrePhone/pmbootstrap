@@ -20,7 +20,6 @@ import os
 import sys
 import pytest
 import types
-import pathlib
 import time
 
 # Import from parent directory
@@ -34,6 +33,7 @@ def args(request, tmpdir):
     args = types.SimpleNamespace()
     args.work = str(tmpdir)
     return args
+
 
 def clear_timestamps_from_files(files):
     """
@@ -54,7 +54,7 @@ def test_files_not_empty(args):
     pkgs = args.work + "/packages"
     for dir in ["", "armhf", "x86_64"]:
         os.mkdir(pkgs + "/" + dir)
-    open(pkgs+"/x86_64/test", "a").close()
+    open(pkgs + "/x86_64/test", "a").close()
     files = pmb.helpers.repo.files(args)
     clear_timestamps_from_files(files)
     assert files == {"armhf": {}, "x86_64": {"test": None}}
