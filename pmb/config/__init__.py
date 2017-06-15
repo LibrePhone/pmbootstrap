@@ -109,6 +109,12 @@ chroot_device_nodes = [
 # BUILD
 #
 
+# Officially supported target architectures for postmarketOS. Only
+# specify architectures supported by Alpine here. When creating a noarch
+# package, symlinks for all architectures get created - so only specify
+# architectures, where we really have device-* packages for.
+build_device_architectures = ["armhf", "aarch64"]
+
 # Packages, that will be installed in a chroot before it builds packages
 # for the first time
 build_packages = ["abuild", "build-base", "ccache"]

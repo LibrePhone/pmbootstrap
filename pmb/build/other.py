@@ -129,18 +129,17 @@ def symlink_noarch_package(args, arch_apk):
     :param arch_apk: for example: x86_64/mypackage-1.2.3-r0.apk
     """
 
-    # Create the arch folder
-    device_arch = args.deviceinfo["arch"]
-    device_repo = args.work + "/packages/" + device_arch
-    if not os.path.exists(device_repo):
-        pmb.chroot.user(args, ["mkdir", "-p", "/home/user/packages/user/" +
-                               device_arch])
+    for arch in pmb.config.build_device_architectures:
+        # Create the arch folder
+        arch_folder = "/home/user/packages/user/" + arch
+        arch_folder_outside = args.work + "/packages/" + arch
+        if not os.path.exists(arch_folder_outside):
+            pmb.chroot.user(args, ["mkdir", "-p", arch_folder])
 
-    # Add symlink, rewrite index
-    device_repo_chroot = "/home/user/packages/user/" + device_arch
-    pmb.chroot.user(args, ["ln", "-sf", "../" + arch_apk, "."],
-                    working_dir=device_repo_chroot)
-    index_repo(args, device_arch)
+        # Add symlink, rewrite index
+        pmb.chroot.user(args, ["ln", "-sf", "../" + arch_apk, "."],
+                        working_dir=arch_folder)
+        index_repo(args, arch)
 
 
 def ccache_stats(args, arch):

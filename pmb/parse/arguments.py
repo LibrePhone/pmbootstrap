@@ -194,8 +194,18 @@ def arguments():
     # Add convinience shortcuts
     setattr(args, "arch_native", pmb.parse.arch.alpine_native())
 
-    # Add the deviceinfo (only after initialization)
+    # Add and verify the deviceinfo (only after initialization)
     if args.action != "init":
         setattr(args, "deviceinfo", pmb.parse.deviceinfo(args))
+        arch = args.deviceinfo["arch"]
+        if (arch != args.arch_native and
+                arch not in pmb.config.build_device_architectures):
+            raise ValueError("Arch '" + arch + "' is not officially enabled"
+                             " in postmarketOS yet. However, this should be straight"
+                             " forward. Simply enable it in pmb/config/__init__.py"
+                             " in build_device_architectures, zap your package cache"
+                             " (otherwise you will have issues with noarch packages)"
+                             " and try again. Some other things might break, but"
+                             " they should be easy to fix them.")
 
     return args

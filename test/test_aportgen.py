@@ -25,6 +25,7 @@ import filecmp
 sys.path.append(os.path.abspath(
     os.path.join(os.path.dirname(__file__) + "/..")))
 import pmb.aportgen
+import pmb.config
 
 
 @pytest.fixture
@@ -45,7 +46,7 @@ def test_aportgen(args):
 
     # Generate all valid packages
     pkgnames = []
-    for arch in ["armhf", "aarch64"]:
+    for arch in pmb.config.build_device_architectures:
         # gcc twice, so the output folder already exists -> different code path
         for pkgname in ["binutils", "musl", "gcc", "gcc"]:
             pkgnames.append(pkgname + "-" + arch)
