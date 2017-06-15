@@ -25,6 +25,12 @@ def carch(args, apkbuild, carch):
     if "noarch" in apkbuild["arch"]:
         return args.arch_native
     if carch:
+        if "all" not in apkbuild["arch"] and carch not in apkbuild["arch"]:
+            raise RuntimeError("Architecture '" + carch + "' is not supported"
+                               " for this package. Please add it to the"
+                               " 'arch=' line inside the APKBUILD and try"
+                               " again: " + args.aports + "/" +
+                               apkbuild["pkgname"] + "/APKBUILD")
         return carch
     if ("all" in apkbuild["arch"] or
             args.arch_native in apkbuild["arch"]):
