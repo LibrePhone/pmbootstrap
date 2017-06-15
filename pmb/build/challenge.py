@@ -51,13 +51,43 @@ def diff_files(tar_a, tar_b, member_a, member_b, name):
         raise RuntimeError("File '" + name + "' is different!")
 
 
+def tar_getnames_without_signature(tar, tar_name):
+    """
+    The signature file name is always different.
+    This function raises an exception, when the number of signature
+    files in the archive is not 1.
+    :returns: a sorted list of all filenames inside the tar archive,
+              except for the signature file.
+    """
+    names = tar.getnames()
+    found = False
+    ret = []
+    for name in names:
+        if name.startswith(".SIGN.RSA."):
+            if found:
+                raise RuntimeError("More than one signature file found"
+                                   " inside " + tar_name + ": " +
+                                   str(names))
+            else:
+                found = True
+        else:
+            ret.append(name)
+
+    if not found:
+        raise RuntimeError("No signature file found inside " +
+                           tar_name + ": " + str(names))
+    return sorted(ret)
+
+
 def diff(args, apk_a, apk_b):
     with tarfile.open(apk_a, "r:gz") as tar_a:
         with tarfile.open(apk_b, "r:gz") as tar_b:
             # List of files must be the same
-            list_a = sorted(tar_a.getnames())
-            list_b = sorted(tar_b.getnames())
+            list_a = tar_getnames_without_signature(tar_a, apk_a)
+            list_b = tar_getnames_without_signature(tar_b, apk_b)
             if list_a != list_b:
+                logging.info("Files in " + apk_a + ":" + str(list_a))
+                logging.info("Files in " + apk_b + ":" + str(list_b))
                 raise RuntimeError(
                     "Both APKs do not contain the same file names!")
 
@@ -66,7 +96,7 @@ def diff(args, apk_a, apk_b):
             for name in list_a:
                 try:
                     logging.debug("Compare: " + name)
-                    if name == ".PKGINFO" or name.startswith(".SIGN.RSA."):
+                    if name == ".PKGINFO":
                         logging.debug(
                             "=> Skipping, this is expected to be different")
                         continue
