@@ -39,8 +39,15 @@ def generate(args, pkgname):
 
     # Copy the apk files to the distfiles cache
     for subpkgname in ["musl", "musl-dev"]:
-        path = glob.glob(args.work + "/cache_apk_" + arch + "/" + subpkgname +
-                         "-" + version + ".*.apk")[0]
+        pattern = (args.work + "/cache_apk_" + arch + "/" + subpkgname +
+                   "-" + version + ".*.apk")
+        glob_result = glob.glob(pattern)
+        if not len(glob_result):
+            raise RuntimeError("Could not find aport " + pattern + "!"
+                               " Update your aports_upstream git repo"
+                               " to the latest version, delete your http cache"
+                               " (pmbootstrap zap -hc) and try again.")
+        path = glob_result[0]
         path_target = (args.work + "/cache_distfiles/" + subpkgname + "-" +
                        version + "-" + arch + ".apk")
         if not os.path.exists(path_target):
