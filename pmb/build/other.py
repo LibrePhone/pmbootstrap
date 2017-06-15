@@ -65,13 +65,14 @@ def copy_to_buildpath(args, package, suffix="native"):
                            "/home/user/build"], suffix=suffix)
 
 
-def is_necessary(args, arch, apkbuild):
+def is_necessary(args, arch, apkbuild, apkindex_path=None):
     """
     Check if the package has already been built (because abuild's check
     only works, if it is the same architecture!)
 
     :param arch: package target architecture
     :param apkbuild: from pmb.parse.apkbuild()
+    :param apkindex_path: override the APKINDEX.tar.gz path
     :returns: boolean
     """
 
@@ -80,9 +81,12 @@ def is_necessary(args, arch, apkbuild):
     version_new = apkbuild["pkgver"] + "-r" + apkbuild["pkgrel"]
 
     # Get old version from APKINDEX
+    if not apkindex_path:
+        apkindex_path = (args.work + "/packages/" + arch +
+                         "/APKINDEX.tar.gz")
     version_old = None
-    index_data = pmb.parse.apkindex.read(args, package,
-                                         args.work + "/packages/" + arch + "/APKINDEX.tar.gz", False)
+    index_data = pmb.parse.apkindex.read(args, package, apkindex_path,
+                                         False)
     if index_data:
         version_old = index_data["version"]
 
