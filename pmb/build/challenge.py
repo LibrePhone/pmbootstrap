@@ -46,7 +46,7 @@ def diff_files(tar_a, tar_b, member_a, member_b, name):
     for temp_file in temp_files:
         os.remove(temp_file)
     if equal:
-        logging.debug("=> File has the same content")
+        logging.debug("=> OK!")
     else:
         raise RuntimeError("File '" + name + "' is different!")
 
@@ -159,7 +159,7 @@ def challenge(args, apk_path):
                                " buildinfo: " + package_buildinfo + ")!")
     # Build the package
     repo_before = pmb.helpers.repo.files(args)
-    pmb.build.package(args, buildinfo["pkgname"], buildinfo["carch"],
+    pmb.build.package(args, buildinfo["pkgname"], buildinfo["arch"],
                       force=True)
     repo_diff = pmb.helpers.repo.diff(args, repo_before)
 

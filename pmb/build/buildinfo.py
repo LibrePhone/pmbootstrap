@@ -57,16 +57,16 @@ def get_depends_recursively(args, pkgnames, arch=None):
     return ret
 
 
-def generate(args, apk_path, carch, suffix, apkbuild):
+def generate(args, apk_path, arch, suffix, apkbuild):
     """
     :param apk_path: Path to the .apk file, relative to the packages cache.
-    :param carch: Architecture, that the package has been built for.
+    :param arch: Architecture, that the package has been built for.
     :apkbuild: Return from pmb.parse.apkbuild().
     """
     ret = {"pkgname": apkbuild["pkgname"],
            "pkgver": apkbuild["pkgver"],
            "pkgrel": apkbuild["pkgrel"],
-           "carch": carch,
+           "arch": arch,
            "versions": []}
 
     # Add makedepends versions
@@ -80,7 +80,7 @@ def generate(args, apk_path, carch, suffix, apkbuild):
     return ret
 
 
-def write(args, apk_path, carch, suffix, apkbuild):
+def write(args, apk_path, arch, suffix, apkbuild):
     """
     Write a .buildinfo.json file for a package, right after building it.
     It stores all information required to rebuild the package, very similar
@@ -88,13 +88,13 @@ def write(args, apk_path, carch, suffix, apkbuild):
     Python): https://wiki.debian.org/ReproducibleBuilds/BuildinfoFiles
 
     :param apk_path: Path to the .apk file, relative to the packages cache.
-    :param carch: Architecture, that the package has been built for.
+    :param arch: Architecture, that the package has been built for.
     :apkbuild: Return from pmb.parse.apkbuild().
     """
     # Write to temp
     if os.path.exists(args.work + "/chroot_native/tmp/buildinfo"):
         pmb.chroot.root(args, ["rm", "/tmp/buildinfo"])
-    buildinfo = generate(args, apk_path, carch, suffix, apkbuild)
+    buildinfo = generate(args, apk_path, arch, suffix, apkbuild)
     with open(args.work + "/chroot_native/tmp/buildinfo", "w") as handle:
         handle.write(json.dumps(buildinfo, indent=4, sort_keys=True) + "\n")
 
