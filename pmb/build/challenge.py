@@ -98,7 +98,7 @@ def diff(args, apk_a, apk_b):
                     logging.debug("Compare: " + name)
                     if name == ".PKGINFO":
                         logging.debug(
-                            "=> Skipping, this is expected to be different")
+                            "=> Skipping: expected to be different")
                         continue
 
                     # Get members
@@ -109,7 +109,7 @@ def diff(args, apk_a, apk_b):
                             "Entry '" + name + "' has a different type!")
 
                     if member_a.isdir():
-                        logging.debug("=> Skipping, this is directory")
+                        logging.debug("=> Skipping: directory")
                     elif member_a.isfile():
                         diff_files(tar_a, tar_b, member_a, member_b, name)
                     elif member_a.issym() or member_a.islnk():
@@ -160,22 +160,26 @@ def challenge(args, apk_path):
     # Build the package
     repo_before = pmb.helpers.repo.files(args)
     pmb.build.package(args, buildinfo["pkgname"], buildinfo["arch"],
-                      force=True)
+                      force=True, buildinfo=True)
     repo_diff = pmb.helpers.repo.diff(args, repo_before)
 
     # Diff the apk contents
     staging_path = os.path.abspath(os.path.dirname(apk_path) + "/../")
     for file in repo_diff:
+        file_staging = staging_path + "/" + file
+        file_work = args.work + "/packages/" + file
+
         if file.endswith(".apk"):
             logging.info("Verify " + file)
-            diff(
-                args,
-                staging_path +
-                "/" +
-                file,
-                args.work +
-                "/packages/" +
-                file)
+            diff(args, file_staging, file_work)
+        elif (file.endswith("/APKINDEX.tar.gz") or
+              file.endswith(".apk.buildinfo.json")):
+            # We only verify the apk file (see above). The APKINDEX can
+            # be verified separately.
+            continue
+        else:
+            raise RuntimeError("Unknown file type changed in the"
+                               " package repository folder: " + file)
 
     # Output the changed files from the repository
     if args.output_repo_changes:
