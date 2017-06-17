@@ -170,6 +170,15 @@ def parse(args, path, strict=False):
                 }, ...
               }
     """
+
+    # Try to get a cached result first
+    lastmod = os.path.getmtime(path)
+    if path in args.cache["apkindex"]:
+        cache = args.cache["apkindex"][path]
+        if cache["lastmod"] == lastmod:
+            return cache["ret"]
+
+    # Parse the whole APKINDEX.tar.gz file
     ret = {}
     start = [0]
     with tarfile.open(path, "r:gz") as tar:
@@ -188,6 +197,9 @@ def parse(args, path, strict=False):
                         if len(split) == 2:
                             parse_add_block(path, strict, ret, block,
                                             split[0], split[1])
+    # Update the cache
+    args.cache["apkindex"][path] = {"lastmod": lastmod, "ret": ret}
+
     return ret
 
 

@@ -199,6 +199,9 @@ def arguments():
     # Add convinience shortcuts
     setattr(args, "arch_native", pmb.parse.arch.alpine_native())
 
+    # Add a caching dict
+    setattr(args, "cache", {"apkindex": {}})
+
     # Add and verify the deviceinfo (only after initialization)
     if args.action != "init":
         setattr(args, "deviceinfo", pmb.parse.deviceinfo(args))
