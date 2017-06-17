@@ -16,10 +16,16 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
-# Exported functions
-from pmb.build.init import init
-from pmb.build.checksum import checksum
-from pmb.build.other import copy_to_buildpath, is_necessary, \
-    symlink_noarch_package, find_aport, ccache_stats, index_repo
-from pmb.build.package import package
-from pmb.build.menuconfig import menuconfig
+import os
+import pmb.challenge
+
+
+def frontend(args):
+    path = args.challenge_file
+    if path.endswith(".apk"):
+        pmb.challenge.build(args, path)
+    elif os.path.basename(path) == "APKINDEX.tar.gz":
+        pmb.challenge.apkindex(args, path)
+    else:
+        raise ValueError("It is only possible to challenge files ending"
+                         " in .apk or files named APKINDEX.tar.gz.")

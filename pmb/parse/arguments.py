@@ -172,12 +172,17 @@ def arguments():
 
     # Action: challenge
     challenge = sub.add_parser("challenge",
-                               help="rebuild a package and diff its contents")
+                               help="verify, that an apk file or"
+                                    " APKINDEX has been built"
+                                    " generated.")
     challenge.add_argument("--output-repo-changes", dest="output_repo_changes",
                            help="pass the path to a file here, to store a list"
                                 " of apk- and APKINDEX-files that have been"
                                 " changed during the build", default=None)
-    challenge.add_argument("apk")
+    challenge.add_argument("challenge_file",
+                           help="the file to be verified. must end in"
+                                " .apk, or must be named"
+                                " APKINDEX.tar.gz.")
 
     # Use defaults from the user's config file
     args = parser.parse_args()

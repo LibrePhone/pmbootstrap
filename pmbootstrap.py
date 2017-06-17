@@ -28,6 +28,7 @@ import traceback
 import pmb.aportgen
 import pmb.build
 import pmb.config
+import pmb.challenge
 import pmb.chroot
 import pmb.chroot.initfs
 import pmb.chroot.other
@@ -61,7 +62,7 @@ def main():
         elif args.action == "build_init":
             pmb.build.init(args, args.suffix)
         elif args.action == "challenge":
-            pmb.build.challenge(args, args.apk)
+            pmb.challenge.frontend(args)
         elif args.action == "checksum":
             pmb.build.checksum(args, args.package)
         elif args.action == "chroot":
