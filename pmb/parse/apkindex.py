@@ -46,8 +46,155 @@ def compare_version(a_str, b_str):
     return 1
 
 
+def parse_next_block(args, path, lines, start):
+    """
+    Parse the next block in an APKINDEX.
+
+    :param path: to the APKINDEX.tar.gz
+    :param start: current index in lines, gets increased in this
+                  function. Wrapped into a list, so it can be modified
+                  "by reference". Example: [5]
+    :param lines: all lines from the "APKINDEX" file inside the archive
+    :returns: a dictionary with the following structure:
+              { "pkgname": "postmarketos-mkinitfs",
+                "version": "0.0.4-r10",
+                "depends": ["busybox-extras", "lddtree", ... ],
+                "provides": ["mkinitfs=0.0.1"],
+              }
+    :returns: None, when there are no more blocks
+    """
+
+    # Parse until we hit an empty line or end of file
+    ret = {}
+    mapping = {
+        "P": "pkgname",
+        "V": "version",
+        "D": "depends",
+        "p": "provides"
+    }
+    end_of_block_found = False
+    for i in range(start[0], len(lines)):
+        # Check for empty line
+        start[0] = i + 1
+        line = lines[i].decode()
+        if line == "\n":
+            end_of_block_found = True
+            break
+
+        # Parse keys from the mapping
+        for letter, key in mapping.items():
+            if line.startswith(letter + ":"):
+                if key in ret:
+                    raise RuntimeError(
+                        "Key " + key + " (" + letter + ":) specified twice"
+                        " in block: " + str(ret) + ", file: " + path)
+                ret[key] = line[2:-1]
+
+    # Format and return the block
+    if end_of_block_found:
+        # Check for required keys
+        for key in ["pkgname", "version"]:
+            if key not in ret:
+                raise RuntimeError("Missing required key '" + key +
+                                   "' in block " + str(ret) + ", file: " + path)
+
+        # Format optional lists
+        for key in ["provides", "depends"]:
+            if key in ret and ret[key] != "":
+                ret[key] = ret[key].split(" ")
+            else:
+                ret[key] = []
+
+        return ret
+
+    # No more blocks
+    elif ret != {}:
+        raise RuntimeError("Last block in " + path + " does not end"
+                           " with a new line! Delete the file and"
+                           " try again. Last block: " + str(ret))
+    return None
+
+
+def parse_add_block(path, strict, ret, block, pkgname=None,
+                    version=None):
+    """
+    Add one block to the return dictionary of parse().
+
+    :param path: to the APKINDEX.tar.gz
+    :param strict: When set to True, only allow one entry per pkgname.
+                   In case there are two, raise an exception.
+                   When set to False, and there are multiple entries
+                   for one pkgname, it uses the latest one.
+    :param ret: dictionary of all packages in the APKINDEX, that is
+                getting built right now. This function will extend it.
+    :param block: return value from parse_next_block().
+    :param pkgname: defaults to the real pkgname, could be an alias
+                    from the "provides" list.
+    :param version: defaults to the real version, could be a value
+                    from the "provides" list.
+    """
+
+    # Defaults
+    if not pkgname:
+        pkgname = block["pkgname"]
+    if not version:
+        version = block["version"]
+
+    # Handle duplicate entries
+    if pkgname in ret:
+        if strict:
+            raise RuntimeError("Multiple blocks for " +
+                               pkgname + " in " + path)
+        if compare_version(ret[pkgname]["version"], version) < 1:
+            return
+
+    # Add it to the result set
+    ret[pkgname] = block
+
+
+def parse(args, path, strict=False):
+    """
+    Parse an APKINDEX.tar.gz file, and return its content as dictionary.
+
+    :param strict: When set to True, only allow one entry per pkgname.
+                   In case there are two, raise an exception.
+                   When set to False, and there are multiple entries
+                   for one pkgname, it uses the latest one.
+    :returns: a dictionary with the following structure:
+              { "postmarketos-mkinitfs":
+                {
+                  "pkgname": "postmarketos-mkinitfs"
+                  "version": "0.0.4-r10",
+                  "depends": ["busybox-extras", "lddtree", ...],
+                  "provides": ["mkinitfs=0.0.1"]
+                }, ...
+              }
+    """
+    ret = {}
+    start = [0]
+    with tarfile.open(path, "r:gz") as tar:
+        with tar.extractfile(tar.getmember("APKINDEX")) as handle:
+            lines = handle.readlines()
+            while True:
+                block = parse_next_block(args, path, lines, start)
+                if not block:
+                    break
+
+                # Add the next package and all aliases
+                parse_add_block(path, strict, ret, block)
+                if "provides" in block:
+                    for alias in block["provides"]:
+                        split = alias.split("=")
+                        if len(split) == 2:
+                            parse_add_block(path, strict, ret, block,
+                                            split[0], split[1])
+    return ret
+
+
 def read(args, package, path, must_exist=True):
     """
+    Get information about a single package from an APKINDEX.tar.gz file.
+
     :param path: Path to APKINDEX.tar.gz, defaults to $WORK/APKINDEX.tar.gz
     :param package: The package of which you want to read the properties.
     :param must_exist: When set to true, raise an exception when the package is
@@ -62,59 +209,23 @@ def read(args, package, path, must_exist=True):
             return None
         raise RuntimeError("File not found: " + path)
 
-    # Read the tarfile
-    ret = None
-    with tarfile.open(path, "r:gz") as tar:
-        with tar.extractfile(tar.getmember("APKINDEX")) as handle:
-            current = {}
-            for line in handle:
-                line = line.decode()
-                if line == "\n":  # end of package
-                    if current["pkgname"] == package:
-                        if not ret or compare_version(current["version"],
-                                                      ret["version"]) == 1:
-                            ret = current
-                    if "provides" in current:
-                        for alias in current["provides"]:
-                            split = alias.split("=")
-                            if len(split) == 1:
-                                continue
-                            name = split[0]
-                            version = split[1]
-                            if name == package:
-                                if not ret or compare_version(current["version"],
-                                                              version) == 1:
-                                    ret = current
-                    current = {}
-                if line.startswith("P:"):  # package
-                    current["pkgname"] = line[2:-1]
-                if line.startswith("V:"):  # version
-                    current["version"] = line[2:-1]
-                if line.startswith("D:"):  # depends
-                    depends = line[2:-1]
-                    if depends:
-                        current["depends"] = depends.split(" ")
-                    else:
-                        current["depends"] = []
-                if line.startswith("p:"):  # provides
-                    provides = line[2:-1]
-                    current["provides"] = provides.split(" ")
-    if not ret and must_exist:
-        raise RuntimeError("Package " + package + " not found in " + path)
-
-    if ret:
-        for key in ["depends", "provides"]:
-            if key not in ret:
-                ret[key] = []
-
-    return ret
+    # Parse the APKINDEX
+    apkindex = parse(args, path)
+    if package not in apkindex:
+        if must_exist:
+            raise RuntimeError("Package '" + package +
+                               "' not found in " + path)
+        else:
+            return None
+    return apkindex[package]
 
 
 def read_any_index(args, package, arch=None):
     """
-    Check if *any* APKINDEX has a specific package.
+    Get information about a single package from any APKINDEX.tar.gz.
 
     :param arch: defaults to native architecture
+    :returns: the same format as read()
     """
     if not arch:
         arch = args.arch_native
