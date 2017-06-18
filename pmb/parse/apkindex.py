@@ -116,7 +116,7 @@ def parse_next_block(args, path, lines, start):
 
 
 def parse_add_block(path, strict, ret, block, pkgname=None,
-                    version=None):
+                    version_new=None):
     """
     Add one block to the return dictionary of parse().
 
@@ -137,15 +137,18 @@ def parse_add_block(path, strict, ret, block, pkgname=None,
     # Defaults
     if not pkgname:
         pkgname = block["pkgname"]
-    if not version:
-        version = block["version"]
+    if not version_new:
+        version_new = block["version"]
 
     # Handle duplicate entries
     if pkgname in ret:
         if strict:
-            raise RuntimeError("Multiple blocks for " +
-                               pkgname + " in " + path)
-        if compare_version(ret[pkgname]["version"], version) < 1:
+            raise RuntimeError("Multiple blocks for " + pkgname +
+                               " in " + path)
+        # Ignore the block, if the block we already have has a higher
+        # version
+        version_old = ret[pkgname]["version"]
+        if compare_version(version_old, version_new) == 1:
             return
 
     # Add it to the result set
