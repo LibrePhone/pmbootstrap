@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
 # Exported functions
-from pmb.challenge.apk import apk
+from pmb.challenge.apk_file import apk
 from pmb.challenge.apkindex import apkindex
 from pmb.challenge.build import build
 from pmb.challenge.frontend import frontend

@@ -38,3 +38,17 @@ def kernel_flavor_autodetect(args, suffix):
     """
     pmb.chroot.apk.install(args, ["device-" + args.device], suffix)
     return kernel_flavors_installed(args, suffix)[0]
+
+
+def tempfolder(args, path, suffix="native"):
+    """
+    Create a temporary folder inside the chroot, that belongs to "user".
+    The folder gets deleted, if it already exists.
+
+    :param path: of the temporary folder inside the chroot
+    :returns: the path
+    """
+    if os.path.exists(args.work + "/chroot_" + suffix + path):
+        pmb.chroot.root(args, ["rm", "-r", path])
+    pmb.chroot.user(args, ["mkdir", "-p", path])
+    return path

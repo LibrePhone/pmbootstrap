@@ -27,7 +27,7 @@ def zap(args):
     pmb.chroot.shutdown(args)
     patterns = [
         "chroot_native",
-        "chroot_buildroot_" + args.deviceinfo["arch"],
+        "chroot_buildroot_*",
         "chroot_rootfs_" + args.device,
     ]
 

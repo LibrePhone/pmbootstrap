@@ -1,0 +1,67 @@
+"""
+Copyright 2017 Oliver Smith
+
+This file is part of pmbootstrap.
+
+pmbootstrap is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+pmbootstrap is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
+"""
+import os
+import sys
+import pytest
+
+# Import from parent directory
+sys.path.append(os.path.abspath(
+    os.path.join(os.path.dirname(__file__) + "/..")))
+import pmb.build.package
+import pmb.challenge.build
+import pmb.parse
+import pmb.config
+
+
+@pytest.fixture
+def args(request, tmpdir):
+    import pmb.parse
+    sys.argv = ["pmbootstrap.py", "chroot"]
+    args = pmb.parse.arguments()
+    setattr(args, "logfd", open("/dev/null", "a+"))
+    request.addfinalizer(args.logfd.close)
+    return args
+
+
+def test_challenge_build(args):
+    # Build the "hello-world" package
+    pkgname = "hello-world"
+    pmb.build.package(args, pkgname, None, force=True, buildinfo=True)
+
+    # Copy it to a temporary path
+    apkbuild = pmb.parse.apkbuild(args.aports + "/" + pkgname + "/APKBUILD")
+    version = apkbuild["pkgver"] + "-r" + apkbuild["pkgrel"]
+    temp_path = pmb.chroot.other.tempfolder(args, "/tmp/test_challenge_build/" +
+                                            args.arch_native)
+    apk_path = ("/home/user/packages/user/" + args.arch_native + "/" + pkgname +
+                "-" + version + ".apk")
+    pmb.chroot.user(args, ["cp", apk_path, apk_path +
+                           ".buildinfo.json", temp_path])
+
+    # Challenge, output changes into a file
+    setattr(args, "output_repo_changes", args.work + "/chroot_native/tmp/"
+                  "test_challenge_build_output.txt")
+    pmb.challenge.build(args, args.work + "/chroot_native/" + temp_path + "/" +
+                        os.path.basename(apk_path))
+
+    # Verify the output textfile
+    with open(args.output_repo_changes, "r") as handle:
+        lines = handle.readlines()
+        assert lines == [args.arch_native + "/APKINDEX.tar.gz\n",
+                         args.arch_native + "/" + pkgname + "-" + version + ".apk\n"]

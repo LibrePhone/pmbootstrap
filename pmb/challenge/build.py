@@ -23,7 +23,7 @@ import pmb.build
 import pmb.parse.apkbuild
 import pmb.parse.other
 import pmb.helpers.repo
-import pmb.challenge.apk
+import pmb.challenge
 
 
 def build(args, apk_path):

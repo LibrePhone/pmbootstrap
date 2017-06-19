@@ -42,15 +42,15 @@ def args(request):
 def test_read_signature_info(args):
     # Tempfolder inside chroot for fake apk files
     tmp_path = "/tmp/test_read_signature_info"
-    tmp_path_chroot = args.work + "/chroot_native" + tmp_path
-    if os.path.exists(tmp_path_chroot):
+    tmp_path_outside = args.work + "/chroot_native" + tmp_path
+    if os.path.exists(tmp_path_outside):
         pmb.chroot.root(args, ["rm", "-r", tmp_path])
     pmb.chroot.user(args, ["mkdir", "-p", tmp_path])
 
     # No signature found
     pmb.chroot.user(args, ["tar", "-czf", tmp_path + "/no_sig.apk",
                            "/etc/issue"])
-    with tarfile.open(tmp_path_chroot + "/no_sig.apk", "r:gz") as tar:
+    with tarfile.open(tmp_path_outside + "/no_sig.apk", "r:gz") as tar:
         with pytest.raises(RuntimeError) as e:
             pmb.chroot.apk_static.read_signature_info(tar)
         assert "Could not find signature" in str(e.value)
@@ -62,7 +62,7 @@ def test_read_signature_info(args):
     pmb.chroot.user(args, ["tar", "-czf", tmp_path + "/invalid_sig.apk",
                            "sbin/apk.static.SIGN.RSA.invalid.pub"],
                     working_dir=tmp_path)
-    with tarfile.open(tmp_path_chroot + "/invalid_sig.apk", "r:gz") as tar:
+    with tarfile.open(tmp_path_outside + "/invalid_sig.apk", "r:gz") as tar:
         with pytest.raises(RuntimeError) as e:
             pmb.chroot.apk_static.read_signature_info(tar)
         assert "Invalid signature key" in str(e.value)
@@ -75,7 +75,7 @@ def test_read_signature_info(args):
                            tmp_path + "/" + path_archive])
     pmb.chroot.user(args, ["tar", "-czf", tmp_path + "/realistic_name_sig.apk",
                            path_archive], working_dir=tmp_path)
-    with tarfile.open(tmp_path_chroot + "/realistic_name_sig.apk", "r:gz") as tar:
+    with tarfile.open(tmp_path_outside + "/realistic_name_sig.apk", "r:gz") as tar:
         sigfilename, sigkey_path = pmb.chroot.apk_static.read_signature_info(
             tar)
         assert sigfilename == path_archive
