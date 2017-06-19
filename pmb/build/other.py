@@ -22,6 +22,7 @@ import glob
 
 import pmb.chroot
 import pmb.helpers.run
+import pmb.helpers.file
 import pmb.parse.apkindex
 
 
@@ -67,8 +68,10 @@ def copy_to_buildpath(args, package, suffix="native"):
 
 def is_necessary(args, arch, apkbuild, apkindex_path=None):
     """
-    Check if the package has already been built (because abuild's check
-    only works, if it is the same architecture!)
+    Check if the package has already been built. Compared to abuild's check,
+    this check also works for different architectures, and it recognizes
+    changed files in an aport folder, even if the pkgver and pkgrel did not
+    change.
 
     :param arch: package target architecture
     :param apkbuild: from pmb.parse.apkbuild()
@@ -90,8 +93,6 @@ def is_necessary(args, arch, apkbuild, apkindex_path=None):
     if index_data:
         version_old = index_data["version"]
 
-    if version_new == version_old:
-        return False
     if pmb.parse.apkindex.compare_version(version_old,
                                           version_new) == 1:
         logging.warning("WARNING: Package " + package + "-" + version_old +
@@ -99,6 +100,16 @@ def is_necessary(args, arch, apkbuild, apkindex_path=None):
                         " in the APKBUILD. Consider cleaning your package cache" +
                         " (pmbootstrap zap -p) or removing that file and running" +
                         " 'pmbootstrap index'!")
+
+    if version_new != version_old:
+        return True
+
+    # Check if all files in the aport folder have an older timestamp,
+    # than the package.
+    path_target = (os.path.dirname(apkindex_path) + "/" + package + "-" +
+                   version_new + ".apk")
+    path_sources = glob.glob(args.aports + "/" + package + "/*")
+    if pmb.helpers.file.is_up_to_date(path_target, path_sources):
         return False
     return True
 
