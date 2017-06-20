@@ -54,6 +54,11 @@ def test_challenge_build(args):
     pmb.chroot.user(args, ["cp", apk_path, apk_path +
                            ".buildinfo.json", temp_path])
 
+    # Change the timestamps of all files, so the changes file gets written
+    # correctly, even if this testcase gets executed very fast
+    pmb.chroot.user(args, ["touch", "-d", "2017-01-01", apk_path, apk_path +
+                           ".buildinfo.json"])
+
     # Challenge, output changes into a file
     setattr(args, "output_repo_changes", args.work + "/chroot_native/tmp/"
                   "test_challenge_build_output.txt")
@@ -64,4 +69,5 @@ def test_challenge_build(args):
     with open(args.output_repo_changes, "r") as handle:
         lines = handle.readlines()
         assert lines == [args.arch_native + "/APKINDEX.tar.gz\n",
-                         args.arch_native + "/" + pkgname + "-" + version + ".apk\n"]
+                         args.arch_native + "/" + pkgname + "-" + version + ".apk\n",
+                         args.arch_native + "/" + pkgname + "-" + version + ".apk.buildinfo.json\n"]
