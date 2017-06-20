@@ -48,6 +48,7 @@ defaults = {
     "device": "samsung-i9100",
     "log": "$WORK/log.txt",
     "mirror_alpine": "https://nl.alpinelinux.org/alpine/",
+    "mirror_postmarketos": "",
     "work": os.path.expanduser("~") + "/.local/var/pmbootstrap",
     "port_distccd": "33632",
 

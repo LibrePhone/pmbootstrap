@@ -88,6 +88,7 @@ def arguments():
     parser.add_argument("-c", "--config", dest="config",
                         default=pmb.config.defaults["config"])
     parser.add_argument("-d", "--port-distccd", dest="port_distccd")
+    parser.add_argument("-mp", "--mirror-pmOS", dest="mirror_postmarketos")
     parser.add_argument("-m", "--mirror-alpine", dest="mirror_alpine")
     parser.add_argument("-j", "--jobs", help="parallel jobs when compiling")
     parser.add_argument("-p", "--aports",

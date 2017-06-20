@@ -70,7 +70,8 @@ def parse_next_block(args, path, lines, start):
         "P": "pkgname",
         "V": "version",
         "D": "depends",
-        "p": "provides"
+        "p": "provides",
+        "t": "timestamp"
     }
     end_of_block_found = False
     for i in range(start[0], len(lines)):
@@ -93,7 +94,7 @@ def parse_next_block(args, path, lines, start):
     # Format and return the block
     if end_of_block_found:
         # Check for required keys
-        for key in ["pkgname", "version"]:
+        for key in ["pkgname", "version", "timestamp"]:
             if key not in ret:
                 raise RuntimeError("Missing required key '" + key +
                                    "' in block " + str(ret) + ", file: " + path)

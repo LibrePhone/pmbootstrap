@@ -79,6 +79,8 @@ def init(args, suffix="native"):
     repos_path = chroot + "/etc/apk/repositories"
     if not os.path.exists(repos_path):
         lines = ["/home/user/packages/user"]
+        if args.mirror_postmarketos:
+            lines.append(args.mirror_postmarketos)
         directories = ["main", "community"]
         if args.alpine_version == "edge":
             directories.append("testing")

@@ -31,14 +31,20 @@ def replace(path, old, new):
         handle.write(text)
 
 
-def is_up_to_date(path_target, path_sources):
+def is_up_to_date(path_sources, path_target=None, lastmod_target=None):
     """
     Check if a file is up-to-date by comparing the last modified timestamps
     (just like make does it).
 
-    :param path_target: full path to the target file
     :param path_sources: list of full paths to the source files
+    :param path_target: full path to the target file
+    :param lastmod_target: the timestamp of the target file. specify this as
+                           alternative to specifying path_target.
     """
+
+    if path_target and lastmod_target:
+        raise RuntimeError(
+            "Specify path_target *or* lastmod_target, not both!")
 
     lastmod_source = None
     for path_source in path_sources:
@@ -46,6 +52,7 @@ def is_up_to_date(path_target, path_sources):
         if not lastmod_source or lastmod > lastmod_source:
             lastmod_source = lastmod
 
-    lastmod_target = os.path.getmtime(path_target)
+    if path_target:
+        lastmod_target = os.path.getmtime(path_target)
 
     return lastmod_target >= lastmod_source

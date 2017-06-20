@@ -78,38 +78,39 @@ def is_necessary(args, arch, apkbuild, apkindex_path=None):
     :param apkindex_path: override the APKINDEX.tar.gz path
     :returns: boolean
     """
-
     # Get new version from APKBUILD
     package = apkbuild["pkgname"]
     version_new = apkbuild["pkgver"] + "-r" + apkbuild["pkgrel"]
 
     # Get old version from APKINDEX
-    if not apkindex_path:
-        apkindex_path = (args.work + "/packages/" + arch +
-                         "/APKINDEX.tar.gz")
-    version_old = None
-    index_data = pmb.parse.apkindex.read(args, package, apkindex_path,
-                                         False)
-    if index_data:
-        version_old = index_data["version"]
+    if apkindex_path:
+        index_data = pmb.parse.apkindex.read(
+            args, package, apkindex_path, False)
+    else:
+        index_data = pmb.parse.apkindex.read_any_index(args, package, arch)
+    if not index_data:
+        return True
 
+    # a) Binary repo has a newer version
+    version_old = index_data["version"]
     if pmb.parse.apkindex.compare_version(version_old,
                                           version_new) == 1:
-        logging.warning("WARNING: Package " + package + "-" + version_old +
-                        " in your binary repository is higher than the version defined" +
-                        " in the APKBUILD. Consider cleaning your package cache" +
-                        " (pmbootstrap zap -p) or removing that file and running" +
-                        " 'pmbootstrap index'!")
+        logging.warning("WARNING: Package '" + package + "' in your aports folder"
+                        " has version " + version_old + ", but the binary package"
+                        " repositories already have version " + version_new + "!")
+        return False
 
+    # b) Aports folder has a newer version
     if version_new != version_old:
         return True
 
-    # Check if all files in the aport folder have an older timestamp,
-    # than the package.
-    path_target = (os.path.dirname(apkindex_path) + "/" + package + "-" +
-                   version_new + ".apk")
+    # c) The version is the same. Check if all files in the aport folder have an
+    # older timestamp, than the package. This way the pkgrel doesn't need to be
+    # increased while developing locally.
+    lastmod_target = float(index_data["timestamp"])
     path_sources = glob.glob(args.aports + "/" + package + "/*")
-    if pmb.helpers.file.is_up_to_date(path_target, path_sources):
+    if pmb.helpers.file.is_up_to_date(
+            path_sources, lastmod_target=lastmod_target):
         return False
     return True
 
