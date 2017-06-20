@@ -125,8 +125,7 @@ def arguments():
             help="count of initial output lines")
 
     # Action: zap
-    zap = sub.add_parser("zap", help="safely delete chroot"
-                         "folders")
+    zap = sub.add_parser("zap", help="safely delete chroot folders")
     zap.add_argument("-p", "--packages", action="store_true", help="also delete"
                      " the precious, self-compiled packages")
     zap.add_argument("-hc", "--http", action="store_true", help="also delete http"
@@ -172,9 +171,10 @@ def arguments():
 
     # Action: challenge
     challenge = sub.add_parser("challenge",
-                               help="verify, that an apk file or"
-                                    " APKINDEX has been built"
-                                    " generated.")
+                               help="verify, that all files in an apk can be"
+                                    " reproduced from the same sources /"
+                                    " verify, that an APKINDEX.tar.gz properly"
+                                    " lists all apks in a repository folder")
     challenge.add_argument("--output-repo-changes", dest="output_repo_changes",
                            help="pass the path to a file here, to store a list"
                                 " of apk- and APKINDEX-files that have been"
