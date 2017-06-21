@@ -4,7 +4,7 @@ Sophisticated chroot/build/flash tool to develop and install postmarketOS.
 [Static code analysis](https://github.com/postmarketOS/pmbootstrap/blob/master/test/static_code_analysis.sh) status: [![travis badge](https://api.travis-ci.org/postmarketOS/pmbootstrap.png?branch=master)](https://travis-ci.org/postmarketOS/pmbootstrap)
 
 ## Requirements
-* GNU/Linux
+* Linux distribution
 * Python 3
 * OpenSSL
 
@@ -35,11 +35,11 @@ Open a shell inside a native Alpine Linux chroot (~6 MB install size).
 `./pmbootstrap.py chroot --suffix=buildroot_armhf`:
 Open a shell inside an `armhf` Alpine Linux chroot, with qemu user mode emulation and binfmt support automatically set up.
 
-`./pmbootstrap.py build heimdall`:
-Build the "heimdall" package (specify any package from the `aports`-folder here).
+`./pmbootstrap.py build hello-world`:
+Build the "hello-world" package (specify any package from the `aports`-folder here).
 
-`./pmbootstrap.py build heimdall --arch=armhf`:
-Build the "heimdall" package for `armhf` inside the `armhf` chroot, with the cross-compiler installed in the native chroot (chroots are connected via distcc).
+`./pmbootstrap.py build hello-world --arch=armhf`:
+Build the "hello-world" package for `armhf` inside the `armhf` chroot, with the cross-compiler installed in the native chroot (chroots are connected via distcc).
 
 `./pmbootstrap.py install`:
 Generate a system image file with a full postmarketOS installation. All required packages get built first, if they do not exist yet. You will get asked for the "user" password and the root partition password.
