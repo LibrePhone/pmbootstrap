@@ -66,6 +66,7 @@ def main():
         elif args.action == "checksum":
             pmb.build.checksum(args, args.package)
         elif args.action == "chroot":
+            pmb.chroot.apk.check_min_version(args, args.suffix)
             pmb.chroot.root(args, args.command, args.suffix, log=False)
         elif args.action == "index":
             pmb.build.index_repo(args)

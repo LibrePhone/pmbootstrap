@@ -201,7 +201,7 @@ def arguments():
     setattr(args, "arch_native", pmb.parse.arch.alpine_native())
 
     # Add a caching dict
-    setattr(args, "cache", {"apkindex": {}})
+    setattr(args, "cache", {"apkindex": {}, "apk_min_version_checked": []})
 
     # Add and verify the deviceinfo (only after initialization)
     if args.action != "init":

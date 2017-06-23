@@ -18,8 +18,34 @@ along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
 import logging
 import pmb.chroot
+import pmb.config
 import pmb.parse.apkindex
 import pmb.parse.other
+
+
+def check_min_version(args, suffix="native"):
+    """
+    Check the minimum apk version, before running it the first time in the
+    current session (lifetime of one pmbootstrap call).
+    """
+    # Skip if we already did this
+    if suffix in args.cache["apk_min_version_checked"]:
+        return
+
+    # Read the version from apk and from the config
+    pkgver = pmb.chroot.root(args, ["apk", "--version"], suffix,
+                             return_stdout=True)
+    pkgver = pkgver.split(" ")[1].split(",")[0]
+    pkgver_min = pmb.config.apk_tools_static_min_version.split("-")[0]
+
+    # Compare
+    if pmb.parse.apkindex.compare_version(pkgver, pkgver_min) == -1:
+        raise RuntimeError("You have an outdated version of the 'apk' package"
+                           " manager installed (your version: " + pkgver +
+                           ", expected at least: " + pkgver_min + "). Delete"
+                           " your http cache and zap all chroots, then try again:"
+                           " 'pmbootstrap zap -hc'")
+    args.cache["apk_min_version_checked"].append(suffix)
 
 
 def install(args, packages, suffix="native", build=True):
@@ -30,6 +56,7 @@ def install(args, packages, suffix="native", build=True):
         False!
     """
     # Initialize chroot
+    check_min_version(args, suffix)
     pmb.chroot.init(args, suffix)
 
     # Filter already installed packages
@@ -63,6 +90,7 @@ def upgrade(args, suffix="native", update_index=True):
     """
     Upgrade all packages installed in a chroot
     """
+    check_min_version(args, suffix)
     pmb.chroot.init(args, suffix)
     if update_index:
         pmb.chroot.root(args, ["apk", "update"], suffix)
@@ -77,9 +105,11 @@ def installed(args, suffix="native"):
     :returns: { "hello-world": {"package": "hello-world-1-r2", "pkgrel": "2",
         "pkgver": "1", "pkgname": "hello-world"}, ...}
     """
-    ret = {}
+    check_min_version(args, suffix)
     list = pmb.chroot.user(args, ["apk", "info", "-vv"], suffix,
                            return_stdout=True)
+    # Parse the output into a dictionary
+    ret = {}
     for line in list.split("\n"):
         if not line.rstrip():
             continue

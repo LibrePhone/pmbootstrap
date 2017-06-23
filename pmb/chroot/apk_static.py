@@ -163,11 +163,11 @@ def init(args):
     version_min = pmb.config.apk_tools_static_min_version
     apk_name = "apk-tools-static-" + version + ".apk"
     if pmb.parse.apkindex.compare_version(version, version_min) == -1:
-        raise RuntimeError("Server provides an outdated version of"
-                           " apk-tools-static: " + version +
-                           " (expected at least " + version_min +
-                           "). Looks like a downgrade attack from a"
-                           " malicious server! Switch the server (-m) and try again!")
+        raise RuntimeError("You have an outdated version of apk-tools-static"
+                           " (your version: " + version +
+                           ", expected at least:"
+                           " " + version_min + "). Delete your http cache and zap"
+                           " all chroots, then try again: 'pmbootstrap zap -hc'")
     apk_static = download(args, apk_name)
     extract(args, version, apk_static)
 

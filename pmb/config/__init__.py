@@ -36,7 +36,7 @@ apk_keys_path = pmb_src + "/keys"
 # Update this frequently to prevent a MITM attack with an outdated version
 # (which may contain a vulnerable apk/libressl, and allows an attacker to
 # exploit the system!)
-apk_tools_static_min_version = "2.7.1-r0"
+apk_tools_static_min_version = "2.7.2-r0"
 
 # Config file/commandline default values
 # $WORK gets replaced with the actual value for args.work (which may be
