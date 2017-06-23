@@ -32,6 +32,9 @@ Run tail -f on the logfile, which contains detailed output. Do this in a second 
 `./pmbootstrap.py chroot`:
 Open a shell inside a native Alpine Linux chroot (~6 MB install size).
 
+`./pmbootstrap.py chroot -- ls -l /home/user`
+Execute `ls -l /home/user` inside the chroot. Make sure, that you use `--` before the command, so all following options (e.g. `-l`) do not get interpreted by pmbootstrap, but passed correctly to your command.
+
 `./pmbootstrap.py chroot --suffix=buildroot_armhf`:
 Open a shell inside an `armhf` Alpine Linux chroot, with qemu user mode emulation and binfmt support automatically set up.
 
@@ -50,5 +53,4 @@ Format and partition the SD card `/dev/mmcblk0`, and put a full postmarketOS ins
 
 ## Testsuite
 Simply install `pytest` (via your package manager or via pip) and run it inside the pmbootstrap folder.
-
 
