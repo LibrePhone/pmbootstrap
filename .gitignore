@@ -1,3 +1,5 @@
+.*.swp
+
 # Failed patches
 *.rej
 *.orig
