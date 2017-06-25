@@ -117,4 +117,4 @@ def generate(args, pkgname):
             handle.write(line[12:] + "\n")
 
         # Hashes
-        handle.write("sha512sums=\"" + hashes.rstrip() + "\"")
+        handle.write("sha512sums=\"" + hashes.rstrip() + "\"\n")
