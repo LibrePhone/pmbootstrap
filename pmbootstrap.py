@@ -40,11 +40,12 @@ import pmb.install
 
 
 def main():
-    try:
-        # Parse arguments
-        args = pmb.parse.arguments()
-        pmb.helpers.logging.init(args)
+    # Parse arguments, set up logging
+    args = pmb.parse.arguments()
+    pmb.helpers.logging.init(args)
 
+    # Wrap everything to display nice error messages
+    try:
         # Initialize or require config
         if args.action == "init":
             return pmb.config.init(args)
@@ -102,6 +103,8 @@ def main():
     except Exception as e:
         logging.info("ERROR: " + str(e))
         logging.info("Run 'pmbootstrap log' for details.")
+        logging.info(
+            "See also: https://github.com/postmarketOS/pmbootstrap/wiki/Troubleshooting")
         logging.debug(traceback.format_exc())
         return 1
 
