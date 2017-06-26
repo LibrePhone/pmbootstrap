@@ -17,7 +17,6 @@ You should have received a copy of the GNU General Public License
 along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
 import platform
-import logging
 import fnmatch
 
 
@@ -25,13 +24,14 @@ def alpine_native():
     machine = platform.machine()
     ret = ""
 
-    if machine == "x86_64":
-        ret = "x86_64"
-    else:
-        raise ValueError("Can not map platform.machine " + machine +
-                         " to the right Alpine Linux architecture")
-
-    logging.debug("(native) Alpine architecture: " + ret)
+    mapping = {
+        "x86_64": "x86_64",
+        "aarch64": "aarch64"
+    }
+    if machine in mapping:
+        return mapping[machine]
+    raise ValueError("Can not map platform.machine " + machine +
+                     " to the right Alpine Linux architecture")
     return ret
 
 
@@ -95,7 +95,7 @@ def alpine_to_hostspec(arch):
         "ppc64le": "powerpc64le-alpine-linux-musl",
         "s390x": "s390x-alpine-linux-musl",
         "x86": "i586-alpine-linux-musl",
-        "x86_66": "x86_64-alpine-linux-musl",
+        "x86_64": "x86_64-alpine-linux-musl",
     }
     if arch in mapping:
         return mapping[arch]
