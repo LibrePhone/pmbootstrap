@@ -96,8 +96,8 @@ def is_necessary(args, arch, apkbuild, apkindex_path=None):
     if pmb.parse.apkindex.compare_version(version_old,
                                           version_new) == 1:
         logging.warning("WARNING: Package '" + package + "' in your aports folder"
-                        " has version " + version_old + ", but the binary package"
-                        " repositories already have version " + version_new + "!")
+                        " has version " + version_new + ", but the binary package"
+                        " repositories already have version " + version_old + "!")
         return False
 
     # b) Aports folder has a newer version

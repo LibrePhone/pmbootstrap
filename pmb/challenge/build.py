@@ -21,7 +21,6 @@ import json
 import os
 import pmb.build
 import pmb.parse.apkbuild
-import pmb.parse.other
 import pmb.helpers.repo
 import pmb.challenge
 
@@ -37,23 +36,17 @@ def build(args, apk_path):
     with open(buildinfo_path) as handle:
         buildinfo = json.load(handle)
 
-    # Parse and install all packages listed in versions
-    versions = {}
-    for package in buildinfo["versions"]:
-        split = pmb.parse.other.package_split(package)
-        pkgname = split["pkgname"]
-        versions[pkgname] = split
-    pmb.chroot.apk.install(args, versions.keys())
+    # Install all listed packages
+    pmb.chroot.apk.install(args, buildinfo["versions"].keys())
 
     # Verify the installed versions
     installed = pmb.chroot.apk.installed(args)
-    for pkgname, split in versions.items():
-        package_installed = installed[pkgname]["package"]
-        package_buildinfo = split["package"]
-        if package_installed != package_buildinfo:
+    for pkgname, version in buildinfo["versions"].items():
+        version_installed = installed[pkgname]["version"]
+        if version_installed != version:
             raise RuntimeError("Dependency " + pkgname + " version is different"
-                               " (installed: " + package_installed + ","
-                               " buildinfo: " + package_buildinfo + ")!")
+                               " (installed: " + version_installed + ","
+                               " buildinfo: " + version + ")!")
     # Build the package
     repo_before = pmb.helpers.repo.files(args)
     pmb.build.package(args, buildinfo["pkgname"], buildinfo["arch"],

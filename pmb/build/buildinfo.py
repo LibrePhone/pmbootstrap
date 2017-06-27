@@ -67,7 +67,7 @@ def generate(args, apk_path, arch, suffix, apkbuild):
            "pkgver": apkbuild["pkgver"],
            "pkgrel": apkbuild["pkgrel"],
            "arch": arch,
-           "versions": []}
+           "versions": {}}
 
     # Add makedepends versions
     installed = pmb.chroot.apk.installed(args, suffix)
@@ -75,8 +75,7 @@ def generate(args, apk_path, arch, suffix, apkbuild):
                 get_depends_recursively(args, [apkbuild["pkgname"], "abuild", "build-base"]))
     for pkgname in relevant:
         if pkgname in installed:
-            ret["versions"].append(installed[pkgname]["package"])
-    ret["versions"].sort()
+            ret["versions"][pkgname] = installed[pkgname]["version"]
     return ret
 
 

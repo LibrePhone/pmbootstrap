@@ -16,11 +16,11 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
+import os
 import logging
 import pmb.chroot
 import pmb.config
 import pmb.parse.apkindex
-import pmb.parse.other
 
 
 def check_min_version(args, suffix="native"):
@@ -28,23 +28,29 @@ def check_min_version(args, suffix="native"):
     Check the minimum apk version, before running it the first time in the
     current session (lifetime of one pmbootstrap call).
     """
+
     # Skip if we already did this
     if suffix in args.cache["apk_min_version_checked"]:
         return
 
-    # Read the version from apk and from the config
-    pkgver = pmb.chroot.root(args, ["apk", "--version"], suffix,
-                             return_stdout=True)
-    pkgver = pkgver.split(" ")[1].split(",")[0]
-    pkgver_min = pmb.config.apk_tools_static_min_version.split("-")[0]
+    # Skip if apk is not installed yet
+    if not os.path.exists(args.work + "/chroot_" + suffix + "/sbin/apk"):
+        logging.debug("NOTE: Skipped apk version check for chroot '" + suffix +
+                      "', because it is not installed yet!")
+        return
 
     # Compare
-    if pmb.parse.apkindex.compare_version(pkgver, pkgver_min) == -1:
+    version_installed = installed(args, suffix)["apk-tools"]["version"]
+    version_min = pmb.config.apk_tools_static_min_version
+    if pmb.parse.apkindex.compare_version(
+            version_installed, version_min) == -1:
         raise RuntimeError("You have an outdated version of the 'apk' package"
-                           " manager installed (your version: " + pkgver +
-                           ", expected at least: " + pkgver_min + "). Delete"
+                           " manager installed (your version: " + version_installed +
+                           ", expected at least: " + version_min + "). Delete"
                            " your http cache and zap all chroots, then try again:"
                            " 'pmbootstrap zap -hc'")
+
+    # Mark this suffix as checked
     args.cache["apk_min_version_checked"].append(suffix)
 
 
@@ -101,19 +107,19 @@ def upgrade(args, suffix="native", update_index=True):
 
 def installed(args, suffix="native"):
     """
-    Get all installed packages and their versions.
-    :returns: { "hello-world": {"package": "hello-world-1-r2", "pkgrel": "2",
-        "pkgver": "1", "pkgname": "hello-world"}, ...}
+    Read the list of installed packages (which has almost the same format, as
+    an APKINDEX, but with more keys).
+    :returns: a dictionary with the following structure:
+              { "postmarketos-mkinitfs":
+                {
+                  "pkgname": "postmarketos-mkinitfs"
+                  "version": "0.0.4-r10",
+                  "depends": ["busybox-extras", "lddtree", ...],
+                  "provides": ["mkinitfs=0.0.1"]
+                }, ...
+              }
     """
-    check_min_version(args, suffix)
-    list = pmb.chroot.user(args, ["apk", "info", "-vv"], suffix,
-                           return_stdout=True)
-    # Parse the output into a dictionary
-    ret = {}
-    for line in list.split("\n"):
-        if not line.rstrip():
-            continue
-        package = line.split(" - ")[0]
-        split = pmb.parse.other.package_split(package)
-        ret[split["pkgname"]] = split
-    return ret
+    path = args.work + "/chroot_" + suffix + "/lib/apk/db/installed"
+    if not os.path.exists(path):
+        return {}
+    return pmb.parse.apkindex.parse(args, path)

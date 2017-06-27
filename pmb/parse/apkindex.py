@@ -77,7 +77,9 @@ def parse_next_block(args, path, lines, start):
     for i in range(start[0], len(lines)):
         # Check for empty line
         start[0] = i + 1
-        line = lines[i].decode()
+        line = lines[i]
+        if not isinstance(line, str):
+            line = line.decode()
         if line == "\n":
             end_of_block_found = True
             break
@@ -182,25 +184,32 @@ def parse(args, path, strict=False):
         if cache["lastmod"] == lastmod:
             return cache["ret"]
 
-    # Parse the whole APKINDEX.tar.gz file
+    # Read all lines
+    if tarfile.is_tarfile(path):
+        with tarfile.open(path, "r:gz") as tar:
+            with tar.extractfile(tar.getmember("APKINDEX")) as handle:
+                lines = handle.readlines()
+    else:
+        with open(path, "r", encoding="utf-8") as handle:
+            lines = handle.readlines()
+
+    # Parse the whole APKINDEX file
     ret = {}
     start = [0]
-    with tarfile.open(path, "r:gz") as tar:
-        with tar.extractfile(tar.getmember("APKINDEX")) as handle:
-            lines = handle.readlines()
-            while True:
-                block = parse_next_block(args, path, lines, start)
-                if not block:
-                    break
+    while True:
+        block = parse_next_block(args, path, lines, start)
+        if not block:
+            break
 
-                # Add the next package and all aliases
-                parse_add_block(path, strict, ret, block)
-                if "provides" in block:
-                    for alias in block["provides"]:
-                        split = alias.split("=")
-                        if len(split) == 2:
-                            parse_add_block(path, strict, ret, block,
-                                            split[0], split[1])
+        # Add the next package and all aliases
+        parse_add_block(path, strict, ret, block)
+        if "provides" in block:
+            for alias in block["provides"]:
+                split = alias.split("=")
+                if len(split) == 2:
+                    parse_add_block(path, strict, ret, block, split[0],
+                                    split[1])
+
     # Update the cache
     args.cache["apkindex"][path] = {"lastmod": lastmod, "ret": ret}
 
