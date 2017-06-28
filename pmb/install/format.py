@@ -23,33 +23,39 @@ import pmb.chroot
 
 def format_and_mount_boot(args):
     mountpoint = "/mnt/install/boot"
-    logging.info("(native) format /dev/installp1 (boot, ext2), mount to " +
+    device = "/dev/installp1"
+    logging.info("(native) format " + device + " (boot, ext2), mount to " +
                  mountpoint)
-    pmb.chroot.root(args, ["mkfs.ext2", "-F", "-q", "/dev/installp1"])
+    pmb.chroot.root(args, ["mkfs.ext2", "-F", "-q", "-L", "pmOS_boot", device])
     pmb.chroot.root(args, ["mkdir", "-p", mountpoint])
-    pmb.chroot.root(args, ["mount", "/dev/installp1", mountpoint])
+    pmb.chroot.root(args, ["mount", device, mountpoint])
 
 
 def format_and_mount_root(args):
     mountpoint = "/dev/mapper/pm_crypt"
-    logging.info("(native) format /dev/installp2 (root, luks), mount to " +
-                 mountpoint)
-    pmb.chroot.root(args, ["cryptsetup", "luksFormat", "--use-urandom",
-                           "--cipher", args.cipher, "-q", "/dev/installp2"], log=False)
-    pmb.chroot.root(args, ["cryptsetup", "luksOpen", "/dev/installp2",
-                           "pm_crypt"], log=False)
-    if not os.path.exists(args.work + "/chroot_native" + mountpoint):
-        raise RuntimeError("Failed to open cryptdevice!")
+    device = "/dev/installp2"
+    if not args.no_fde:
+        logging.info("(native) format " + device + " (root, luks), mount to " +
+                     mountpoint)
+        pmb.chroot.root(args, ["cryptsetup", "luksFormat", "--use-urandom",
+                        "--cipher", args.cipher, "-q", device], log=False)
+        pmb.chroot.root(args, ["cryptsetup", "luksOpen", device,
+                        "pm_crypt"], log=False)
+        if not os.path.exists(args.work + "/chroot_native" + mountpoint):
+            raise RuntimeError("Failed to open cryptdevice!")
 
 
 def format_and_mount_pm_crypt(args):
-    cryptdevice = "/dev/mapper/pm_crypt"
+    if args.no_fde:
+        device = "/dev/installp2"
+    else:
+        device = "/dev/mapper/pm_crypt"
     mountpoint = "/mnt/install"
-    logging.info("(native) format " + cryptdevice + " (ext4), mount to " +
+    logging.info("(native) format " + device + " (ext4), mount to " +
                  mountpoint)
-    pmb.chroot.root(args, ["mkfs.ext4", "-F", "-q", cryptdevice])
+    pmb.chroot.root(args, ["mkfs.ext4", "-F", "-q", "-L", "pmOS_root", device])
     pmb.chroot.root(args, ["mkdir", "-p", mountpoint])
-    pmb.chroot.root(args, ["mount", cryptdevice, mountpoint])
+    pmb.chroot.root(args, ["mount", device, mountpoint])
 
 
 def format(args):

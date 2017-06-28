@@ -154,6 +154,8 @@ def arguments():
                          " encrypt the system partition, eg. aes-xts-plain64")
     install.add_argument("--add", help="comma separated list of packages to be"
                          " added to the rootfs (e.g. 'vim,gcc')")
+    install.add_argument("--no-fde", help="do not use full disk encryption",
+                         action="store_true")
 
     # Action: build / checksum / menuconfig / parse_apkbuild / aportgen
     menuconfig = sub.add_parser("menuconfig", help="run menuconfig on"
