@@ -34,22 +34,22 @@ def format_and_mount_boot(args):
 def format_and_mount_root(args):
     mountpoint = "/dev/mapper/pm_crypt"
     device = "/dev/installp2"
-    if not args.no_fde:
+    if args.full_disk_encryption:
         logging.info("(native) format " + device + " (root, luks), mount to " +
                      mountpoint)
         pmb.chroot.root(args, ["cryptsetup", "luksFormat", "--use-urandom",
-                        "--cipher", args.cipher, "-q", device], log=False)
+                               "--cipher", args.cipher, "-q", device], log=False)
         pmb.chroot.root(args, ["cryptsetup", "luksOpen", device,
-                        "pm_crypt"], log=False)
+                               "pm_crypt"], log=False)
         if not os.path.exists(args.work + "/chroot_native" + mountpoint):
             raise RuntimeError("Failed to open cryptdevice!")
 
 
 def format_and_mount_pm_crypt(args):
-    if args.no_fde:
-        device = "/dev/installp2"
-    else:
+    if args.full_disk_encryption:
         device = "/dev/mapper/pm_crypt"
+    else:
+        device = "/dev/installp2"
     mountpoint = "/mnt/install"
     logging.info("(native) format " + device + " (ext4), mount to " +
                  mountpoint)

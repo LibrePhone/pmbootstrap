@@ -155,7 +155,7 @@ def arguments():
     install.add_argument("--add", help="comma separated list of packages to be"
                          " added to the rootfs (e.g. 'vim,gcc')")
     install.add_argument("--no-fde", help="do not use full disk encryption",
-                         action="store_true")
+                         action="store_false", dest="full_disk_encryption")
 
     # Action: build / checksum / menuconfig / parse_apkbuild / aportgen
     menuconfig = sub.add_parser("menuconfig", help="run menuconfig on"
