@@ -20,7 +20,7 @@ import pmb.flasher
 import pmb.chroot.initfs
 
 
-def run(args, action, kernel=None, ramdisk=None, image=None):
+def run(args, action, flavor):
     pmb.flasher.init(args)
 
     # Verify action
@@ -30,12 +30,18 @@ def run(args, action, kernel=None, ramdisk=None, image=None):
         raise RuntimeError("action " + action + " is not"
                            " configured for method " + method + "!")
 
+    # Kernel commandline is optional
+    # Optional variables
+    cmdline = ""
+    if "kernel_cmdline" in args.deviceinfo:
+        cmdline = args.deviceinfo["kernel_cmdline"]
+
     # Variable setup
     vars = {
-        "$KERNEL": kernel,
-        "$RAMDISK": ramdisk,
-        "$IMAGE": image,
-        "$OFFSET_BASE": args.deviceinfo["flash_offset_base"],
+        "$BOOT": "/mnt/rootfs_" + args.device + "/boot",
+        "$FLAVOR": flavor,
+        "$IMAGE": "/home/user/rootfs/" + args.device + ".img",
+        "$KERNEL_CMDLINE": cmdline,
         "$OFFSET_KERNEL": args.deviceinfo["flash_offset_kernel"],
         "$OFFSET_RAMDISK": args.deviceinfo["flash_offset_ramdisk"],
         "$OFFSET_SECOND": args.deviceinfo["flash_offset_second"],
@@ -49,10 +55,11 @@ def run(args, action, kernel=None, ramdisk=None, image=None):
         for key, value in vars.items():
             for i in range(len(command)):
                 if key in command[i]:
-                    if not value:
+                    if not value and key != "$KERNEL_CMDLINE":
                         raise RuntimeError("Variable " + key + " found in"
                                            " action " + action + " for method " + method + ","
-                                           " but the value for this variable is None!")
+                                           " but the value for this variable is None! Is that"
+                                           " missing in your deviceinfo?")
                     command[i] = command[i].replace(key, value)
 
         # Run the action

@@ -50,15 +50,12 @@ def kernel(args):
 
     # Generate the paths and run the flasher
     pmb.flasher.init(args)
-    mnt = "/mnt/rootfs_" + args.device
-    kernel = mnt + "/boot/vmlinuz-" + flavor
-    ramdisk = mnt + "/boot/initramfs-" + flavor
     if args.action_flasher == "boot":
         logging.info("(native) boot " + flavor + " kernel")
-        pmb.flasher.run(args, "boot", kernel, ramdisk)
+        pmb.flasher.run(args, "boot", flavor)
     else:
         logging.info("(native) flash kernel " + flavor)
-        pmb.flasher.run(args, "flash_kernel", kernel, ramdisk)
+        pmb.flasher.run(args, "flash_kernel", flavor)
 
 
 def list_flavors(args):
@@ -78,7 +75,7 @@ def system(args):
 
     # Run the flasher
     logging.info("(native) flash system image")
-    pmb.flasher.run(args, "flash_system", image=img_path)
+    pmb.flasher.run(args, "flash_system")
 
 
 def list_devices(args):

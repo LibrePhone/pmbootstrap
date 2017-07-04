@@ -192,29 +192,31 @@ flash_mount_bind = [
     "/dev/bus/usb/"
 ]
 
-# Allowed variables:
-# $KERNEL, $RAMDISK, $IMAGE (system partition image), $BOOTPARAM
+"""
+Flasher abstraction. Allowed variables:
+
+$BOOT: Path to the /boot partition
+$FLAVOR: Kernel flavor
+$IMAGE: Path to the system partition image
+$KERNEL_CMDLINE: Kernel commandline
+
+Fastboot specific: $OFFSET_KERNEL, $OFFSET_RAMDISK, $OFFSET_TAGS, $PAGE_SIZE
+"""
 flashers = {
     "fastboot": {
         "depends": ["android-tools"],
         "actions":
                 {
                     "list_devices": [["fastboot", "devices", "-l"]],
-            "flash_system": [["fastboot", "flash", "system", "$IMAGE"]],
-            "flash_kernel": [["fastboot",
-                              "--base", "$OFFSET_BASE",
+                    "flash_system": [["fastboot", "flash", "system", "$IMAGE"]],
+                    "flash_kernel": [["fastboot", "flash" "boot", "$BOOT/boot.img-$FLAVOR"]],
+                    "boot": [["fastboot",
                               "--kernel-offset", "$OFFSET_KERNEL",
                               "--ramdisk-offset", "$OFFSET_RAMDISK",
                               "--tags-offset", "$OFFSET_TAGS",
                               "--page-size", "$PAGE_SIZE",
-                              "flash:raw", "$KERNEL", "$RAMDISK"]],
-            "boot": [["fastboot",
-                      "--base", "$OFFSET_BASE",
-                      "--kernel-offset", "$OFFSET_KERNEL",
-                      "--ramdisk-offset", "$OFFSET_RAMDISK",
-                      "--tags-offset", "$OFFSET_TAGS",
-                      "--page-size", "$PAGE_SIZE",
-                      "boot", "$KERNEL", "$RAMDISK"]],
+                              "-c", "$KERNEL_CMDLINE",
+                              "boot", "$BOOT/vmlinuz-$FLAVOR", "$BOOT/initramfs-$FLAVOR"]],
         }
     },
     "heimdall": {
@@ -222,10 +224,12 @@ flashers = {
         "actions":
                 {
                     "list_devices": [["heimdall", "detect"]],
-            "flash_system": [
+                    "flash_system": [
                         ["heimdall_wait_for_device.sh"],
                         ["heimdall", "flash", "--SYSTEM", "$IMAGE"]],
-            "flash_kernel": [["heimdall_flash_kernel.sh", "$RAMDISK", "$KERNEL"]]
+                    "flash_kernel": [["heimdall_flash_kernel.sh",
+                                      "$BOOT/initramfs-$FLAVOR",
+                                      "$BOOT/vmlinuz-$FLAVOR"]]
         },
     },
 }

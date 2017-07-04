@@ -129,7 +129,12 @@ def install(args, show_flash_msg=True):
                      " target device:")
         logging.info("* pmbootstrap flasher flash_kernel")
         logging.info("  Flashes the kernel + initramfs to your device:")
-        logging.info("  " + args.work + "/chroot_rootfs_" + args.device + "/boot")
+        logging.info(
+            "  " +
+            args.work +
+            "/chroot_rootfs_" +
+            args.device +
+            "/boot")
         method = args.deviceinfo["flash_methods"]
         if (method in pmb.config.flashers and "boot" in
                 pmb.config.flashers[method]["actions"]):
