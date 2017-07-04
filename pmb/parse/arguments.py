@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
 import argparse
+import os
 import pmb.config
 import pmb.parse.arch
 
@@ -32,12 +33,19 @@ def arguments_flasher(subparser):
                    " inside the device rootfs chroot on this computer")
     sub.add_parser("list_devices", help="show connected devices")
 
-    # Boot, flash kernel
+    # Boot, flash kernel, export
     boot = sub.add_parser("boot", help="boot a kernel once")
     flash_kernel = sub.add_parser("flash_kernel", help="flash a kernel")
-    for action in [boot, flash_kernel]:
+    export = sub.add_parser("export", help="create convenience symlinks to the"
+                                           " generated image files (system,"
+                                           " kernel, initramfs, boot.img, ...)")
+    for action in [boot, flash_kernel, export]:
         action.add_argument("--flavor", default=None)
 
+    # Export: additional arguments
+    export.add_argument("export_folder", help="export folder, defaults to"
+                                              " the current working directory.",
+                        default=os.getcwd(), nargs="?")
     return ret
 
 
@@ -199,7 +207,7 @@ def arguments():
         old = getattr(args, varname)
         setattr(args, varname, old.replace("$WORK", args.work))
 
-    # Add convinience shortcuts
+    # Add convenience shortcuts
     setattr(args, "arch_native", pmb.parse.arch.alpine_native())
 
     # Add a caching dict

@@ -26,26 +26,32 @@ import pmb.chroot.initfs
 import pmb.chroot.other
 
 
-def kernel(args):
+def parse_flavor_arg(args):
+    """
+    Verify the flavor argument if specified, or return a default value.
+    """
     # Make sure, that at least one kernel is installed
     suffix = "rootfs_" + args.device
     pmb.chroot.apk.install(args, ["device-" + args.device], suffix)
 
-    # Parse the kernel flavor
+    # Parse and verify the flavor argument
     flavor = args.flavor
     flavors = pmb.chroot.other.kernel_flavors_installed(args, suffix)
     if flavor:
         if flavor not in flavors:
             raise RuntimeError("No kernel installed with flavor " + flavor + "!" +
                                " Run 'pmbootstrap flasher list_flavors' to get a list.")
-    elif not len(flavors):
+        return flavor
+    if not len(flavors):
         raise RuntimeError(
             "No kernel flavors installed in chroot " + suffix + "! Please let"
             " your device package depend on a package starting with 'linux-'.")
-    else:
-        flavor = flavors[0]
+    return flavors[0]
 
+
+def kernel(args):
     # Rebuild the initramfs, just to make sure (see #69)
+    flavor = parse_flavor_arg(args)
     pmb.chroot.initfs.build(args, flavor, "rootfs_" + args.device)
 
     # Generate the paths and run the flasher
@@ -82,6 +88,20 @@ def list_devices(args):
     pmb.flasher.run(args, "list_devices")
 
 
+def export(args):
+    # Generate system image
+    img_path = "/home/user/rootfs/" + args.device + ".img"
+    if not os.path.exists(args.work + "/chroot_native" + img_path):
+        setattr(args, "sdcard", None)
+        pmb.install.install(args, False)
+
+    # Rebuild the initramfs, just to make sure (see #69)
+    flavor = parse_flavor_arg(args)
+    pmb.chroot.initfs.build(args, flavor, "rootfs_" + args.device)
+
+    pmb.flasher.export(args, flavor, args.export_folder)
+
+
 def frontend(args):
     action = args.action_flasher
     if action in ["boot", "flash_kernel"]:
@@ -92,3 +112,5 @@ def frontend(args):
         list_flavors(args)
     if action == "list_devices":
         list_devices(args)
+    if action == "export":
+        export(args)
