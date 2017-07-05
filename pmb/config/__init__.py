@@ -143,7 +143,6 @@ apkbuild_attributes = {
     "_flavor": {"array": False},
     "_device": {"array": False},
     "_kernver": {"array": False},
-    "_pmb_build_in_native_chroot": {"array": False},
 
     # mesa
     "_llvmver": {"array": False},

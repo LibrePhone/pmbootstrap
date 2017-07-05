@@ -47,7 +47,7 @@ def suffix(args, apkbuild, carch):
     pkgname = apkbuild["pkgname"]
     if pkgname.endswith("-repack"):
         return "native"
-    if args.cross and apkbuild["_pmb_build_in_native_chroot"] != "false":
+    if args.cross:
         for pattern in pmb.config.build_cross_native:
             if fnmatch.fnmatch(pkgname, pattern):
                 return "native"
