@@ -21,6 +21,7 @@ import logging
 import pmb.aportgen.binutils
 import pmb.aportgen.musl
 import pmb.aportgen.gcc
+import pmb.aportgen.busybox_static
 import pmb.helpers.git
 
 
@@ -38,6 +39,8 @@ def generate(args, pkgname):
         pmb.aportgen.musl.generate(args, pkgname)
     elif pkgname.startswith("gcc-"):
         pmb.aportgen.gcc.generate(args, pkgname)
+    elif pkgname.startswith("busybox-static-"):
+        pmb.aportgen.busybox_static.generate(args, pkgname)
     else:
         raise ValueError("No generator available for " + pkgname + "!")
 
