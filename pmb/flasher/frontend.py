@@ -73,6 +73,7 @@ def list_flavors(args):
 
 def system(args):
     # Generate system image, install flasher
+    flavor = parse_flavor_arg(args)
     img_path = "/home/user/rootfs/" + args.device + ".img"
     if not os.path.exists(args.work + "/chroot_native" + img_path):
         setattr(args, "sdcard", None)
@@ -81,7 +82,7 @@ def system(args):
 
     # Run the flasher
     logging.info("(native) flash system image")
-    pmb.flasher.run(args, "flash_system")
+    pmb.flasher.run(args, "flash_system", flavor)
 
 
 def list_devices(args):
