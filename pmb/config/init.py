@@ -31,7 +31,9 @@ def init(args):
     # Device
     devices = sorted(pmb.helpers.devices.list(args))
     logging.info("Target device (either an existing one, or a new one for"
-                 " porting). Available: " + ", ".join(devices))
+                 " porting).")
+    logging.info("Available (" + str(len(devices)) + "): " +
+                 ", ".join(devices))
     cfg["pmbootstrap"]["device"] = pmb.helpers.cli.ask(args, "Device",
                                                        None, args.device)
 
