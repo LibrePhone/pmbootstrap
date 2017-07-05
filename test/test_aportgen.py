@@ -48,7 +48,7 @@ def test_aportgen(args):
     pkgnames = []
     for arch in pmb.config.build_device_architectures:
         # gcc twice, so the output folder already exists -> different code path
-        for pkgname in ["binutils", "musl", "gcc", "gcc"]:
+        for pkgname in ["binutils", "musl", "busybox-static", "gcc", "gcc"]:
             pkgnames.append(pkgname + "-" + arch)
     for pkgname in pkgnames:
         pmb.aportgen.generate(args, pkgname)
