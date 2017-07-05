@@ -209,7 +209,7 @@ flashers = {
                 {
                     "list_devices": [["fastboot", "devices", "-l"]],
                     "flash_system": [["fastboot", "flash", "system", "$IMAGE"]],
-                    "flash_kernel": [["fastboot", "flash" "boot", "$BOOT/boot.img-$FLAVOR"]],
+                    "flash_kernel": [["fastboot", "flash", "boot", "$BOOT/boot.img-$FLAVOR"]],
                     "boot": [["fastboot",
                               "--kernel-offset", "$OFFSET_KERNEL",
                               "--ramdisk-offset", "$OFFSET_RAMDISK",
