@@ -20,7 +20,7 @@ import pmb.flasher
 import pmb.chroot.initfs
 
 
-def run(args, action, flavor):
+def run(args, action, flavor=None):
     pmb.flasher.init(args)
 
     # Verify action
@@ -39,7 +39,7 @@ def run(args, action, flavor):
     # Variable setup
     vars = {
         "$BOOT": "/mnt/rootfs_" + args.device + "/boot",
-        "$FLAVOR": flavor,
+        "$FLAVOR": flavor if flavor is not None else "",
         "$IMAGE": "/home/user/rootfs/" + args.device + ".img",
         "$KERNEL_CMDLINE": cmdline,
         "$OFFSET_KERNEL": args.deviceinfo["flash_offset_kernel"],
