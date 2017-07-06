@@ -103,8 +103,7 @@ def main():
     except Exception as e:
         logging.info("ERROR: " + str(e))
         logging.info("Run 'pmbootstrap log' for details.")
-        logging.info(
-            "See also: https://github.com/postmarketOS/pmbootstrap/wiki/Troubleshooting")
+        logging.info("See also: <https://postmarketos.org/troubleshooting>")
         logging.debug(traceback.format_exc())
         return 1
 
