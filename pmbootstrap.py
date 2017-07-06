@@ -34,6 +34,7 @@ import pmb.chroot.initfs
 import pmb.chroot.other
 import pmb.flasher
 import pmb.helpers.logging
+import pmb.helpers.other
 import pmb.helpers.run
 import pmb.parse
 import pmb.install
@@ -46,6 +47,9 @@ def main():
 
     # Wrap everything to display nice error messages
     try:
+        # Sanity check
+        pmb.helpers.other.check_grsec()
+
         # Initialize or require config
         if args.action == "init":
             return pmb.config.init(args)
