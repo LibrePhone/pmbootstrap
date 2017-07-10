@@ -25,6 +25,7 @@ import filecmp
 import pmb.chroot
 import pmb.chroot.apk_static
 import pmb.config
+import pmb.helpers.repo
 import pmb.helpers.run
 import pmb.parse.arch
 
@@ -78,16 +79,7 @@ def init(args, suffix="native"):
     # Write /etc/apk/repositories
     repos_path = chroot + "/etc/apk/repositories"
     if not os.path.exists(repos_path):
-        lines = ["/home/user/packages/user"]
-        if args.mirror_postmarketos:
-            lines.append(args.mirror_postmarketos)
-        directories = ["main", "community"]
-        if args.alpine_version == "edge":
-            directories.append("testing")
-        for dir in directories:
-            lines.append(args.mirror_alpine + args.alpine_version +
-                         "/" + dir)
-        for line in lines:
+        for line in pmb.helpers.repo.urls(args):
             pmb.helpers.run.root(args, ["sh", "-c",
                                         "echo " + shlex.quote(line) + " >> " + repos_path])
 

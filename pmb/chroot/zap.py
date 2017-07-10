@@ -28,7 +28,7 @@ def zap(args):
     patterns = [
         "chroot_native",
         "chroot_buildroot_*",
-        "chroot_rootfs_" + args.device,
+        "chroot_rootfs_*",
     ]
 
     # Only ask for removal, if the user specificed the extra '-p' switch.

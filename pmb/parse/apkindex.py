@@ -17,9 +17,11 @@ You should have received a copy of the GNU General Public License
 along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
 import distutils.version
-import glob
+import logging
 import os
 import tarfile
+import pmb.chroot.apk
+import pmb.helpers.repo
 
 
 def compare_version(a_str, b_str):
@@ -118,8 +120,7 @@ def parse_next_block(args, path, lines, start):
     return None
 
 
-def parse_add_block(path, strict, ret, block, pkgname=None,
-                    version_new=None):
+def parse_add_block(path, strict, ret, block, pkgname=None):
     """
     Add one block to the return dictionary of parse().
 
@@ -140,8 +141,6 @@ def parse_add_block(path, strict, ret, block, pkgname=None,
     # Defaults
     if not pkgname:
         pkgname = block["pkgname"]
-    if not version_new:
-        version_new = block["version"]
 
     # Handle duplicate entries
     if pkgname in ret:
@@ -151,6 +150,7 @@ def parse_add_block(path, strict, ret, block, pkgname=None,
         # Ignore the block, if the block we already have has a higher
         # version
         version_old = ret[pkgname]["version"]
+        version_new = block["version"]
         if compare_version(version_old, version_new) == 1:
             return
 
@@ -207,8 +207,7 @@ def parse(args, path, strict=False):
             for alias in block["provides"]:
                 split = alias.split("=")
                 if len(split) == 2:
-                    parse_add_block(path, strict, ret, block, split[0],
-                                    split[1])
+                    parse_add_block(path, strict, ret, block, split[0])
 
     # Update the cache
     args.cache["apkindex"][path] = {"lastmod": lastmod, "ret": ret}
@@ -254,12 +253,14 @@ def read_any_index(args, package, arch=None):
     """
     if not arch:
         arch = args.arch_native
-    indexes = [args.work + "/packages/" + arch + "/APKINDEX.tar.gz"]
-    pattern = args.work + "/cache_apk_" + arch + "/APKINDEX.*.tar.gz"
-    indexes += glob.glob(pattern)
 
-    for index in indexes:
+    # Return first match
+    for index in pmb.helpers.repo.apkindex_files(args, arch):
         index_data = read(args, package, index, False)
+        logging.verbose("Search for " + package + " in " + index +
+                        " - result: " + str(index_data))
         if index_data:
             return index_data
+
+    logging.verbose("No match found in any APKINDEX.tar.gz!")
     return None

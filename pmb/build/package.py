@@ -30,7 +30,7 @@ import pmb.parse
 import pmb.parse.arch
 
 
-def package(args, pkgname, carch, force=False, recurse=True, buildinfo=False):
+def package(args, pkgname, carch, force=False, buildinfo=False):
     """
     Build a package with Alpine Linux' abuild.
 
@@ -46,24 +46,19 @@ def package(args, pkgname, carch, force=False, recurse=True, buildinfo=False):
                            " and could not find this package in any APKINDEX!")
 
     # Autodetect the build environment
-    apkbuild = pmb.parse.apkbuild(aport + "/APKBUILD")
+    apkbuild = pmb.parse.apkbuild(args, aport + "/APKBUILD")
     pkgname = apkbuild["pkgname"]
     carch_buildenv = pmb.build.autodetect.carch(args, apkbuild, carch)
     suffix = pmb.build.autodetect.suffix(args, apkbuild, carch_buildenv)
     cross = pmb.build.autodetect.crosscompile(args, apkbuild, carch_buildenv,
                                               suffix)
 
-    # Build dependencies first (they may be outdated, even if they exist)
-    if recurse:
-        for depend in apkbuild["depends"]:
-            package(args, depend, carch)
-
     # Skip already built versions
     if not force and not pmb.build.is_necessary(
             args, carch_buildenv, apkbuild):
         return
 
-    # Install build tools and makedepends
+    # Initialize build environment, install/build makedepends
     pmb.build.init(args, suffix)
     if len(apkbuild["makedepends"]):
         pmb.chroot.apk.install(args, apkbuild["makedepends"], suffix)

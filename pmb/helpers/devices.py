@@ -40,5 +40,5 @@ def list_apkbuilds(args):
     ret = {}
     for device in list(args):
         apkbuild_path = args.aports + "/device-" + device + "/APKBUILD"
-        ret[device] = pmb.parse.apkbuild(apkbuild_path)
+        ret[device] = pmb.parse.apkbuild(args, apkbuild_path)
     return ret

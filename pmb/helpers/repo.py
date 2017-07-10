@@ -18,6 +18,7 @@ along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
 import glob
 import os
+import hashlib
 
 
 def files(args):
@@ -64,3 +65,74 @@ def diff(args, files_a, files_b=None):
                 ret.append(arch + "/" + file)
 
     return sorted(ret)
+
+
+def hash(url, length=8):
+    """
+    Generate the hash, that APK adds to the APKINDEX and apk packages
+    in its apk cache folder. It is the "12345678" part in this example:
+    "APKINDEX.12345678.tar.gz".
+
+    :param length: The length of the hash in the output file.
+
+    See also: official implementation in apk-tools:
+    <https://git.alpinelinux.org/cgit/apk-tools/>
+
+    blob.c: apk_blob_push_hexdump(), "const char *xd"
+    apk_defines.h: APK_CACHE_CSUM_BYTES
+    database.c: apk_repo_format_cache_index()
+    """
+    binary = hashlib.sha1(url.encode("utf-8")).digest()
+    xd = "0123456789abcdefghijklmnopqrstuvwxyz"
+    csum_bytes = int(length / 2)
+
+    ret = ""
+    for i in range(csum_bytes):
+        ret += xd[(binary[i] >> 4) & 0xf]
+        ret += xd[binary[i] & 0xf]
+
+    return ret
+
+
+def urls(args, user_repository=True):
+    """
+    Get a list of repository URLs, as they are in /etc/apk/repositories.
+    """
+    ret = []
+    # Local user repository (for packages compiled with pmbootstrap)
+    if user_repository:
+        ret.append("/home/user/packages/user")
+
+    # Upstream postmarketOS binary repository
+    if args.mirror_postmarketos:
+        ret.append(args.mirror_postmarketos)
+
+    # Upstream Alpine Linux repositories
+    directories = ["main", "community"]
+    if args.alpine_version == "edge":
+        directories.append("testing")
+    for dir in directories:
+        ret.append(args.mirror_alpine + args.alpine_version + "/" + dir)
+    return ret
+
+
+def apkindex_files(args, arch="native"):
+    """
+    Get a list of outside paths to all resolved APKINDEX.tar.gz files
+    from the urls() list for a specific arch.
+    """
+    if arch == "native":
+        arch = args.arch_native
+
+    # Try to get a cached result first.
+    if arch in args.cache["apkindex_files"]:
+        return args.cache["apkindex_files"][arch]
+
+    # Add the non-hashed user path and the upstream paths with hashes
+    ret = [args.work + "/packages/" + arch + "/APKINDEX.tar.gz"]
+    for url in urls(args, False):
+        ret.append(args.work + "/cache_apk_" + arch + "/APKINDEX." +
+                   hash(url) + ".tar.gz")
+
+    args.cache["apkindex_files"][arch] = ret
+    return ret

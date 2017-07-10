@@ -25,6 +25,7 @@ sys.path.append(os.path.abspath(
     os.path.join(os.path.dirname(__file__) + "/..")))
 import pmb.challenge.apkindex
 import pmb.config
+import pmb.helpers.logging
 
 
 @pytest.fixture
@@ -32,7 +33,8 @@ def args(request, tmpdir):
     import pmb.parse
     sys.argv = ["pmbootstrap.py", "chroot"]
     args = pmb.parse.arguments()
-    setattr(args, "logfd", open("/dev/null", "a+"))
+    args.log = args.work + "/log_testsuite.txt"
+    pmb.helpers.logging.init(args)
     request.addfinalizer(args.logfd.close)
 
     # Create an empty APKINDEX.tar.gz file, so we can use its path and

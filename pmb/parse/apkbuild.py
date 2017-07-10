@@ -69,7 +69,7 @@ def cut_off_function_names(apkbuild):
     return apkbuild
 
 
-def apkbuild(path):
+def apkbuild(args, path):
     """
     Parse relevant information out of the APKBUILD file. This is not meant
     to be perfect and catch every edge case (for that, a full shell parser
@@ -80,6 +80,11 @@ def apkbuild(path):
     :returns: Relevant variables from the APKBUILD. Arrays get returned as
         arrays.
     """
+    # Try to get a cached result first (we assume, that the aports don't change
+    # in one pmbootstrap call)
+    if path in args.cache["apkbuild"]:
+        return args.cache["apkbuild"][path]
+
     with open(path, encoding="utf-8") as handle:
         lines = handle.readlines()
 
@@ -122,4 +127,5 @@ def apkbuild(path):
 
     ret = replace_variables(ret)
     ret = cut_off_function_names(ret)
+    args.cache["apkbuild"][path] = ret
     return ret

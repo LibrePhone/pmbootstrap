@@ -19,6 +19,7 @@ along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 import os
 import logging
 import glob
+import shutil
 
 import pmb.chroot
 import pmb.helpers.run
@@ -37,14 +38,23 @@ def find_aport(args, package, must_exist=True):
     if os.path.exists(path):
         return path
 
+    # Try to get a cached result first (we assume, that the aports don't change
+    # in one pmbootstrap call)
+    if path in args.cache["find_aport"]:
+        return args.cache["find_aport"][path]
+
+    ret = None
     for path_current in glob.glob(args.aports + "/*/APKBUILD"):
-        apkbuild = pmb.parse.apkbuild(path_current)
+        apkbuild = pmb.parse.apkbuild(args, path_current)
         if package in apkbuild["subpackages"]:
-            return os.path.dirname(path_current)
-    if must_exist:
+            ret = os.path.dirname(path_current)
+            break
+    if ret is None and must_exist:
         raise RuntimeError("Could not find aport for package: " +
                            package)
-    return None
+
+    args.cache["find_aport"][path] = ret
+    return ret
 
 
 def copy_to_buildpath(args, package, suffix="native"):
@@ -66,6 +76,83 @@ def copy_to_buildpath(args, package, suffix="native"):
                            "/home/user/build"], suffix=suffix)
 
 
+def aports_files_out_of_sync_with_git(args, package=None):
+    """
+    Get a list of files, about which git says, that they have changed in
+    comparison to upstream. We need this for the timestamp based rebuild check,
+    where it does not only rely on the APKBUILD pkgver and pkgrel, but also on
+    the file's last modified date to decide if it needs to be rebuilt. Git sets
+    the last modified timestamp to the last checkout date, so we must ignore
+    all files, that have not been modified, or else we would trigger rebuilds
+    for all packages, from the pmOS binary repository.
+
+    :returns: list of absolute paths to all files not in sync with upstream
+    """
+
+    # Filter out a specific package
+    if package:
+        ret = []
+        prefix = os.path.abspath(args.aports + "/" + package + "/")
+        for file in aports_files_out_of_sync_with_git(args):
+            if file.startswith(prefix):
+                ret.append(file)
+        return ret
+
+    # Use cached result if possible
+    if args.cache["aports_files_out_of_sync_with_git"] is not None:
+        return args.cache["aports_files_out_of_sync_with_git"]
+
+    # Get the aport's git repository folder
+    git_root = None
+    if shutil.which("git"):
+        git_root = pmb.helpers.run.user(args, ["git", "rev-parse",
+                                               "--show-toplevel"],
+                                        working_dir=args.aports,
+                                        return_stdout=True,
+                                        check=False)
+        if git_root:
+            git_root = git_root.rstrip()
+    ret = []
+    if git_root and os.path.exists(git_root):
+        # Find tracked files out of sync with upstream
+        tracked = pmb.helpers.run.user(args, ["git", "diff", "--name-only", "origin"],
+                                       working_dir=git_root, return_stdout=True)
+
+        # Find all untracked files
+        untracked = pmb.helpers.run.user(
+            args, ["git", "ls-files", "--others", "--exclude-standard"],
+            working_dir=git_root, return_stdout=True)
+
+        # Set absolute path, filter out aports files
+        aports_absolute = os.path.abspath(args.aports)
+        files = tracked.rstrip().split("\n") + untracked.rstrip().split("\n")
+        for file in files:
+            file = os.path.abspath(git_root + "/" + file)
+            if file.startswith(aports_absolute):
+                ret.append(file)
+    else:
+        logging.warning("WARNING: Can not determine, which aport-files have been"
+                        " changed from upstream!")
+        logging.info("* Aports-folder is not a git repository or git is not"
+                     " installed")
+        logging.info("* You can turn timestamp-based rebuilds off in"
+                     " 'pmbootstrap init'")
+
+    # Save cache
+    args.cache["aports_files_out_of_sync_with_git"] = ret
+    return ret
+
+
+def sources_newer_than_binary_package(args, package, index_data):
+    path_sources = []
+    for file in glob.glob(args.aports + "/" + package + "/*"):
+        path_sources.append(file)
+
+    lastmod_target = float(index_data["timestamp"])
+    return not pmb.helpers.file.is_up_to_date(path_sources,
+                                              lastmod_target=lastmod_target)
+
+
 def is_necessary(args, arch, apkbuild, apkindex_path=None):
     """
     Check if the package has already been built. Compared to abuild's check,
@@ -78,9 +165,10 @@ def is_necessary(args, arch, apkbuild, apkindex_path=None):
     :param apkindex_path: override the APKINDEX.tar.gz path
     :returns: boolean
     """
-    # Get new version from APKBUILD
+    # Get package name, version, define start of debug message
     package = apkbuild["pkgname"]
     version_new = apkbuild["pkgver"] + "-r" + apkbuild["pkgrel"]
+    msg = "Build is neccessary for package '" + package + "': "
 
     # Get old version from APKINDEX
     if apkindex_path:
@@ -89,6 +177,7 @@ def is_necessary(args, arch, apkbuild, apkindex_path=None):
     else:
         index_data = pmb.parse.apkindex.read_any_index(args, package, arch)
     if not index_data:
+        logging.debug(msg + "No binary package available")
         return True
 
     # a) Binary repo has a newer version
@@ -102,17 +191,31 @@ def is_necessary(args, arch, apkbuild, apkindex_path=None):
 
     # b) Aports folder has a newer version
     if version_new != version_old:
+        logging.debug(msg + "Binary package out of date (binary: " + version_old +
+                      ", aport: " + version_new + ")")
         return True
 
-    # c) The version is the same. Check if all files in the aport folder have an
-    # older timestamp, than the package. This way the pkgrel doesn't need to be
-    # increased while developing locally.
-    lastmod_target = float(index_data["timestamp"])
-    path_sources = glob.glob(args.aports + "/" + package + "/*")
-    if pmb.helpers.file.is_up_to_date(
-            path_sources, lastmod_target=lastmod_target):
+    # Aports and binary repo have the same version.
+    if not args.timestamp_based_rebuild:
         return False
-    return True
+
+    # c) Same version, source files out of sync with upstream, source
+    # files newer than binary package
+    files_out_of_sync = aports_files_out_of_sync_with_git(args, package)
+    sources_newer = sources_newer_than_binary_package(
+        args, package, index_data)
+    if len(files_out_of_sync) and sources_newer:
+        logging.debug(msg + "Binary package and aport have the same pkgver and"
+                      " pkgrel, but there are aport source files out of sync"
+                      " with the upstream git repository *and* these source"
+                      " files have a more recent 'last modified' timestamp than"
+                      " the binary package's build timestamp.")
+        return True
+
+    # d) Same version, source files *in sync* with upstream *or* source
+    # files *older* than binary package
+    else:
+        return False
 
 
 def index_repo(args, arch=None):

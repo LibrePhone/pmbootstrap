@@ -46,6 +46,7 @@ defaults = {
     "aports": os.path.normpath(pmb_src + "/aports"),
     "config": os.path.expanduser("~") + "/.config/pmbootstrap.cfg",
     "device": "samsung-i9100",
+    "timestamp_based_rebuild": True,
     "log": "$WORK/log.txt",
     "mirror_alpine": "https://nl.alpinelinux.org/alpine/",
     "mirror_postmarketos": "",

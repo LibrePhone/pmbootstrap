@@ -18,6 +18,6 @@ along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
 from pmb.parse.arguments import arguments
 from pmb.parse.apkbuild import apkbuild
-from pmb.parse.deviceinfo import deviceinfo
 from pmb.parse.binfmt_info import binfmt_info
+from pmb.parse.deviceinfo import deviceinfo
 import pmb.parse.arch

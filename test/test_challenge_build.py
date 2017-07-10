@@ -25,8 +25,9 @@ sys.path.append(os.path.abspath(
     os.path.join(os.path.dirname(__file__) + "/..")))
 import pmb.build.package
 import pmb.challenge.build
-import pmb.parse
 import pmb.config
+import pmb.helpers.logging
+import pmb.parse
 
 
 @pytest.fixture
@@ -34,7 +35,8 @@ def args(request, tmpdir):
     import pmb.parse
     sys.argv = ["pmbootstrap.py", "chroot"]
     args = pmb.parse.arguments()
-    setattr(args, "logfd", open("/dev/null", "a+"))
+    args.log = args.work + "/log_testsuite.txt"
+    pmb.helpers.logging.init(args)
     request.addfinalizer(args.logfd.close)
     return args
 
@@ -45,7 +47,8 @@ def test_challenge_build(args):
     pmb.build.package(args, pkgname, None, force=True, buildinfo=True)
 
     # Copy it to a temporary path
-    apkbuild = pmb.parse.apkbuild(args.aports + "/" + pkgname + "/APKBUILD")
+    apkbuild = pmb.parse.apkbuild(args, args.aports + "/" + pkgname +
+                                  "/APKBUILD")
     version = apkbuild["pkgver"] + "-r" + apkbuild["pkgrel"]
     temp_path = pmb.chroot.other.tempfolder(args, "/tmp/test_challenge_build/" +
                                             args.arch_native)

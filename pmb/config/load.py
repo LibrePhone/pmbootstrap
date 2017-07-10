@@ -31,6 +31,6 @@ def load(args):
 
     for key in pmb.config.defaults:
         if key not in cfg["pmbootstrap"]:
-            cfg["pmbootstrap"][key] = pmb.config.defaults[key]
+            cfg["pmbootstrap"][key] = str(pmb.config.defaults[key])
 
     return cfg

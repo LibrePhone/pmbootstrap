@@ -53,7 +53,8 @@ def root(args, cmd, suffix="native", working_dir="/", log=True,
     if not auto_init and not os.path.islink(chroot + "/bin/sh"):
         raise RuntimeError("Chroot does not exist: " + chroot)
 
-    pmb.chroot.init(args, suffix)
+    if auto_init:
+        pmb.chroot.init(args, suffix)
 
     # Run the args with sudo chroot, and with cleaned environment
     # variables

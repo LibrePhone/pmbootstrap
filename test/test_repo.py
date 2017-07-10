@@ -25,11 +25,24 @@ import time
 # Import from parent directory
 pmb_src = os.path.abspath(os.path.join(os.path.dirname(__file__) + "/.."))
 sys.path.append(pmb_src)
+import pmb.build.package
+import pmb.helpers.logging
 import pmb.helpers.repo
 
 
 @pytest.fixture
-def args(request, tmpdir):
+def args(request):
+    import pmb.parse
+    sys.argv = ["pmbootstrap.py", "chroot"]
+    args = pmb.parse.arguments()
+    args.log = args.work + "/log_testsuite.txt"
+    pmb.helpers.logging.init(args)
+    request.addfinalizer(args.logfd.close)
+    return args
+
+
+@pytest.fixture
+def args_fake_work_dir(request, tmpdir):
     args = types.SimpleNamespace()
     args.work = str(tmpdir)
     return args
@@ -45,12 +58,14 @@ def clear_timestamps_from_files(files):
             files[arch][file] = None
 
 
-def test_files_empty(args):
+def test_files_empty(args_fake_work_dir):
+    args = args_fake_work_dir
     os.mkdir(args.work + "/packages")
     assert pmb.helpers.repo.files(args) == {}
 
 
-def test_files_not_empty(args):
+def test_files_not_empty(args_fake_work_dir):
+    args = args_fake_work_dir
     pkgs = args.work + "/packages"
     for dir in ["", "armhf", "x86_64"]:
         os.mkdir(pkgs + "/" + dir)
@@ -60,7 +75,8 @@ def test_files_not_empty(args):
     assert files == {"armhf": {}, "x86_64": {"test": None}}
 
 
-def test_files_diff(args):
+def test_files_diff(args_fake_work_dir):
+    args = args_fake_work_dir
     # Create x86_64/test, x86_64/test2
     pkgs = args.work + "/packages"
     for dir in ["", "x86_64"]:
@@ -85,3 +101,21 @@ def test_files_diff(args):
 
     diff = pmb.helpers.repo.diff(args, first)
     assert diff == ["aarch64/test3", "x86_64/test", "x86_64/test4"]
+
+
+def test_hash():
+    url = "https://nl.alpinelinux.org/alpine/edge/testing"
+    hash = "865a153c"
+    assert pmb.helpers.repo.hash(url, 8) == hash
+
+
+def test_apkindex_files(args):
+    # Make sure, that we have a user's APKINDEX.tar.gz
+    pmb.build.package(args, "hello-world", args.arch_native)
+
+    files = pmb.helpers.repo.apkindex_files(args)
+    for file in files:
+        assert os.path.exists(file)
+
+    # Test cache
+    assert files == pmb.helpers.repo.apkindex_files(args)

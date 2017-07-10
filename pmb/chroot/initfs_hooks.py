@@ -24,12 +24,15 @@ import pmb.config
 import pmb.chroot.apk
 
 
-def list_chroot(args, suffix):
+def list_chroot(args, suffix, remove_prefix=True):
     ret = []
     prefix = pmb.config.initfs_hook_prefix
     for pkgname in pmb.chroot.apk.installed(args, suffix):
         if pkgname.startswith(prefix):
-            ret.append(pkgname[len(prefix):])
+            if remove_prefix:
+                ret.append(pkgname[len(prefix):])
+            else:
+                ret.append(pkgname)
     return ret
 
 
@@ -65,3 +68,10 @@ def delete(args, hook, suffix):
         raise RuntimeError("There is no such hook installed!")
     prefix = pmb.config.initfs_hook_prefix
     pmb.chroot.root(args, ["apk", "del", prefix + hook], suffix)
+
+
+def update(args, suffix):
+    """
+    Rebuild and update all hooks, that are out of date
+    """
+    pmb.chroot.apk.install(args, list_chroot(args, suffix, False), suffix)

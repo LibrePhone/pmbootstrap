@@ -18,15 +18,21 @@ along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
 import subprocess
 import logging
+import os
 
 
-def core(args, cmd, log_message, log, return_stdout, check=True):
+def core(args, cmd, log_message, log, return_stdout, check=True,
+         working_dir=None):
     logging.debug(log_message)
     """
     Run the command and write the output to the log.
 
     :param check: raise an exception, when the command fails
     """
+
+    if working_dir:
+        working_dir_old = os.getcwd()
+        os.chdir(working_dir)
 
     try:
         ret = None
@@ -52,19 +58,22 @@ def core(args, cmd, log_message, log, return_stdout, check=True):
             raise RuntimeError("Command failed: " + log_message) from exc
         else:
             pass
+
+    if working_dir:
+        os.chdir(working_dir_old)
     return ret
 
 
 def user(args, cmd, log=True, working_dir=None, return_stdout=False,
          check=True):
-    """
-    :param working_dir: defaults to args.work
-    """
-    if not working_dir:
-        working_dir = args.work
+
+    if working_dir:
+        msg = "% cd " + working_dir + " && " + " ".join(cmd)
+    else:
+        msg = "% " + " ".join(cmd)
 
     # TODO: maintain and check against a whitelist
-    return core(args, cmd, "% " + " ".join(cmd), log, return_stdout, check)
+    return core(args, cmd, msg, log, return_stdout, check, working_dir)
 
 
 def root(args, cmd, log=True, working_dir=None, return_stdout=False,

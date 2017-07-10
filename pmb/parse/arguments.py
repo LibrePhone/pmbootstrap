@@ -107,8 +107,8 @@ def arguments():
     # Logging
     parser.add_argument("-l", "--log", dest="log", default=None)
     parser.add_argument("-v", "--verbose", dest="verbose",
-                        action="store_true", help="output the source file, where the log"
-                        " message originated from with each log message")
+                        action="store_true", help="write even more to the"
+                        "logfile (this may reduce performance)")
     parser.add_argument("-q", "--quiet", dest="quiet",
                         action="store_true", help="do not output any log messages")
 
@@ -195,23 +195,38 @@ def arguments():
                                 " .apk, or must be named"
                                 " APKINDEX.tar.gz.")
 
+    # Action: parse_apkindex
+    parse_apkindex = sub.add_parser("parse_apkindex")
+    parse_apkindex.add_argument("apkindex_path")
+
     # Use defaults from the user's config file
     args = parser.parse_args()
     cfg = pmb.config.load(args)
     for varname in cfg["pmbootstrap"]:
         if varname not in args or not getattr(args, varname):
-            setattr(args, varname, cfg["pmbootstrap"][varname])
+            value = cfg["pmbootstrap"][varname]
+            if varname in pmb.config.defaults:
+                default = pmb.config.defaults[varname]
+                if isinstance(default, bool):
+                    value = (value.lower() == "true")
+            setattr(args, varname, value)
 
     # Replace $WORK in variables from user's config
     for varname in cfg["pmbootstrap"]:
         old = getattr(args, varname)
-        setattr(args, varname, old.replace("$WORK", args.work))
+        if isinstance(old, str):
+            setattr(args, varname, old.replace("$WORK", args.work))
 
     # Add convenience shortcuts
     setattr(args, "arch_native", pmb.parse.arch.alpine_native())
 
-    # Add a caching dict
-    setattr(args, "cache", {"apkindex": {}, "apk_min_version_checked": []})
+    # Add a caching dict (caches parsing of files etc. for the current session)
+    setattr(args, "cache", {"apkindex": {},
+                            "apkindex_files": {},
+                            "apkbuild": {},
+                            "apk_min_version_checked": [],
+                            "aports_files_out_of_sync_with_git": None,
+                            "find_aport": {}})
 
     # Add and verify the deviceinfo (only after initialization)
     if args.action != "init":

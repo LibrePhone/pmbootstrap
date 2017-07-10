@@ -52,6 +52,16 @@ def init(args):
                  " compiling?")
     cfg["pmbootstrap"]["jobs"] = pmb.helpers.cli.ask(args, "Jobs",
                                                      None, default)
+    # Timestamp based rebuilds
+    default = "y"
+    if not args.timestamp_based_rebuild:
+        default = "n"
+    logging.info("Rebuild packages, when the last modified timestamp changed,"
+                 " even if the version did not change? This makes pmbootstrap"
+                 " behave more like 'make'.")
+    answer = pmb.helpers.cli.ask(args, "Timestamp based rebuilds",
+                                 default=default)
+    cfg["pmbootstrap"]["timestamp_based_rebuild"] = str(answer == "y")
 
     # Save config
     pmb.config.save(args, cfg)
@@ -61,5 +71,4 @@ def init(args):
     logging.info("Run 'pmbootstrap zap' to delete all chroots once a day before"
                  " working with pmbootstrap!")
     logging.info("It only takes a few seconds, and all packages are cached.")
-
     logging.info("Done!")

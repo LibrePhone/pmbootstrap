@@ -26,6 +26,7 @@ sys.path.append(os.path.abspath(
     os.path.join(os.path.dirname(__file__) + "/..")))
 import pmb.aportgen
 import pmb.config
+import pmb.helpers.logging
 
 
 @pytest.fixture
@@ -33,10 +34,11 @@ def args(tmpdir, request):
     import pmb.parse
     sys.argv = ["pmbootstrap.py", "chroot"]
     args = pmb.parse.arguments()
-    setattr(args, "logfd", open("/dev/null", "a+"))
+    args.log = args.work + "/log_testsuite.txt"
+    pmb.helpers.logging.init(args)
+    request.addfinalizer(args.logfd.close)
     setattr(args, "_aports_real", args.aports)
     args.aports = str(tmpdir)
-    request.addfinalizer(args.logfd.close)
     return args
 
 

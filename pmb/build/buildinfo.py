@@ -18,43 +18,10 @@ along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
 import os
 import json
-import logging
 import pmb.chroot
 import pmb.chroot.apk
 import pmb.parse.apkindex
-
-
-def get_depends_recursively(args, pkgnames, arch=None):
-    """
-    :param pkgnames: List of pkgnames, for which the dependencies shall be
-                     retrieved.
-    """
-    todo = list(pkgnames)
-    ret = []
-    seen = []
-    while len(todo):
-        pkgname = todo.pop(0)
-        index_data = pmb.parse.apkindex.read_any_index(args, pkgname, arch)
-        if not index_data:
-            logging.debug(
-                "NOTE: Could not find dependency " +
-                pkgname +
-                " in any APKINDEX.")
-            continue
-        pkgname = index_data["pkgname"]
-        if pkgname not in pkgnames and pkgname not in ret:
-            ret.append(pkgname)
-        for depend in index_data["depends"]:
-            if depend not in ret:
-                if depend.startswith("!"):
-                    continue
-                for operator in [">", "="]:
-                    if operator in depend:
-                        depend = depend.split(operator)[0]
-                if depend not in seen:
-                    todo.append(depend)
-                    seen.append(depend)
-    return ret
+import pmb.parse.depends
 
 
 def generate(args, apk_path, arch, suffix, apkbuild):
@@ -71,9 +38,12 @@ def generate(args, apk_path, arch, suffix, apkbuild):
 
     # Add makedepends versions
     installed = pmb.chroot.apk.installed(args, suffix)
-    relevant = (apkbuild["makedepends"] +
-                get_depends_recursively(args, [apkbuild["pkgname"], "abuild", "build-base"]))
+    relevant = (apkbuild["makedepends"] + [apkbuild["pkgname"], "abuild",
+                                           "build-base"])
+    relevant = pmb.parse.depends.recurse(args, relevant, arch, in_aports=False)
     for pkgname in relevant:
+        if pkgname == apkbuild["pkgname"]:
+            continue
         if pkgname in installed:
             ret["versions"][pkgname] = installed[pkgname]["version"]
     return ret

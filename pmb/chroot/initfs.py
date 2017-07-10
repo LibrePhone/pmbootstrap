@@ -25,6 +25,11 @@ import pmb.helpers.cli
 
 
 def build(args, flavor, suffix):
+    # Update mkinitfs and hooks
+    pmb.chroot.apk.install(args, ["postmarketos-mkinitfs"], suffix)
+    pmb.chroot.initfs_hooks.update(args, suffix)
+
+    # Call mkinitfs
     logging.info("(" + suffix + ") mkinitfs " + flavor)
     release_file = (args.work + "/chroot_" + suffix + "/usr/share/kernel/" +
                     flavor + "/kernel.release")

@@ -62,7 +62,7 @@ def main():
         if args.action == "aportgen":
             pmb.aportgen.generate(args, args.package)
         elif args.action == "build":
-            pmb.build.package(args, args.package, args.arch, args.force, False,
+            pmb.build.package(args, args.package, args.arch, args.force,
                               args.buildinfo)
         elif args.action == "build_init":
             pmb.build.init(args, args.suffix)
@@ -84,8 +84,15 @@ def main():
         elif args.action == "menuconfig":
             pmb.build.menuconfig(args, args.package, args.deviceinfo["arch"])
         elif args.action == "parse_apkbuild":
-            print(json.dumps(pmb.parse.apkbuild(args.aports + "/" +
+            print(json.dumps(pmb.parse.apkbuild(args, args.aports + "/" +
                                                 args.package + "/APKBUILD"), indent=4))
+        elif args.action == "parse_apkindex":
+            print(
+                json.dumps(
+                    pmb.parse.apkindex.parse(
+                        args,
+                        args.apkindex_path),
+                    indent=4))
         elif args.action == "shutdown":
             pmb.chroot.shutdown(args)
         elif args.action == "stats":

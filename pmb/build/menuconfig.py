@@ -33,7 +33,7 @@ def menuconfig(args, pkgname, arch):
     aport = pmb.build.find_aport(args, pkgname, False)
     if not aport:
         raise RuntimeError("Package " + pkgname + ": Could not find aport!")
-    apkbuild = pmb.parse.apkbuild(aport + "/APKBUILD")
+    apkbuild = pmb.parse.apkbuild(args, aport + "/APKBUILD")
 
     # Set up build tools and makedepends
     pmb.build.init(args)

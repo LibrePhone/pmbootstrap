@@ -48,28 +48,47 @@ class log_handler(logging.StreamHandler):
             self.handleError(record)
 
 
+def add_verbose_log_level():
+    """
+    Add a new log level "verbose", which is below "debug". Also monkeypatch
+    logging, so it can be used with logging.verbose().
+
+    This function is based on work by Voitek Zylinski and sleepycal:
+    https://stackoverflow.com/a/20602183
+    All stackoverflow user contributions are licensed as CC-BY-SA:
+    https://creativecommons.org/licenses/by-sa/3.0/
+    """
+    logging.VERBOSE = 5
+    logging.addLevelName(logging.VERBOSE, "VERBOSE")
+    logging.Logger.verbose = lambda inst, msg, * \
+        args, **kwargs: inst.log(logging.VERBOSE, msg, *args, **kwargs)
+    logging.verbose = lambda msg, *args, **kwargs: logging.log(logging.VERBOSE, msg,
+                                                               *args, **kwargs)
+
+
 def init(args):
     """
-    Set log format and add the log file descriptor to args.logfd.
+    Set log format and add the log file descriptor to args.logfd, add the
+    verbose log level.
     """
+    # Open logfile
     if not os.path.exists(args.work):
         os.makedirs(args.work)
-
-    date_format = "%H:%M:%S"
     setattr(args, "logfd", open(args.log, "a+"))
 
+    # Set log format
     root_logger = logging.getLogger()
     root_logger.handlers = []
+    formatter = logging.Formatter("[%(asctime)s] %(message)s",
+                                  datefmt="%H:%M:%S")
 
-    formatter = None
+    # Set log level
+    add_verbose_log_level()
     root_logger.setLevel(logging.DEBUG)
     if args.verbose:
-        formatter = logging.Formatter("[%(asctime)s %(module)s]"
-                                      " %(message)s", datefmt=date_format)
-    else:
-        formatter = logging.Formatter("[%(asctime)s] %(message)s",
-                                      datefmt=date_format)
+        root_logger.setLevel(logging.VERBOSE)
 
+    # Add a custom log handler
     handler = log_handler()
     log_handler._args = args
     handler.setFormatter(formatter)

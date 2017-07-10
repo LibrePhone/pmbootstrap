@@ -27,6 +27,7 @@ sys.path.append(os.path.abspath(
 import pmb.challenge.apk_file
 import pmb.config
 import pmb.chroot.other
+import pmb.helpers.logging
 
 
 @pytest.fixture
@@ -34,7 +35,8 @@ def args(request):
     import pmb.parse
     sys.argv = ["pmbootstrap.py", "chroot"]
     args = pmb.parse.arguments()
-    setattr(args, "logfd", open("/dev/null", "a+"))
+    args.log = args.work + "/log_testsuite.txt"
+    pmb.helpers.logging.init(args)
     request.addfinalizer(args.logfd.close)
     return args
 
