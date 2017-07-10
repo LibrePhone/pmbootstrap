@@ -125,6 +125,11 @@ build_packages = ["abuild", "build-base", "ccache"]
 # the native chroot and a cross-compiler, without using distcc
 build_cross_native = ["linux-*"]
 
+
+#
+# PARSE
+#
+
 # Variables in APKBUILD files, that get parsed
 apkbuild_attributes = {
     "arch": {"array": True},
@@ -148,6 +153,39 @@ apkbuild_attributes = {
     # mesa
     "_llvmver": {"array": False},
 }
+
+# Variables from deviceinfo. Reference: <https://postmarketos.org/deviceinfo>
+deviceinfo_attributes = [
+    # device
+    "format_version",
+    "name",
+    "manufacturer",
+    "date",
+    "keyboard",
+    "nonfree",
+    "dtb",
+    "modules_initfs",
+    "external_disk",
+    "external_disk_install",
+    "flash_methods",
+    "arch",
+
+    # flash
+    "generate_bootimg",
+    "generate_legacy_uboot_initfs",
+    "flash_heimdall_partition_initfs",
+    "flash_heimdall_partition_kernel",
+    "flash_offset_base",
+    "flash_offset_kernel",
+    "flash_offset_ramdisk",
+    "flash_offset_second",
+    "flash_offset_tags",
+    "flash_pagesize",
+    "kernel_cmdline",
+
+    # weston
+    "weston_pixman_type",
+]
 
 #
 # INITFS
@@ -201,6 +239,7 @@ $IMAGE: Path to the system partition image
 $KERNEL_CMDLINE: Kernel commandline
 
 Fastboot specific: $OFFSET_KERNEL, $OFFSET_RAMDISK, $OFFSET_TAGS, $PAGE_SIZE
+Heimdall specific: $PARTITION_KERNEL, $PARTITION_INITFS
 """
 flashers = {
     "fastboot": {
@@ -228,8 +267,8 @@ flashers = {
                         ["heimdall_wait_for_device.sh"],
                         ["heimdall", "flash", "--SYSTEM", "$IMAGE"]],
                     "flash_kernel": [["heimdall_flash_kernel.sh",
-                                      "$BOOT/initramfs-$FLAVOR",
-                                      "$BOOT/vmlinuz-$FLAVOR"]]
+                                      "$BOOT/initramfs-$FLAVOR", "$PARTITION_INITFS",
+                                      "$BOOT/vmlinuz-$FLAVOR", "$PARTITION_KERNEL"]]
         },
     },
 }

@@ -30,23 +30,19 @@ def run(args, action, flavor=None):
         raise RuntimeError("action " + action + " is not"
                            " configured for method " + method + "!")
 
-    # Kernel commandline is optional
-    # Optional variables
-    cmdline = ""
-    if "kernel_cmdline" in args.deviceinfo:
-        cmdline = args.deviceinfo["kernel_cmdline"]
-
     # Variable setup
     vars = {
         "$BOOT": "/mnt/rootfs_" + args.device + "/boot",
         "$FLAVOR": flavor if flavor is not None else "",
         "$IMAGE": "/home/user/rootfs/" + args.device + ".img",
-        "$KERNEL_CMDLINE": cmdline,
+        "$KERNEL_CMDLINE": args.deviceinfo["kernel_cmdline"],
         "$OFFSET_KERNEL": args.deviceinfo["flash_offset_kernel"],
         "$OFFSET_RAMDISK": args.deviceinfo["flash_offset_ramdisk"],
         "$OFFSET_SECOND": args.deviceinfo["flash_offset_second"],
         "$OFFSET_TAGS": args.deviceinfo["flash_offset_tags"],
         "$PAGE_SIZE": args.deviceinfo["flash_pagesize"],
+        "$PARTITION_INITFS": args.deviceinfo["flash_heimdall_partition_initfs"],
+        "$PARTITION_KERNEL": args.deviceinfo["flash_heimdall_partition_kernel"],
     }
 
     # Run the commands of each action
