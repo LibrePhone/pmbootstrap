@@ -18,7 +18,6 @@ along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
 import logging
 import os
-import shlex
 import glob
 import filecmp
 
@@ -51,6 +50,7 @@ def init(args, suffix="native"):
         if suffix != "native":
             pmb.chroot.binfmt.register(args, arch)
         copy_resolv_conf(args, suffix)
+        pmb.chroot.apk.update_repository_list(args, suffix)
         return
 
     # Require apk-tools-static
@@ -69,19 +69,13 @@ def init(args, suffix="native"):
     pmb.helpers.run.root(args, ["ln", "-s", "/var/cache/apk", chroot +
                                 "/etc/apk/cache"])
 
-    # Copy /etc/apk/keys/ and resolv.conf
+    # Initialize /etc/apk/keys/, resolv.conf, repositories
     logging.debug(pmb.config.apk_keys_path)
     for key in glob.glob(pmb.config.apk_keys_path + "/*.pub"):
         pmb.helpers.run.root(args, ["cp", key, args.work +
                                     "/config_apk_keys/"])
     copy_resolv_conf(args, suffix)
-
-    # Write /etc/apk/repositories
-    repos_path = chroot + "/etc/apk/repositories"
-    if not os.path.exists(repos_path):
-        for line in pmb.helpers.repo.urls(args):
-            pmb.helpers.run.root(args, ["sh", "-c",
-                                        "echo " + shlex.quote(line) + " >> " + repos_path])
+    pmb.chroot.apk.update_repository_list(args, suffix)
 
     # Install alpine-base (no clean exit for non-native chroot!)
     pmb.chroot.apk_static.run(args, ["-U", "--root", chroot,

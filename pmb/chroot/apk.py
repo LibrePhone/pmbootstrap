@@ -18,11 +18,60 @@ along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
 import os
 import logging
+import shlex
+
 import pmb.chroot
 import pmb.config
 import pmb.parse.apkindex
 import pmb.parse.arch
 import pmb.parse.depends
+
+
+def update_repository_list(args, suffix="native", check=False):
+    """
+    Update /etc/apk/repositories, if it is outdated (when the user changed the
+    --mirror-alpine or --mirror-pmOS parameters).
+
+    :param check: This function calls it self after updating the
+                  /etc/apk/repositories file, to check if it was successful.
+                  Only for this purpose, the "check" parameter should be set to
+                  True.
+    """
+    # Skip if we already did this
+    if suffix in args.cache["apk_repository_list_updated"]:
+        return
+
+    # Read old entries or create folder structure
+    path = args.work + "/chroot_" + suffix + "/etc/apk/repositories"
+    lines_old = []
+    if os.path.exists(path):
+        # Read all old lines
+        lines_old = []
+        with open(path) as handle:
+            for line in handle:
+                lines_old.append(line[:-1])
+    else:
+        pmb.helpers.run.root(args, ["mkdir", "-p", os.path.dirname(path)],
+                             suffix)
+
+    # Up to date: Save cache, return
+    lines_new = pmb.helpers.repo.urls(args)
+    if lines_old == lines_new:
+        args.cache["apk_repository_list_updated"].append(suffix)
+        return
+
+    # Check phase: raise error when still outdated
+    if check:
+        raise RuntimeError("Failed to update: " + path)
+
+    # Update the file
+    logging.debug("(" + suffix + ") update /etc/apk/repositories")
+    if os.path.exists(path):
+        pmb.helpers.run.root(args, ["rm", path])
+    for line in lines_new:
+        pmb.helpers.run.root(args, ["sh", "-c", "echo " +
+                                    shlex.quote(line) + " >> " + path])
+    update_repository_list(args, suffix, True)
 
 
 def check_min_version(args, suffix="native"):
