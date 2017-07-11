@@ -18,6 +18,7 @@ along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
 import os
 import glob
+import logging
 import pmb.parse.apkindex
 
 
@@ -37,6 +38,8 @@ def apkindex(args, path_apkindex, apk_suffix=""):
 
     # All listed packages must exist
     found = []
+    count = str(len(content.items()))
+    logging.info("Check for existence of all listed packages (" + count + ")")
     for pkgname_alias, block in content.items():
         apk = (block["pkgname"] + "-" + block["version"] + ".apk" +
                apk_suffix)
@@ -52,6 +55,7 @@ def apkindex(args, path_apkindex, apk_suffix=""):
                 found.append(buildinfo)
 
     # There must be no extra files
+    logging.info("Check for extra files")
     for path in glob.glob(folder + "/*"):
         name = os.path.basename(path)
         if name == "APKINDEX.tar.gz" or name in found:

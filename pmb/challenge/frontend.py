@@ -17,11 +17,13 @@ You should have received a copy of the GNU General Public License
 along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
 import os
+import logging
 import pmb.challenge
 
 
 def frontend(args):
     path = args.challenge_file
+    logging.info("Challenge " + path)
     if path.endswith(".apk"):
         pmb.challenge.build(args, path)
     elif os.path.basename(path) == "APKINDEX.tar.gz":
