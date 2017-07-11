@@ -48,7 +48,7 @@ def main():
     # Wrap everything to display nice error messages
     try:
         # Sanity check
-        pmb.helpers.other.check_grsec()
+        pmb.helpers.other.check_grsec(args)
 
         # Initialize or require config
         if args.action == "init":

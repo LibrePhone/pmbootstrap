@@ -17,9 +17,10 @@ You should have received a copy of the GNU General Public License
 along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
 import os
+import pmb.helpers.run
 
 
-def check_grsec():
+def check_grsec(args):
     """
     Check if the current kernel is based on the grsec patchset, and if
     the chroot_deny_chmod option is enabled. Raise an exception in that
@@ -29,9 +30,8 @@ def check_grsec():
     if not os.path.exists(path):
         return
 
-    with open(path, "r") as handle:
-        status = handle.readlines()[0].rstrip()
-
+    status = pmb.helpers.run.root(
+        args, ["cat", path], return_stdout=True).rstrip()
     if status != "0":
         link = "https://github.com/postmarketOS/pmbootstrap/wiki/Troubleshooting:grsec"
         raise RuntimeError("You're running a kernel based on the grsec"
