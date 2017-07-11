@@ -43,16 +43,20 @@ def apkindex(args, path_apkindex, apk_suffix=""):
     for pkgname_alias, block in content.items():
         apk = (block["pkgname"] + "-" + block["version"] + ".apk" +
                apk_suffix)
-        buildinfo = (block["pkgname"] + "-" + block["version"] +
-                     ".apk.buildinfo.json")
         if not os.path.exists(folder + "/" + apk):
             raise RuntimeError("Could not find file '" + apk +
                                "' mentioned in " + path_apkindex)
         # Mark the apk and its buildinfo (if it exists) as found
         if apk not in found:
             found.append(apk)
+            buildinfo = (block["pkgname"] + "-" + block["version"] +
+                         ".apk.buildinfo.json")
             if os.path.exists(folder + "/" + buildinfo):
                 found.append(buildinfo)
+            # Add diff files, if they exist
+            for name in [apk + ".diff.md", buildinfo + ".diff.md"]:
+                if os.path.exists(folder + "/" + name):
+                    found.append(name)
 
     # There must be no extra files
     logging.info("Check for extra files")
