@@ -94,7 +94,7 @@ def hash(url, length=8):
     return ret
 
 
-def urls(args, user_repository=True):
+def urls(args, user_repository=True, postmarketos_mirror=True):
     """
     Get a list of repository URLs, as they are in /etc/apk/repositories.
     """
@@ -104,8 +104,11 @@ def urls(args, user_repository=True):
         ret.append("/home/user/packages/user")
 
     # Upstream postmarketOS binary repository
-    if args.mirror_postmarketos:
-        ret.append(args.mirror_postmarketos)
+    if postmarketos_mirror and args.mirror_postmarketos:
+        if os.path.exists(args.mirror_postmarketos):
+            ret.append("/mnt/postmarketos-mirror")
+        else:
+            ret.append(args.mirror_postmarketos)
 
     # Upstream Alpine Linux repositories
     directories = ["main", "community"]
@@ -116,21 +119,35 @@ def urls(args, user_repository=True):
     return ret
 
 
-def apkindex_files(args, arch="native"):
+def apkindex_files(args, arch=None):
     """
-    Get a list of outside paths to all resolved APKINDEX.tar.gz files
-    from the urls() list for a specific arch.
+    Get a list of outside paths to all resolved APKINDEX.tar.gz files for a
+    specific arch.
+    :param arch: defaults to native
     """
-    if arch == "native":
+    if not arch:
         arch = args.arch_native
 
     # Try to get a cached result first.
     if arch in args.cache["apkindex_files"]:
         return args.cache["apkindex_files"][arch]
 
-    # Add the non-hashed user path and the upstream paths with hashes
+    # Local user repository (for packages compiled with pmbootstrap)
     ret = [args.work + "/packages/" + arch + "/APKINDEX.tar.gz"]
-    for url in urls(args, False):
+
+    # Upstream postmarketOS binary repository
+    urls_todo = []
+    mirror = args.mirror_postmarketos
+    if mirror:
+        if os.path.exists(mirror):
+            ret.append(mirror + "/" + arch + "/APKINDEX.tar.gz")
+        else:
+            # Non-local path: treat it like other URLs
+            urls_todo.append(mirror)
+
+    # Resolve the APKINDEX.$HASH.tar.gz files
+    urls_todo += urls(args, False, False)
+    for url in urls_todo:
         ret.append(args.work + "/cache_apk_" + arch + "/APKINDEX." +
                    hash(url) + ".tar.gz")
 
