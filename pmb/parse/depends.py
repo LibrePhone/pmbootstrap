@@ -101,7 +101,8 @@ def recurse(args, pkgnames, arch=None, in_apkindexes=True, in_aports=True,
 
         # Append to todo/ret
         logging.verbose("-> Depends: " + str(depends))
-        todo += depends
+        if depends:
+            todo += depends
         ret.append(pkgname)
 
     return ret

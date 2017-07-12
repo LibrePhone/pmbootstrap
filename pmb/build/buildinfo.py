@@ -40,7 +40,8 @@ def generate(args, apk_path, arch, suffix, apkbuild):
     installed = pmb.chroot.apk.installed(args, suffix)
     relevant = (apkbuild["makedepends"] + [apkbuild["pkgname"], "abuild",
                                            "build-base"])
-    relevant = pmb.parse.depends.recurse(args, relevant, arch, in_aports=False)
+    relevant = pmb.parse.depends.recurse(args, relevant, arch, in_aports=False,
+                                         strict=True)
     for pkgname in relevant:
         if pkgname == apkbuild["pkgname"]:
             continue
