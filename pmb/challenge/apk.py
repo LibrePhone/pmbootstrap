@@ -41,7 +41,7 @@ def contents_diff(tar_a, tar_b, member_a, member_b, name):
     for temp_file in temp_files:
         os.remove(temp_file)
     if equal:
-        logging.debug("=> OK!")
+        logging.verbose("=> OK!")
     else:
         raise RuntimeError("File '" + name + "' is different!")
 
@@ -90,9 +90,9 @@ def apk(args, apk_a, apk_b):
             success = True
             for name in list_a:
                 try:
-                    logging.debug("Compare: " + name)
+                    logging.verbose("Compare: " + name)
                     if name == ".PKGINFO":
-                        logging.debug(
+                        logging.verbose(
                             "=> Skipping: expected to be different")
                         continue
 
@@ -104,12 +104,12 @@ def apk(args, apk_a, apk_b):
                             "Entry '" + name + "' has a different type!")
 
                     if member_a.isdir():
-                        logging.debug("=> Skipping: directory")
+                        logging.verbose("=> Skipping: directory")
                     elif member_a.isfile():
                         contents_diff(tar_a, tar_b, member_a, member_b, name)
                     elif member_a.issym() or member_a.islnk():
                         if member_a.linkname == member_b.linkname:
-                            logging.debug(
+                            logging.verbose(
                                 "=> Both link to " + member_a.linkname)
                         else:
                             raise RuntimeError(
