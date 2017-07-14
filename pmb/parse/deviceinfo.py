@@ -18,6 +18,7 @@ along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
 import logging
 import os
+import pmb.config
 
 
 def deviceinfo(args, device=None):
@@ -48,4 +49,10 @@ def deviceinfo(args, device=None):
             key = split[0][len("deviceinfo_"):]
             value = split[1].replace("\"", "").replace("\n", "")
             ret[key] = value
+
+    # Assign empty string as default
+    for key in pmb.config.deviceinfo_attributes:
+        if key not in ret:
+            ret[key] = ""
+
     return ret
