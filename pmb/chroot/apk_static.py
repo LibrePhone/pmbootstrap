@@ -102,7 +102,7 @@ def verify_signature(args, files, sigkey_path):
                                     sigkey_path, "-signature", files[
                                         "sig"]["temp_path"],
                                     files["apk"]["temp_path"]], check=True)
-    except:
+    except BaseException:
         os.unlink(files["sig"]["temp_path"])
         os.unlink(files["apk"]["temp_path"])
         raise RuntimeError("Failed to validate signature of apk.static."

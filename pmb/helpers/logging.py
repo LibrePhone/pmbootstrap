@@ -44,7 +44,7 @@ class log_handler(logging.StreamHandler):
 
         except (KeyboardInterrupt, SystemExit):
             raise
-        except:
+        except BaseException:
             self.handleError(record)
 
 
