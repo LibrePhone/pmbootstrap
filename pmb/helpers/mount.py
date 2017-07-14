@@ -25,7 +25,7 @@ def ismount(folder):
     Ismount() implementation, that works for mount --bind.
     Workaround for: https://bugs.python.org/issue29707
     """
-    folder = os.path.abspath(folder)
+    folder = os.path.abspath(os.path.realpath(folder))
     with open("/proc/mounts", "r") as handle:
         for line in handle:
             words = line.split()
