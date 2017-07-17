@@ -40,6 +40,84 @@ import pmb.parse
 import pmb.install
 
 
+def action_aportgen(args):
+    pmb.aportgen.generate(args, args.package)
+
+
+def action_build(args):
+    pmb.build.package(args, args.package, args.arch, args.force,
+                      args.buildinfo)
+
+
+def action_build_init(args):
+    pmb.build.init(args, args.suffix)
+
+
+def action_challenge(args):
+    pmb.challenge.frontend(args)
+
+
+def action_checksum(args):
+    pmb.build.checksum(args, args.package)
+
+
+def action_chroot(args):
+    pmb.chroot.apk.check_min_version(args, args.suffix)
+    pmb.chroot.root(args, args.command, args.suffix, log=False)
+
+
+def action_index(args):
+    pmb.build.index_repo(args)
+
+
+def action_initfs(args):
+    pmb.chroot.initfs.frontend(args)
+
+
+def action_install(args):
+    pmb.install.install(args)
+
+
+def action_flasher(args):
+    pmb.flasher.frontend(args)
+
+
+def action_menuconfig(args):
+    pmb.build.menuconfig(args, args.package, args.deviceinfo["arch"])
+
+
+def action_parse_apkbuild(args):
+    build_path = args.aports + "/" + args.package + "/APKBUILD"
+    print(json.dumps(pmb.parse.apkbuild(args, build_path), indent=4))
+
+
+def action_parse_apkindex(args):
+    result = pmb.parse.apkindex.parse(args, args.apkindex_path)
+    print(json.dumps(result, indent=4))
+
+
+def action_shutdown(args):
+    pmb.chroot.shutdown(args)
+
+
+def action_stats(args):
+    pmb.build.ccache_stats(args, args.arch)
+
+
+def action_log(args):
+    pmb.helpers.run.user(args, ["tail", "-f", args.log, "-n", args.lines],
+                         log=False)
+
+
+def action_log_distccd(args):
+    logpath = "/home/user/distccd.log"
+    pmb.chroot.user(args, ["tail", "-f", logpath, "-n", args.lines], log=False)
+
+
+def action_zap(args):
+    pmb.chroot.zap(args)
+
+
 def main():
     # Parse arguments, set up logging
     args = pmb.parse.arguments()
@@ -53,58 +131,15 @@ def main():
         # Initialize or require config
         if args.action == "init":
             return pmb.config.init(args)
-        if not os.path.exists(args.config):
+        elif not os.path.exists(args.config):
             logging.critical("Please specify a config file, or run"
                              " 'pmbootstrap init' to generate one.")
             return 1
 
-        # All other actions
-        if args.action == "aportgen":
-            pmb.aportgen.generate(args, args.package)
-        elif args.action == "build":
-            pmb.build.package(args, args.package, args.arch, args.force,
-                              args.buildinfo)
-        elif args.action == "build_init":
-            pmb.build.init(args, args.suffix)
-        elif args.action == "challenge":
-            pmb.challenge.frontend(args)
-        elif args.action == "checksum":
-            pmb.build.checksum(args, args.package)
-        elif args.action == "chroot":
-            pmb.chroot.apk.check_min_version(args, args.suffix)
-            pmb.chroot.root(args, args.command, args.suffix, log=False)
-        elif args.action == "index":
-            pmb.build.index_repo(args)
-        elif args.action == "initfs":
-            pmb.chroot.initfs.frontend(args)
-        elif args.action == "install":
-            pmb.install.install(args)
-        elif args.action == "flasher":
-            pmb.flasher.frontend(args)
-        elif args.action == "menuconfig":
-            pmb.build.menuconfig(args, args.package, args.deviceinfo["arch"])
-        elif args.action == "parse_apkbuild":
-            print(json.dumps(pmb.parse.apkbuild(args, args.aports + "/" +
-                                                args.package + "/APKBUILD"), indent=4))
-        elif args.action == "parse_apkindex":
-            print(
-                json.dumps(
-                    pmb.parse.apkindex.parse(
-                        args,
-                        args.apkindex_path),
-                    indent=4))
-        elif args.action == "shutdown":
-            pmb.chroot.shutdown(args)
-        elif args.action == "stats":
-            pmb.build.ccache_stats(args, args.arch)
-        elif args.action == "log":
-            pmb.helpers.run.user(args, ["tail", "-f", args.log,
-                                        "-n", args.lines], log=False)
-        elif args.action == "log_distccd":
-            pmb.chroot.user(args, ["tail", "-f", "/home/user/distccd.log",
-                                   "-n", args.lines], log=False)
-        elif args.action == "zap":
-            pmb.chroot.zap(args)
+        # If an action_xxx function is defined in local scope, run it with args
+        func = locals().get('action_' + args.action)
+        if func:
+            func(args)
         else:
             logging.info("Run pmbootstrap -h for usage information.")
 
