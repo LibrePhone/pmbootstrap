@@ -137,12 +137,11 @@ def main():
             return 1
 
         # If an action_xxx function is defined in local scope, run it with args
-        func = locals().get('action_' + args.action)
+        func = globals().get('action_' + args.action)
         if func:
             func(args)
         else:
             logging.info("Run pmbootstrap -h for usage information.")
-
         # Print finish timestamp
         logging.info("Done")
 
