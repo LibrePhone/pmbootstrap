@@ -36,6 +36,7 @@ def export(args, flavor, folder):
         " contains initramfs and kernel",
         "initramfs-" + flavor: "Initramfs",
         "uInitrd-" + flavor: "Initramfs, legacy u-boot image format",
+        "uImage-" + flavor: "Kernel, legacy u-boot image format",
         "vmlinuz-" + flavor: "Linux kernel",
         args.device + ".img": "System partition",
     }
