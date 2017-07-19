@@ -168,7 +168,7 @@ def is_necessary(args, arch, apkbuild, apkindex_path=None):
     # Get package name, version, define start of debug message
     package = apkbuild["pkgname"]
     version_new = apkbuild["pkgver"] + "-r" + apkbuild["pkgrel"]
-    msg = "Build is neccessary for package '" + package + "': "
+    msg = "Build is necessary for package '" + package + "': "
 
     # Get old version from APKINDEX
     if apkindex_path:

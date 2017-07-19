@@ -19,6 +19,7 @@ along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 import logging
 import os
 
+import pmb.config
 import pmb.flasher
 import pmb.install
 import pmb.chroot.apk
@@ -62,6 +63,14 @@ def kernel(args):
     else:
         logging.info("(native) flash kernel " + flavor)
         pmb.flasher.run(args, "flash_kernel", flavor)
+    logging.info("You will get an IP automatically assigned to your "
+                 "USB interface shortly.")
+    logging.info("Connect to the telnet session and type your LUKS password"
+                 " to boot postmarketOS (not necessary if full disk"
+                 " encryption is disabled):")
+    logging.info("telnet " + pmb.config.default_ip)
+    logging.info("Then you can connect to your device using ssh:")
+    logging.info("ssh user@" + pmb.config.default_ip)
 
 
 def list_flavors(args):

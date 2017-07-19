@@ -191,6 +191,7 @@ deviceinfo_attributes = [
 # INITFS
 #
 initfs_hook_prefix = "postmarketos-mkinitfs-hook-"
+default_ip = "172.16.42.1"
 
 
 #
