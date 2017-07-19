@@ -240,7 +240,7 @@ $FLAVOR: Kernel flavor
 $IMAGE: Path to the system partition image
 $KERNEL_CMDLINE: Kernel commandline
 
-Fastboot specific: $OFFSET_KERNEL, $OFFSET_RAMDISK, $OFFSET_TAGS, $PAGE_SIZE
+Fastboot specific: $OFFSET_BASE, $OFFSET_KERNEL, $OFFSET_RAMDISK, $OFFSET_TAGS, $PAGE_SIZE
 Heimdall specific: $PARTITION_KERNEL, $PARTITION_INITFS
 """
 flashers = {
@@ -252,6 +252,7 @@ flashers = {
                     "flash_system": [["fastboot", "flash", "system", "$IMAGE"]],
                     "flash_kernel": [["fastboot", "flash", "boot", "$BOOT/boot.img-$FLAVOR"]],
                     "boot": [["fastboot",
+                              "--base", "$OFFSET_BASE",
                               "--kernel-offset", "$OFFSET_KERNEL",
                               "--ramdisk-offset", "$OFFSET_RAMDISK",
                               "--tags-offset", "$OFFSET_TAGS",

@@ -30,12 +30,17 @@ def run(args, action, flavor=None):
         raise RuntimeError("action " + action + " is not"
                            " configured for method " + method + "!")
 
+    _base = args.deviceinfo["flash_offset_base"]
+    if _base == "":
+        _base = "0x10000000"
+
     # Variable setup
     vars = {
         "$BOOT": "/mnt/rootfs_" + args.device + "/boot",
         "$FLAVOR": flavor if flavor is not None else "",
         "$IMAGE": "/home/user/rootfs/" + args.device + ".img",
         "$KERNEL_CMDLINE": args.deviceinfo["kernel_cmdline"],
+        "$OFFSET_BASE": _base,
         "$OFFSET_KERNEL": args.deviceinfo["flash_offset_kernel"],
         "$OFFSET_RAMDISK": args.deviceinfo["flash_offset_ramdisk"],
         "$OFFSET_SECOND": args.deviceinfo["flash_offset_second"],
