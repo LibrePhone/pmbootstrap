@@ -134,6 +134,7 @@ build_cross_native = ["linux-*"]
 apkbuild_attributes = {
     "arch": {"array": True},
     "depends": {"array": True},
+    "depends_dev": {"array": True},
     "makedepends": {"array": True},
     "options": {"array": True},
     "pkgname": {"array": False},
