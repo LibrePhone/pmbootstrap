@@ -37,6 +37,7 @@ def format_and_mount_root(args):
     if args.full_disk_encryption:
         logging.info("(native) format " + device + " (root, luks), mount to " +
                      mountpoint)
+        logging.info(" *** SET FULL DISK ENCRYPTION PASSWORD ***")
         pmb.chroot.root(args, ["cryptsetup", "luksFormat", "--use-urandom",
                                "--cipher", args.cipher, "-q", device], log=False)
         pmb.chroot.root(args, ["cryptsetup", "luksOpen", device,

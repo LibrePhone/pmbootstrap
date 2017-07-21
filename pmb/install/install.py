@@ -67,6 +67,7 @@ def set_user_password(args):
     """
     Loop until the passwords for user and root have been changed successfully.
     """
+    logging.info(" *** SET LOGIN PASSWORD FOR: 'user' ***")
     suffix = "rootfs_" + args.device
     while True:
         try:
