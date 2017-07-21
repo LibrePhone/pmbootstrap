@@ -64,6 +64,7 @@ def package(args, pkgname, carch, force=False, buildinfo=False):
         pmb.chroot.apk.install(args, apkbuild["makedepends"], suffix)
     if cross:
         pmb.chroot.apk.install(args, ["gcc-" + carch_buildenv,
+                                      "g++-" + carch_buildenv,
                                       "ccache-cross-symlinks"])
         if cross == "distcc":
             pmb.chroot.apk.install(args, ["distcc"], suffix=suffix)
