@@ -35,6 +35,12 @@ def shutdown_cryptsetup_device(args, name):
     pmb.chroot.apk.install(args, ["cryptsetup"])
     status = pmb.chroot.root(args, ["cryptsetup", "status", name], check=False,
                              return_stdout=True)
+    if not status:
+        logging.warning("WARNING: Failed to run cryptsetup to get the status"
+                        " for " + name + ", assuming it is not mounted"
+                        " (shutdown fails later if it is)!")
+        return
+
     if status.startswith("/dev/mapper/" + name + " is active."):
         pmb.chroot.root(args, ["cryptsetup", "luksClose", name])
     elif status.startswith("/dev/mapper/" + name + " is inactive."):
