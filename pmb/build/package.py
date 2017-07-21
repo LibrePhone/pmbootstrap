@@ -22,7 +22,6 @@ import logging
 import pmb.build
 import pmb.build.autodetect
 import pmb.build.buildinfo
-import pmb.build.crosscompiler
 import pmb.chroot
 import pmb.chroot.apk
 import pmb.chroot.distccd

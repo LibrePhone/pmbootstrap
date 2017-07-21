@@ -108,7 +108,7 @@ def arguments():
     parser.add_argument("-l", "--log", dest="log", default=None)
     parser.add_argument("-v", "--verbose", dest="verbose",
                         action="store_true", help="write even more to the"
-                        "logfile (this may reduce performance)")
+                        " logfiles (this may reduce performance)")
     parser.add_argument("-q", "--quiet", dest="quiet",
                         action="store_true", help="do not output any log messages")
 
