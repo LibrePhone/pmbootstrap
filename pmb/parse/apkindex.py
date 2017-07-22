@@ -106,10 +106,19 @@ def parse_next_block(args, path, lines, start):
         # Format optional lists
         for key in ["provides", "depends"]:
             if key in ret and ret[key] != "":
-                ret[key] = ret[key].split(" ")
+                # Ignore all operators for now
+                values = ret[key].split(" ")
+                ret[key] = []
+                for value in values:
+                    if value.startswith("!"):
+                        continue
+                    for operator in [">", "=", "<"]:
+                        if operator in value:
+                            value = value.split(operator)[0]
+                            break
+                    ret[key].append(value)
             else:
                 ret[key] = []
-
         return ret
 
     # No more blocks
@@ -205,9 +214,7 @@ def parse(args, path, strict=False):
         parse_add_block(path, strict, ret, block)
         if "provides" in block:
             for alias in block["provides"]:
-                split = alias.split("=")
-                if len(split) == 2:
-                    parse_add_block(path, strict, ret, block, split[0])
+                parse_add_block(path, strict, ret, block, alias)
 
     # Update the cache
     args.cache["apkindex"][path] = {"lastmod": lastmod, "ret": ret}

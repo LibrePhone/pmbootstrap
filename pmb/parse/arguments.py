@@ -198,6 +198,7 @@ def arguments():
     # Action: parse_apkindex
     parse_apkindex = sub.add_parser("parse_apkindex")
     parse_apkindex.add_argument("apkindex_path")
+    parse_apkindex.add_argument("package", default=None, nargs="?")
 
     # Use defaults from the user's config file
     args = parser.parse_args()

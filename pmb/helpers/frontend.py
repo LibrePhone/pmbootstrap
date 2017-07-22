@@ -88,6 +88,11 @@ def parse_apkbuild(args):
 
 def parse_apkindex(args):
     result = pmb.parse.apkindex.parse(args, args.apkindex_path)
+    if args.package:
+        if args.package not in result:
+            raise RuntimeError("Package not found in the APKINDEX: " +
+                               args.package)
+        result = result[args.package]
     print(json.dumps(result, indent=4))
 
 

@@ -27,20 +27,10 @@ def apkindex(args, pkgname, arch):
     Non-recursively get the dependencies of one package in any APKINDEX.
     """
     index_data = pmb.parse.apkindex.read_any_index(args, pkgname, arch)
-    if not index_data:
+    if index_data:
+        return index_data["depends"]
+    else:
         return None
-
-    # Remove operators from the depends list
-    ret = []
-    for depend in index_data["depends"]:
-        if depend.startswith("!"):
-            continue
-        for operator in [">", "="]:
-            if operator in depend:
-                depend = depend.split(operator)[0]
-        if depend not in ret:
-            ret.append(depend)
-    return ret
 
 
 def recurse_error_message(pkgname, in_aports, in_apkindexes):

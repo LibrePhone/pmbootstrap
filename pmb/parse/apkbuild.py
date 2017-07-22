@@ -53,6 +53,15 @@ def replace_variables(apkbuild):
             for var in ["_llvmver"]:
                 makedepend = makedepend.replace("$" + var, ret[var])
             replaced += [makedepend]
+
+    # Python: ${pkgname#py-}
+    if ret["pkgname"].startswith("py-"):
+        replacement = ret["pkgname"][3:]
+        for var in ["depends", "makedepends", "subpackages"]:
+            for i in range(len(ret[var])):
+                ret[var][i] = ret[var][i].replace(
+                    "${pkgname#py-}", replacement)
+
     ret["makedepends"] = replaced
     return ret
 
