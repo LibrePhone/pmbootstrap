@@ -34,7 +34,7 @@ def generate(args, pkgname):
         "depends": "isl binutils-" + arch,
         "makedepends_build": "gcc g++ paxmark bison flex texinfo gawk zip gmp-dev mpfr-dev mpc1-dev zlib-dev",
         "makedepends_host": "linux-headers gmp-dev mpfr-dev mpc1-dev isl-dev zlib-dev musl-dev-" + arch + " binutils-" + arch,
-        "subpackages": "g++-" + arch,
+        "subpackages": "g++-" + arch + ":gpp",
 
         "LIBGOMP": "false",
         "LIBGCC": "false",
@@ -54,9 +54,10 @@ def generate(args, pkgname):
     """
 
     replace_simple = {
-        # Do not package libstdc++
-        '*subpackages="$subpackages libstdc++:libcxx:*':
-            '       subpackages="$subpackages g++$_target:gpp"',
+        # Do not package libstdc++, do not add "g++-$ARCH" here (already
+        # did that explicitly in the subpackages variable above, so
+        # pmbootstrap picks it up properly).
+        '*subpackages="$subpackages libstdc++:libcxx:*': None
     }
 
     pmb.aportgen.core.rewrite(
