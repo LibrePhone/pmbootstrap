@@ -34,7 +34,7 @@ def generate(args, pkgname):
         "depends": "isl binutils-" + arch,
         "makedepends_build": "gcc g++ paxmark bison flex texinfo gawk zip gmp-dev mpfr-dev mpc1-dev zlib-dev",
         "makedepends_host": "linux-headers gmp-dev mpfr-dev mpc1-dev isl-dev zlib-dev musl-dev-" + arch + " binutils-" + arch,
-        "subpackages": "g++-"+arch,
+        "subpackages": "g++-" + arch,
 
         "LIBGOMP": "false",
         "LIBGCC": "false",
