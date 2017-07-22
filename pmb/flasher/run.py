@@ -31,7 +31,7 @@ def run(args, action, flavor=None):
                            " configured for method " + method + "!")
 
     _cmdline = args.deviceinfo["kernel_cmdline"]
-    if args.cmdline:
+    if "cmdline" in args and args.cmdline:
         _cmdline = args.cmdline
     _base = args.deviceinfo["flash_offset_base"]
     if _base == "":
