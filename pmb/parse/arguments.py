@@ -35,6 +35,7 @@ def arguments_flasher(subparser):
 
     # Boot, flash kernel, export
     boot = sub.add_parser("boot", help="boot a kernel once")
+    boot.add_argument("--cmdline", help="override kernel commandline")
     flash_kernel = sub.add_parser("flash_kernel", help="flash a kernel")
     export = sub.add_parser("export", help="create convenience symlinks to the"
                                            " generated image files (system,"
