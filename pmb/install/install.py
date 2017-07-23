@@ -67,6 +67,7 @@ def set_user_password(args):
     """
     Loop until the passwords for user and root have been changed successfully.
     """
+    logging.info(" *** SET LOGIN PASSWORD FOR: 'user' ***")
     suffix = "rootfs_" + args.device
     while True:
         try:
@@ -78,7 +79,7 @@ def set_user_password(args):
             pass
 
 
-def install(args, show_flash_msg=True):
+def install(args):
     # Install required programs in native chroot
     logging.info("*** (1/5) PREPARE NATIVE CHROOT ***")
     pmb.chroot.apk.install(args, pmb.config.install_native_packages,
@@ -122,32 +123,32 @@ def install(args, show_flash_msg=True):
     fix_mount_folders(args)
     pmb.chroot.shutdown(args, True)
 
-    # Flash to target device
+    # Kernel flash information
     logging.info("*** (5/5) FLASHING TO DEVICE ***")
-    if show_flash_msg:
-        logging.info("Run the following to flash your installation to the"
-                     " target device:")
-        logging.info("* pmbootstrap flasher flash_kernel")
-        logging.info("  Flashes the kernel + initramfs to your device:")
-        logging.info(
-            "  " +
-            args.work +
-            "/chroot_rootfs_" +
-            args.device +
-            "/boot")
-        method = args.deviceinfo["flash_methods"]
-        if (method in pmb.config.flashers and "boot" in
-                pmb.config.flashers[method]["actions"]):
-            logging.info("  (NOTE: " + method + " also supports booting"
-                         " the kernel/initramfs directly without flashing."
-                         " Use 'pmbootstrap flasher boot' to do that.)")
+    logging.info("Run the following to flash your installation to the"
+                 " target device:")
+    logging.info("* pmbootstrap flasher flash_kernel")
+    logging.info("  Flashes the kernel + initramfs to your device:")
+    logging.info("  " + args.work + "/chroot_rootfs_" + args.device +
+                 "/boot")
+    method = args.deviceinfo["flash_methods"]
+    if (method in pmb.config.flashers and "boot" in
+            pmb.config.flashers[method]["actions"]):
+        logging.info("  (NOTE: " + method + " also supports booting"
+                     " the kernel/initramfs directly without flashing."
+                     " Use 'pmbootstrap flasher boot' to do that.)")
 
-        if not args.sdcard:
-            logging.info("* pmbootstrap flasher flash_system")
-            logging.info("  Flashes the system image, that has been"
-                         " generated to your device:")
-            logging.info("  " + args.work + "/chroot_native/home/user/rootfs/" +
-                         args.device + ".img")
-            logging.info("  (NOTE: This file has a partition table,"
-                         " which contains one currently unused boot"
-                         " partition, and the root partition.)")
+    # System flash information
+    if not args.sdcard:
+        logging.info("* pmbootstrap flasher flash_system")
+        logging.info("  Flashes the system image, that has been"
+                     " generated to your device:")
+        logging.info("  " + args.work + "/chroot_native/home/user/rootfs/" +
+                     args.device + ".img")
+        logging.info("  (NOTE: This file has a partition table,"
+                     " which contains a boot- and root subpartition.)")
+
+    # Export information
+    logging.info("* If the above steps do not work, you can also create"
+                 " symlinks to the generated files with 'pmbootstrap flasher"
+                 " export <target_dir>' and flash outside of pmbootstrap.")

@@ -84,8 +84,8 @@ def system(args):
     # Generate system image, install flasher
     img_path = "/home/user/rootfs/" + args.device + ".img"
     if not os.path.exists(args.work + "/chroot_native" + img_path):
-        setattr(args, "sdcard", None)
-        pmb.install.install(args, False)
+        raise RuntimeError("The system image has not been generated yet,"
+                           " please run 'pmbootstrap install' first.")
     pmb.flasher.init(args)
 
     # Run the flasher
