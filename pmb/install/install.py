@@ -90,6 +90,8 @@ def install(args):
     logging.info("*** (2/5) CREATE DEVICE ROOTFS (" + args.device + ") ***")
     install_packages = (pmb.config.install_device_packages +
                         ["device-" + args.device])
+    if args.ui.lower() != "none":
+        install_packages += ["postmarketos-ui-" + args.ui]
     suffix = "rootfs_" + args.device
     pmb.chroot.apk.upgrade(args, suffix)
 

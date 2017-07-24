@@ -52,6 +52,7 @@ defaults = {
     "mirror_postmarketos": "",
     "work": os.path.expanduser("~") + "/.local/var/pmbootstrap",
     "port_distccd": "33632",
+    "ui": "weston",
 
     # aes-xts-plain64 would be better, but this is not supported on LineageOS
     # kernel configs
@@ -206,12 +207,7 @@ install_native_packages = ["cryptsetup", "util-linux", "e2fsprogs", "parted"]
 install_device_packages = [
 
     # postmarketos
-    "postmarketos-base", "postmarketos-demos",
-
-    # weston
-    "weston", "weston-shell-desktop", "weston-backend-fbdev", "weston-backend-drm",
-    "weston-backend-x11", "weston-clients", "weston-terminal",
-    "weston-xwayland", "xorg-server-xwayland",
+    "postmarketos-base",
 
     # other
     "ttf-droid"

@@ -23,6 +23,7 @@ import multiprocessing
 import pmb.config
 import pmb.helpers.cli
 import pmb.helpers.devices
+import pmb.helpers.ui
 
 
 def init(args):
@@ -36,6 +37,12 @@ def init(args):
                  ", ".join(devices))
     cfg["pmbootstrap"]["device"] = pmb.helpers.cli.ask(args, "Device",
                                                        None, args.device)
+
+    # UI selection
+    ui_list = pmb.helpers.ui.list(args)
+    logging.info("Available user interfaces (" + str(len(ui_list) - 1) + "): " + ", ".join(ui_list))
+    cfg["pmbootstrap"]["ui"] = pmb.helpers.cli.ask(args, "User Interface:",
+                                                   None, args.ui, True)
 
     # Work folder
     logging.info("Location of the 'work' path. Multiple chroots (native,"
