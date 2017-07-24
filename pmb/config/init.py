@@ -63,6 +63,9 @@ def init(args):
                                  default=default)
     cfg["pmbootstrap"]["timestamp_based_rebuild"] = str(answer == "y")
 
+    # Do not save aports location to config file
+    del cfg["pmbootstrap"]["aports"]
+
     # Save config
     pmb.config.save(args, cfg)
 
