@@ -255,19 +255,39 @@ flashers = {
                               "--page-size", "$PAGE_SIZE",
                               "-c", "$KERNEL_CMDLINE",
                               "boot", "$BOOT/vmlinuz-$FLAVOR", "$BOOT/initramfs-$FLAVOR"]],
-        }
+        },
     },
-    "heimdall": {
+    # Some Samsung devices need the initramfs to be baked into the kernel (e.g.
+    # i9070, i9100). We want the initramfs to be generated after the kernel was
+    # built, so we put the real initramfs on another partition (e.g. RECOVERY)
+    # and load it from the initramfs in the kernel. This method is called
+    # "isorec" (isolated recovery), a term coined by Lanchon.
+    "heimdall-isorec": {
         "depends": ["heimdall"],
         "actions":
-                {
-                    "list_devices": [["heimdall", "detect"]],
-                    "flash_system": [
-                        ["heimdall_wait_for_device.sh"],
-                        ["heimdall", "flash", "--SYSTEM", "$IMAGE"]],
-                    "flash_kernel": [["heimdall_flash_kernel.sh",
-                                      "$BOOT/initramfs-$FLAVOR", "$PARTITION_INITFS",
-                                      "$BOOT/vmlinuz-$FLAVOR", "$PARTITION_KERNEL"]]
+        {
+            "list_devices": [["heimdall", "detect"]],
+            "flash_system": [
+                ["heimdall_wait_for_device.sh"],
+                ["heimdall", "flash", "--SYSTEM", "$IMAGE"]],
+            "flash_kernel": [["heimdall_flash_kernel.sh",
+                              "$BOOT/initramfs-$FLAVOR", "$PARTITION_INITFS",
+                              "$BOOT/vmlinuz-$FLAVOR", "$PARTITION_KERNEL"]]
+        },
+    },
+    # Some Samsung devices need a 'boot.img' file, just like the one generated
+    # fastboot compatible devices. Example: s7562, n7100
+    "heimdall-bootimg": {
+        "depends": ["heimdall"],
+        "actions":
+        {
+            "list_devices": [["heimdall", "detect"]],
+            "flash_system": [
+                ["heimdall_wait_for_device.sh"],
+                ["heimdall", "flash", "--SYSTEM", "$IMAGE"]],
+            "flash_kernel": [
+                ["heimdall_wait_for_device.sh"],
+                ["heimdall", "flash", "--$PARTITION_KERNEL", "$BOOT/boot.img-$FLAVOR"]],
         },
     },
 }
