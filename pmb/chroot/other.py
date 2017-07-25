@@ -27,8 +27,11 @@ def kernel_flavors_installed(args, suffix):
     pattern = args.work + "/chroot_" + suffix + "/boot/" + prefix + "*"
     ret = []
     for file in glob.glob(pattern):
-        ret.append(os.path.basename(file)[prefix_len:])
-    return ret
+        flavor = os.path.basename(file)[prefix_len:]
+        if flavor[-4:] == "-dtb":
+            flavor = flavor[:-4]
+        ret.append(flavor)
+    return list(set(ret))
 
 
 def kernel_flavor_autodetect(args, suffix):
