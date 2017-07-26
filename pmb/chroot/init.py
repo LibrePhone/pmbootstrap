@@ -45,9 +45,11 @@ def init(args, suffix="native"):
     # When already initialized: just prepare the chroot
     chroot = args.work + "/chroot_" + suffix
     arch = pmb.parse.arch.from_chroot_suffix(args, suffix)
+    emulate = pmb.parse.arch.cpu_emulation_required(args, arch)
+
     pmb.chroot.mount(args, suffix)
     if os.path.islink(chroot + "/bin/sh"):
-        if suffix != "native":
+        if emulate:
             pmb.chroot.binfmt.register(args, arch)
         copy_resolv_conf(args, suffix)
         pmb.chroot.apk.update_repository_list(args, suffix)
@@ -57,7 +59,7 @@ def init(args, suffix="native"):
     pmb.chroot.apk_static.init(args)
 
     # Non-native chroot: require qemu-user-static
-    if suffix != "native":
+    if emulate:
         pmb.chroot.apk.install(args, ["qemu-user-static-repack",
                                       "qemu-user-static-repack-binfmt"])
         pmb.chroot.binfmt.register(args, arch)
@@ -80,7 +82,7 @@ def init(args, suffix="native"):
     # Install alpine-base (no clean exit for non-native chroot!)
     pmb.chroot.apk_static.run(args, ["-U", "--root", chroot,
                                      "--cache-dir", apk_cache, "--initdb", "--arch", arch,
-                                     "add", "alpine-base"], check=(suffix == "native"))
+                                     "add", "alpine-base"], check=(not emulate))
 
     # Create device nodes
     for dev in pmb.config.chroot_device_nodes:
@@ -99,7 +101,7 @@ def init(args, suffix="native"):
                                    " to an eCryptfs folder.)")
 
     # Non-native chroot: install qemu-user-binary, run apk fix
-    if suffix != "native":
+    if emulate:
         arch_debian = pmb.parse.arch.alpine_to_debian(arch)
         pmb.helpers.run.root(args, ["cp", args.work +
                                     "/chroot_native/usr/bin/qemu-" + arch_debian + "-static",

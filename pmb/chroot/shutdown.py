@@ -20,10 +20,11 @@ import logging
 import glob
 import os
 
-import pmb.install.losetup
-import pmb.helpers.mount
 import pmb.chroot
 import pmb.chroot.distccd
+import pmb.helpers.mount
+import pmb.install.losetup
+import pmb.parse.arch
 
 
 def shutdown_cryptsetup_device(args, name):
@@ -73,5 +74,7 @@ def shutdown(args, only_install_related=False):
         # Clean up the rest
         pmb.helpers.mount.umount_all(args, args.work)
         pmb.helpers.mount.umount_all(args, args.work)
-        pmb.chroot.binfmt.unregister(args, args.deviceinfo["arch"])
+        arch = args.deviceinfo["arch"]
+        if pmb.parse.arch.cpu_emulation_required(args, arch):
+            pmb.chroot.binfmt.unregister(args, arch)
         logging.info("Shutdown complete")

@@ -19,6 +19,7 @@ along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 import fnmatch
 import pmb.config
 import pmb.chroot.apk
+import pmb.parse.arch
 
 
 def carch(args, apkbuild, carch):
@@ -63,7 +64,7 @@ def crosscompile(args, apkbuild, carch, suffix):
         return None
     if apkbuild["pkgname"].endswith("-repack"):
         return None
-    if carch == args.arch_native:
+    if not pmb.parse.arch.cpu_emulation_required(args, carch):
         return None
     if suffix == "native":
         return "native"

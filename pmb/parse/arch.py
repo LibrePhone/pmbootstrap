@@ -102,3 +102,21 @@ def alpine_to_hostspec(arch):
 
     raise ValueError("Can not map Alpine architecture " + arch +
                      " to the right hostspec value")
+
+
+def cpu_emulation_required(args, arch):
+    # Obvious case: host arch is target arch
+    if args.arch_native == arch:
+        return False
+
+    # Other cases: host arch on the left, target archs on the right
+    not_required = {
+        "x86_64": ["x86"],
+        "aarch64": ["armel", "armhf", "armv7"],
+    }
+    if args.arch_native in not_required:
+        if arch in not_required[args.arch_native]:
+            return False
+
+    # No match: then it's required
+    return True
