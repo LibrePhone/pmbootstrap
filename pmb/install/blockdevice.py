@@ -37,8 +37,8 @@ def mount_sdcard(args):
         if pmb.helpers.mount.ismount(path):
             raise RuntimeError(path + " is mounted! We will not attempt"
                                " to format this!")
-    if pmb.helpers.cli.ask(args, "EVERYTHING ON " + args.sdcard + " WILL BE"
-                           " ERASED! CONTINUE?") != "y":
+    if not pmb.helpers.cli.confirm(args, "EVERYTHING ON " + args.sdcard +
+                                   " WILL BE ERASED! CONTINUE?"):
         raise RuntimeError("Aborted.")
 
     logging.info("(native) mount /dev/install (host: " + args.sdcard + ")")
@@ -66,7 +66,7 @@ def create_and_mount_image(args):
     logging.info("(native) create " + args.device + ".img (" + size + ")")
     logging.info("WARNING: Make sure, that your target device's partition"
                  " table has allocated at least " + size + " as system partition!")
-    if pmb.helpers.cli.ask(args) != "y":
+    if not pmb.helpers.cli.confirm(args):
         raise RuntimeError("Aborted.")
 
     pmb.chroot.user(args, ["mkdir", "-p", "/home/user/rootfs"])

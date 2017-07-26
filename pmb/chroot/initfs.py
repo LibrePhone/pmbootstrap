@@ -48,8 +48,8 @@ def extract(args, flavor, suffix, log_message=False):
     inside = "/tmp/initfs-extracted"
     outside = args.work + "/chroot_" + suffix + inside
     if os.path.exists(outside):
-        if pmb.helpers.cli.ask(args, "Extraction folder " + outside +
-                               " already exists. Do you want to overwrite it?") != "y":
+        if not pmb.helpers.cli.confirm(args, "Extraction folder " + outside +
+                                       " already exists. Do you want to overwrite it?"):
             raise RuntimeError("Aborted!")
         pmb.chroot.root(args, ["rm", "-r", inside], suffix)
 
