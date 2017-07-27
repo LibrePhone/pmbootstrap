@@ -26,6 +26,38 @@ import pmb.helpers.devices
 import pmb.helpers.ui
 
 
+def ask_for_work_path(args):
+    """
+    Ask for the work path, until we can create it (when it does not exist) and
+    write into it.
+    :returns: the work path
+    """
+    logging.info("Location of the 'work' path. Multiple chroots"
+                 " (native, device arch, device rootfs) will be created"
+                 " in there.")
+    while True:
+        try:
+            ret = os.path.expanduser(pmb.helpers.cli.ask(
+                args, "Work path", None, args.work, False))
+            os.makedirs(ret + "/chroot_native", 0o700, True)
+            return ret
+        except OSError:
+            logging.fatal("ERROR: Could not create this folder, or write"
+                          " inside it! Please try again.")
+
+
+def ask_for_ui(args):
+    ui_list = pmb.helpers.ui.list(args)
+    logging.info("Available user interfaces (" +
+                 str(len(ui_list) - 1) + "): " + ", ".join(ui_list))
+    while True:
+        ret = pmb.helpers.cli.ask(args, "User interface", None, args.ui, True)
+        if ret in ui_list:
+            return ret
+        logging.fatal("ERROR: Invalid user interface specified, please type in"
+                      " one from the list above.")
+
+
 def init(args):
     cfg = pmb.config.load(args)
 
@@ -36,20 +68,11 @@ def init(args):
     logging.info("Available (" + str(len(devices)) + "): " +
                  ", ".join(devices))
     cfg["pmbootstrap"]["device"] = pmb.helpers.cli.ask(args, "Device",
-                                                       None, args.device)
+                                                       None, args.device, False, "[a-z0-9]+-[a-z0-9]+")
 
-    # UI selection
-    ui_list = pmb.helpers.ui.list(args)
-    logging.info("Available user interfaces (" + str(len(ui_list) - 1) + "): " + ", ".join(ui_list))
-    cfg["pmbootstrap"]["ui"] = pmb.helpers.cli.ask(args, "User Interface:",
-                                                   None, args.ui, True)
-
-    # Work folder
-    logging.info("Location of the 'work' path. Multiple chroots (native,"
-                 " device arch, device rootfs) will be created in there.")
-    cfg["pmbootstrap"]["work"] = os.path.expanduser(pmb.helpers.cli.ask(args, "Work path",
-                                                                        None, args.work, False))
-    os.makedirs(cfg["pmbootstrap"]["work"], 0o700, True)
+    # UI and work folder
+    cfg["pmbootstrap"]["ui"] = ask_for_ui(args)
+    cfg["pmbootstrap"]["work"] = ask_for_work_path(args)
 
     # Parallel job count
     default = args.jobs
@@ -58,17 +81,15 @@ def init(args):
     logging.info("How many jobs should run parallel on this machine, when"
                  " compiling?")
     cfg["pmbootstrap"]["jobs"] = pmb.helpers.cli.ask(args, "Jobs",
-                                                     None, default)
+                                                     None, default, validation_regex="[1-9][0-9]*")
+
     # Timestamp based rebuilds
-    default = "y"
-    if not args.timestamp_based_rebuild:
-        default = "n"
     logging.info("Rebuild packages, when the last modified timestamp changed,"
                  " even if the version did not change? This makes pmbootstrap"
                  " behave more like 'make'.")
-    answer = pmb.helpers.cli.ask(args, "Timestamp based rebuilds",
-                                 default=default)
-    cfg["pmbootstrap"]["timestamp_based_rebuild"] = str(answer == "y")
+    answer = pmb.helpers.cli.confirm(args, "Timestamp based rebuilds",
+                                     default=args.timestamp_based_rebuild)
+    cfg["pmbootstrap"]["timestamp_based_rebuild"] = str(answer)
 
     # Do not save aports location to config file
     del cfg["pmbootstrap"]["aports"]

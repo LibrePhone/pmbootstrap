@@ -42,5 +42,5 @@ def zap(args):
         pattern = os.path.abspath(args.work + "/" + pattern)
         matches = glob.glob(pattern)
         for match in matches:
-            if pmb.helpers.cli.ask(args, "Remove " + match + "?") == "y":
+            if pmb.helpers.cli.confirm(args, "Remove " + match + "?"):
                 pmb.helpers.run.root(args, ["rm", "-rf", match])
