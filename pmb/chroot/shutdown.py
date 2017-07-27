@@ -57,8 +57,6 @@ def shutdown(args, only_install_related=False):
 
     # Umount installation-related paths (order is important!)
     pmb.helpers.mount.umount_all(args, args.work +
-                                 "/chroot_native/mnt/install/boot")
-    pmb.helpers.mount.umount_all(args, args.work +
                                  "/chroot_native/mnt/install")
     shutdown_cryptsetup_device(args, "pm_crypt")
 
@@ -72,7 +70,6 @@ def shutdown(args, only_install_related=False):
 
     if not only_install_related:
         # Clean up the rest
-        pmb.helpers.mount.umount_all(args, args.work)
         pmb.helpers.mount.umount_all(args, args.work)
         arch = args.deviceinfo["arch"]
         if pmb.parse.arch.cpu_emulation_required(args, arch):

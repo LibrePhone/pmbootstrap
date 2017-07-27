@@ -60,10 +60,12 @@ def bind(args, source, destination, create_folders=True):
     if not ismount(destination):
         raise RuntimeError("Mount failed: " + source + " -> " + destination)
 
-# Mount a blockdevice
-
 
 def bind_blockdevice(args, source, destination):
+    """
+    Mount a blockdevice with the --bind option, and create the destination
+    file, if necessary.
+    """
     # Skip existing mountpoint
     if ismount(destination):
         return
@@ -77,16 +79,31 @@ def bind_blockdevice(args, source, destination):
                                 destination])
 
 
+def umount_all_list(prefix, source="/proc/mounts"):
+    """
+    Parses `/proc/mounts` for all folders beginning with a prefix.
+    :source: can be changed for testcases
+    :returns: a list of folders, that need to be umounted
+    """
+    ret = []
+    prefix = os.path.abspath(prefix)
+    with open(source, "r") as handle:
+        for line in handle:
+            words = line.split()
+            if len(words) < 2:
+                raise RuntimeError("Failed to parse line in " + source + ": " +
+                                   line)
+            if words[1].startswith(prefix):
+                ret.append(words[1])
+    ret.sort(reverse=True)
+    return ret
+
+
 def umount_all(args, folder):
     """
     Umount all folders, that are mounted inside a given folder.
     """
-    folder = os.path.abspath(folder)
-    with open("/proc/mounts", "r") as handle:
-        for line in handle:
-            words = line.split()
-            if len(words) < 2 or not words[1].startswith(folder):
-                continue
-            pmb.helpers.run.root(args, ["umount", words[1]])
-            if ismount(words[1]):
-                raise RuntimeError("Failed to umount: " + words[1])
+    for mountpoint in umount_all_list(folder):
+        pmb.helpers.run.root(args, ["umount", mountpoint])
+        if ismount(mountpoint):
+            raise RuntimeError("Failed to umount: " + mountpoint)
