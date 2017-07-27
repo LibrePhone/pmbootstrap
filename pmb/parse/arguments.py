@@ -17,7 +17,6 @@ You should have received a copy of the GNU General Public License
 along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
 import argparse
-import os
 import pmb.config
 import pmb.parse.arch
 
@@ -45,8 +44,8 @@ def arguments_flasher(subparser):
 
     # Export: additional arguments
     export.add_argument("export_folder", help="export folder, defaults to"
-                                              " the current working directory.",
-                        default=os.getcwd(), nargs="?")
+                                              " /tmp/postmarketOS-export",
+                        default="/tmp/postmarketOS-export", nargs="?")
     return ret
 
 

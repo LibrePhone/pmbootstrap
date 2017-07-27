@@ -98,11 +98,15 @@ def list_devices(args):
 
 
 def export(args):
-    # Generate system image
+    # Create the export folder
+    if not os.path.exists(args.export_folder):
+        pmb.helpers.run.user(args, ["mkdir", "-p", args.export_folder])
+
+    # System image note
     img_path = "/home/user/rootfs/" + args.device + ".img"
     if not os.path.exists(args.work + "/chroot_native" + img_path):
-        setattr(args, "sdcard", None)
-        pmb.install.install(args, False)
+        logging.info("NOTE: To export the system image, run 'pmbootstrap"
+                     " install' first (without the 'sdcard' parameter).")
 
     # Rebuild the initramfs, just to make sure (see #69)
     flavor = parse_flavor_arg(args)

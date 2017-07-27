@@ -30,6 +30,8 @@ def export(args, flavor, folder):
     """
     Create convenience symlinks to the system image and boot files.
     """
+    logging.info("Export symlinks to: " + folder)
+
     # File descriptions
     info = {
         "boot.img-" + flavor: "Fastboot compatible boot.img file,"
@@ -58,7 +60,7 @@ def export(args, flavor, folder):
         link = folder + "/" + basename
 
         # Display a readable message
-        msg = "Symlink: " + basename
+        msg = " * " + basename
         if basename in info:
             msg += " (" + info[basename] + ")"
         logging.info(msg)

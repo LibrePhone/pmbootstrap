@@ -153,4 +153,4 @@ def install(args):
     # Export information
     logging.info("* If the above steps do not work, you can also create"
                  " symlinks to the generated files with 'pmbootstrap flasher"
-                 " export <target_dir>' and flash outside of pmbootstrap.")
+                 " export [export_folder]' and flash outside of pmbootstrap.")
