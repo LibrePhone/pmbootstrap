@@ -28,8 +28,8 @@ import pmb.helpers.ui
 
 def ask_for_work_path(args):
     """
-    Ask for the work path, until we can create (when it does not exist) and
-    write into.
+    Ask for the work path, until we can create it (when it does not exist) and
+    write into it.
     :returns: the work path
     """
     logging.info("Location of the 'work' path. Multiple chroots"
@@ -51,7 +51,7 @@ def ask_for_ui(args):
     logging.info("Available user interfaces (" +
                  str(len(ui_list) - 1) + "): " + ", ".join(ui_list))
     while True:
-        ret = pmb.helpers.cli.ask(args, "User interface:", None, args.ui, True)
+        ret = pmb.helpers.cli.ask(args, "User interface", None, args.ui, True)
         if ret in ui_list:
             return ret
         logging.fatal("ERROR: Invalid user interface specified, please type in"
