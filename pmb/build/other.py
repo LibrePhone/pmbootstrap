@@ -21,6 +21,7 @@ import logging
 import glob
 import shutil
 
+import pmb.build.other
 import pmb.chroot
 import pmb.helpers.run
 import pmb.helpers.file
@@ -34,32 +35,41 @@ def find_aport(args, package, must_exist=True):
     :param must_exist: Raise an exception, when not found
     :returns: the full path to the aport folder
     """
-    path = args.aports + "/" + package
-    if os.path.exists(path):
-        return path
-
     # Try to get a cached result first (we assume, that the aports don't change
     # in one pmbootstrap call)
-    if path in args.cache["find_aport"]:
-        return args.cache["find_aport"][path]
-
     ret = None
-    for path_current in glob.glob(args.aports + "/*/APKBUILD"):
-        apkbuild = pmb.parse.apkbuild(args, path_current)
-        if package in apkbuild["subpackages"]:
-            ret = os.path.dirname(path_current)
-            break
+    if package in args.cache["find_aport"]:
+        ret = args.cache["find_aport"][package]
+    else:
+        # Search in packages
+        paths = glob.glob(args.aports + "/*/" + package)
+        if len(paths) > 2:
+            raise RuntimeError("Package " + package + " found in multiple"
+                               " aports subfolders. Please put it only in one"
+                               " folder.")
+        elif len(paths) == 1:
+            ret = paths[0]
+        else:
+            # Search in subpackages
+            for path_current in glob.glob(args.aports + "/*/*/APKBUILD"):
+                apkbuild = pmb.parse.apkbuild(args, path_current)
+                if package in apkbuild["subpackages"]:
+                    ret = os.path.dirname(path_current)
+                    break
+
+    # Crash when necessary
     if ret is None and must_exist:
         raise RuntimeError("Could not find aport for package: " +
                            package)
 
-    args.cache["find_aport"][path] = ret
+    # Save result in cache
+    args.cache["find_aport"][package] = ret
     return ret
 
 
 def copy_to_buildpath(args, package, suffix="native"):
     # Sanity check
-    aport = args.aports + "/" + package
+    aport = find_aport(args, package)
     if not os.path.exists(aport + "/APKBUILD"):
         raise ValueError("Path does not contain an APKBUILD file:" +
                          aport)
@@ -92,7 +102,9 @@ def aports_files_out_of_sync_with_git(args, package=None):
     # Filter out a specific package
     if package:
         ret = []
-        prefix = os.path.abspath(args.aports + "/" + package + "/")
+        prefix = os.path.abspath(
+            pmb.build.other.find_aport(
+                args, package)) + "/"
         for file in aports_files_out_of_sync_with_git(args):
             if file.startswith(prefix):
                 ret.append(file)
@@ -145,7 +157,7 @@ def aports_files_out_of_sync_with_git(args, package=None):
 
 def sources_newer_than_binary_package(args, package, index_data):
     path_sources = []
-    for file in glob.glob(args.aports + "/" + package + "/*"):
+    for file in glob.glob(args.aports + "/*/" + package + "/*"):
         path_sources.append(file)
 
     lastmod_target = float(index_data["timestamp"])

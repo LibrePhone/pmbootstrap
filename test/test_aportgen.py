@@ -39,6 +39,7 @@ def args(tmpdir, request):
     request.addfinalizer(args.logfd.close)
     setattr(args, "_aports_real", args.aports)
     args.aports = str(tmpdir)
+    pmb.helpers.run.user(args, ["mkdir", "-p", str(tmpdir) + "/cross"])
     return args
 
 
@@ -54,8 +55,8 @@ def test_aportgen(args):
             pkgnames.append(pkgname + "-" + arch)
     for pkgname in pkgnames:
         pmb.aportgen.generate(args, pkgname)
-        path_new = args.aports + "/" + pkgname + "/APKBUILD"
-        path_old = args._aports_real + "/" + pkgname + "/APKBUILD"
+        path_new = args.aports + "/cross/" + pkgname + "/APKBUILD"
+        path_old = args._aports_real + "/cross/" + pkgname + "/APKBUILD"
         assert os.path.exists(path_new)
         assert filecmp.cmp(path_new, path_old, False)
 

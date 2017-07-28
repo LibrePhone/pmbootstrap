@@ -53,10 +53,10 @@ def temp_aports_repo(args):
     # Create fake "aports" repo
     # For this test to work, we need a git repository cloned from a real upstream
     # location. It does not work, when cloned from the same file system. The
-    # apk-tools repo also gets used in test_versions.py, so we use that.
+    # aports_upstream repo also gets used in test_aportgen.py, so we use that.
     pmb.chroot.apk.install(args, ["git"])
-    pmb.helpers.git.clone(args, "apk-tools")
-    pmb.chroot.user(args, ["cp", "-r", "/home/user/git/apk-tools",
+    pmb.helpers.git.clone(args, "aports_upstream")
+    pmb.chroot.user(args, ["cp", "-r", "/home/user/git/aports_upstream",
                            temp + "/aports"])
 
     # Configure git
@@ -78,24 +78,24 @@ def out_of_sync_files(args):
     """
     args.cache["aports_files_out_of_sync_with_git"] = None
     return pmb.build.other.aports_files_out_of_sync_with_git(args,
-                                                             "hello-world")
+                                                             "alpine-base")
 
 
 def test_aport_in_sync_with_git(args):
     aports = temp_aports_repo(args)
     ret_in_sync = []
-    ret_out_of_sync = [args.aports + "/hello-world/APKBUILD"]
+    ret_out_of_sync = [args.aports + "/main/alpine-base/APKBUILD"]
 
     # In sync (no files changed)
     assert out_of_sync_files(args) == ret_in_sync
 
     # Out of sync: untracked files
-    pmb.chroot.user(args, ["mkdir", aports + "/hello-world"])
-    pmb.chroot.user(args, ["touch", aports + "/hello-world/APKBUILD"])
+    pmb.chroot.user(args, ["sh -c 'echo test >> " + aports +
+                           "/main/alpine-base/APKBUILD'"])
     assert out_of_sync_files(args) == ret_out_of_sync
 
     # Out of sync: tracked files
-    pmb.chroot.user(args, ["git", "add", aports + "/hello-world/APKBUILD"],
+    pmb.chroot.user(args, ["git", "add", aports + "/main/alpine-base/APKBUILD"],
                     working_dir=aports)
     assert out_of_sync_files(args) == ret_out_of_sync
 

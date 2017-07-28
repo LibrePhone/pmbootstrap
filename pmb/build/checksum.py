@@ -21,6 +21,7 @@ import logging
 import pmb.chroot
 import pmb.build
 import pmb.helpers.run
+import pmb.build.other
 
 
 def checksum(args, pkgname):
@@ -32,5 +33,5 @@ def checksum(args, pkgname):
 
     # Copy modified APKBUILD back
     source = args.work + "/chroot_native/home/user/build/APKBUILD"
-    target = args.aports + "/" + pkgname + "/"
+    target = pmb.build.other.find_aport(args, pkgname) + "/"
     pmb.helpers.run.user(args, ["cp", source, target])

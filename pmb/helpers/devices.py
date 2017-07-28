@@ -27,7 +27,7 @@ def list(args):
     :returns: ["first-device", "second-device", ...]
     """
     ret = []
-    for path in glob.glob(args.aports + "/device-*"):
+    for path in glob.glob(args.aports + "/device/device-*"):
         device = os.path.basename(path).split("-", 1)[1]
         ret += [device]
     return ret

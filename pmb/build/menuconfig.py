@@ -62,7 +62,6 @@ def menuconfig(args, pkgname, arch):
     source = args.work + "/chroot_native/home/user/build/src/build/.config"
     if not os.path.exists(source):
         raise RuntimeError("No kernel config generated!")
-    target = (args.aports + "/" + pkgname + "/config-" + apkbuild["_flavor"] +
-              "." + arch)
+    target = aport + "/config-" + apkbuild["_flavor"] + "." + arch
     pmb.helpers.run.user(args, ["cp", source, target])
     pmb.build.checksum(args, pkgname)

@@ -30,8 +30,7 @@ def carch(args, apkbuild, carch):
             raise RuntimeError("Architecture '" + carch + "' is not supported"
                                " for this package. Please add it to the"
                                " 'arch=' line inside the APKBUILD and try"
-                               " again: " + args.aports + "/" +
-                               apkbuild["pkgname"] + "/APKBUILD")
+                               " again: " + apkbuild["pkgname"])
         return carch
     if ("all" in apkbuild["arch"] or
             args.arch_native in apkbuild["arch"]):

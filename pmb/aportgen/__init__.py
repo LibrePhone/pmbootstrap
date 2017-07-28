@@ -45,7 +45,7 @@ def generate(args, pkgname):
         raise ValueError("No generator available for " + pkgname + "!")
 
     # Move to the aports folder
-    path_target = args.aports + "/" + pkgname
+    path_target = args.aports + "/cross/" + pkgname
     if os.path.exists(path_target):
         pmb.helpers.run.user(args, ["rm", "-r", path_target])
     pmb.helpers.run.user(

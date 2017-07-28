@@ -28,7 +28,7 @@ def deviceinfo(args, device=None):
     if not device:
         device = args.device
 
-    aport = args.aports + "/device-" + device
+    aport = args.aports + "/device/device-" + device
     if not os.path.exists(aport) or not os.path.exists(aport + "/deviceinfo"):
         logging.fatal("You will need to create a device-specific package")
         logging.fatal("before you can continue. Please create at least the")

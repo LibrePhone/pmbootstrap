@@ -72,13 +72,15 @@ def cache_files_out_of_sync(args, is_out_of_sync):
     """
     new = []
     if is_out_of_sync:
-        new = [os.path.abspath(args.aports + "/hello-world/APKBUILD")]
+        aport = pmb.build.other.find_aport(args, "hello-world")
+        new = [os.path.abspath(aport + "/APKBUILD")]
     args.cache["aports_files_out_of_sync_with_git"] = new
 
 
 def test_build_is_necessary(args):
     # Prepare APKBUILD and APKINDEX data
-    apkbuild = pmb.parse.apkbuild(args, args.aports + "/hello-world/APKBUILD")
+    aport = pmb.build.other.find_aport(args, "hello-world")
+    apkbuild = pmb.parse.apkbuild(args, aport + "/APKBUILD")
     apkbuild["pkgver"] = "1"
     apkbuild["pkgrel"] = "2"
     apkindex_path = list(args.cache["apkindex"].keys())[0]
@@ -129,5 +131,6 @@ def test_build_is_necessary_no_binary_available(args):
     hello-world package has not been built yet.
     """
     apkindex_path = list(args.cache["apkindex"].keys())[0]
-    apkbuild = pmb.parse.apkbuild(args, args.aports + "/hello-world/APKBUILD")
+    aport = pmb.build.other.find_aport(args, "hello-world")
+    apkbuild = pmb.parse.apkbuild(args, aport + "/APKBUILD")
     assert pmb.build.is_necessary(args, None, apkbuild, apkindex_path) is True

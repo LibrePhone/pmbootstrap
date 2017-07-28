@@ -39,7 +39,7 @@ def list_chroot(args, suffix, remove_prefix=True):
 def list_aports(args):
     ret = []
     prefix = pmb.config.initfs_hook_prefix
-    for path in glob.glob(args.aports + "/" + prefix + "*"):
+    for path in glob.glob(args.aports + "/*/" + prefix + "*"):
         ret.append(os.path.basename(path)[len(prefix):])
     return ret
 

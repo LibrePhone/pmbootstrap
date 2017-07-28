@@ -100,8 +100,9 @@ def menuconfig(args):
 
 
 def parse_apkbuild(args):
-    build_path = args.aports + "/" + args.package + "/APKBUILD"
-    print(json.dumps(pmb.parse.apkbuild(args, build_path), indent=4))
+    aport = pmb.build.other.find_aport(args, args.package)
+    path = aport + "/APKBUILD"
+    print(json.dumps(pmb.parse.apkbuild(args, path), indent=4))
 
 
 def parse_apkindex(args):
