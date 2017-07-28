@@ -39,13 +39,16 @@ def build(args, flavor, suffix):
                     suffix)
 
 
-def extract(args, flavor, suffix, log_message=False):
+def extract(args, flavor, suffix, extra=False):
     """
-    Extract the initramfs to /tmp/initfs-extracted and return the outside
-    extraction path.
+    Extract the initramfs to /tmp/initfs-extracted or the initramfs-extra to
+    /tmp/initfs-extra-extracted and return the outside extraction path.
     """
     # Extraction folder
     inside = "/tmp/initfs-extracted"
+    if extra:
+        inside = "/tmp/initfs-extra-extracted"
+        flavor += "-extra"
     outside = args.work + "/chroot_" + suffix + inside
     if os.path.exists(outside):
         if not pmb.helpers.cli.confirm(args, "Extraction folder " + outside +
@@ -75,9 +78,11 @@ def extract(args, flavor, suffix, log_message=False):
     return outside
 
 
-def ls(args, flavor, suffix):
+def ls(args, flavor, suffix, extra=False):
     tmp = "/tmp/initfs-extracted"
-    extract(args, flavor, suffix)
+    if extra:
+        tmp = "/tmp/initfs-extra-extracted"
+    extract(args, flavor, suffix, extra)
     pmb.chroot.user(args, ["ls", "-lahR", "."], suffix, tmp, log=False)
     pmb.chroot.root(args, ["rm", "-r", tmp], suffix)
 
@@ -95,9 +100,14 @@ def frontend(args):
         build(args, flavor, suffix)
     elif action == "extract":
         dir = extract(args, flavor, suffix)
-        logging.info("Successfully extracted to: " + dir)
+        logging.info("Successfully extracted initramfs to: " + dir)
+        dir_extra = extract(args, flavor, suffix, True)
+        logging.info("Successfully extracted initramfs-extra to: " + dir_extra)
     elif action == "ls":
+        logging.info("*** initramfs ***")
         ls(args, flavor, suffix)
+        logging.info("*** initramfs-extra ***")
+        ls(args, flavor, suffix, True)
 
     # Handle hook actions
     elif action == "hook_ls":
@@ -111,3 +121,7 @@ def frontend(args):
         # Rebuild the initfs for all kernels after adding/removing a hook
         for flavor in pmb.chroot.other.kernel_flavors_installed(args, suffix):
             build(args, flavor, suffix)
+
+    if action in ["ls", "extract"]:
+        link = "https://github.com/postmarketOS/pmbootstrap/wiki/initramfs-development"
+        logging.info("See also: <" + link + ">")
