@@ -39,7 +39,8 @@ def ask_for_work_path(args):
         try:
             ret = os.path.expanduser(pmb.helpers.cli.ask(
                 args, "Work path", None, args.work, False))
-            os.makedirs(ret + "/chroot_native", 0o700, True)
+            os.makedirs(ret, 0o700, True)
+            os.makedirs(ret + "/chroot_native", 0o755, True)
             return ret
         except OSError:
             logging.fatal("ERROR: Could not create this folder, or write"
