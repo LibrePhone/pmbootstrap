@@ -33,7 +33,8 @@ def init(args, suffix="native"):
         return
 
     # Initialize chroot, install packages
-    pmb.chroot.apk.install(args, pmb.config.build_packages, suffix)
+    pmb.chroot.apk.install(args, pmb.config.build_packages, suffix,
+                           build=False)
 
     # Fix permissions
     pmb.chroot.root(args, ["chmod", "-R", "a+rw",
