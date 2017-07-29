@@ -70,6 +70,8 @@ def export(args, flavor, folder):
                     os.path.abspath(os.readlink(link)) == os.path.abspath(file)):
                 continue
             raise RuntimeError("File exists: " + link)
+        elif os.path.islink(link):
+            os.unlink(link)
 
         # Create the symlink
         pmb.helpers.run.user(args, ["ln", "-s", file, link])

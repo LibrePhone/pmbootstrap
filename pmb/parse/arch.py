@@ -30,7 +30,7 @@ def alpine_native():
     }
     if machine in mapping:
         return mapping[machine]
-    raise ValueError("Can not map platform.machine " + machine +
+    raise ValueError("Can not map platform.machine '" + machine + "'"
                      " to the right Alpine Linux architecture")
     return ret
 
@@ -61,7 +61,7 @@ def alpine_to_debian(arch):
     for pattern, arch_debian in mapping.items():
         if fnmatch.fnmatch(arch, pattern):
             return arch_debian
-    raise ValueError("Can not map Alpine architecture " + arch +
+    raise ValueError("Can not map Alpine architecture '" + arch + "'"
                      " to the right Debian architecture.")
 
 
@@ -100,7 +100,7 @@ def alpine_to_hostspec(arch):
     if arch in mapping:
         return mapping[arch]
 
-    raise ValueError("Can not map Alpine architecture " + arch +
+    raise ValueError("Can not map Alpine architecture '" + arch + "'"
                      " to the right hostspec value")
 
 
