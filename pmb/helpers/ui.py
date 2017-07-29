@@ -26,7 +26,7 @@ def list(args):
     :returns: ["none", "postmarketos-ui-one", "psotmarketos-ui-two", ...]
     """
     ret = []
-    for path in glob.glob(args.aports + "/postmarketos-ui-*"):
+    for path in glob.glob(args.aports + "/main/postmarketos-ui-*"):
         ui = os.path.basename(path).split("-", 2)[2]
         ret.append(ui)
     ret.append('none')
