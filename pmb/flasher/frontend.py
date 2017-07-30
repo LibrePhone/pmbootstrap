@@ -56,7 +56,6 @@ def kernel(args):
     pmb.chroot.initfs.build(args, flavor, "rootfs_" + args.device)
 
     # Generate the paths and run the flasher
-    pmb.flasher.init(args)
     if args.action_flasher == "boot":
         logging.info("(native) boot " + flavor + " kernel")
         pmb.flasher.run(args, "boot", flavor)
@@ -86,7 +85,6 @@ def system(args):
     if not os.path.exists(args.work + "/chroot_native" + img_path):
         raise RuntimeError("The system image has not been generated yet,"
                            " please run 'pmbootstrap install' first.")
-    pmb.flasher.init(args)
 
     # Run the flasher
     logging.info("(native) flash system image")

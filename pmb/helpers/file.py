@@ -19,6 +19,8 @@ along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
 
+import pmb.helpers.run
+
 
 def replace(path, old, new):
     text = ""
@@ -56,3 +58,19 @@ def is_up_to_date(path_sources, path_target=None, lastmod_target=None):
         lastmod_target = os.path.getmtime(path_target)
 
     return lastmod_target >= lastmod_source
+
+
+def symlink(args, file, link):
+    """
+    Checks if the symlink is already present, otherwise create it.
+    """
+    if os.path.exists(link):
+        if (os.path.islink(link) and
+                os.path.abspath(os.readlink(link)) == os.path.abspath(file)):
+            return
+        raise RuntimeError("File exists: " + link)
+    elif os.path.islink(link):
+        os.unlink(link)
+
+    # Create the symlink
+    pmb.helpers.run.user(args, ["ln", "-s", file, link])
