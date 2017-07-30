@@ -65,7 +65,7 @@ def root(args, cmd, suffix="native", working_dir="/", log=True,
                        " ".join(cmd))
 
     cmd_full = ["sudo", executables["sh"], "-c",
-                "unset $(env | cut -d= -f1);" +  # unset all
+                "env -i" +  # unset all
                 " CHARSET=UTF-8" +
                 " PATH=" + pmb.config.chroot_path +
                 " SHELL=/bin/ash" +
