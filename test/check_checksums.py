@@ -38,6 +38,8 @@ def check_checksums(package):
         logfile = os.path.expanduser("~/.local/var/pmbootstrap/log.txt")
         with open(logfile) as log:
             print(log.read())
+        print("Test script failed on checksumming package '{}'".format(package))
+        exit(1)
 
     result = check_output_always(['git', 'status', '--porcelain', '--untracked-files=no']).decode()
 
@@ -50,6 +52,8 @@ def check_checksums(package):
 
 
 if __name__ == "__main__":
+    if 'TRAVIS_COMMIT_RANGE' in os.environ:
+        print('Checking commit range: {}'.format(os.environ['TRAVIS_COMMIT_RANGE']))
     packages = get_changed_packages()
 
     if len(packages) == 0:
