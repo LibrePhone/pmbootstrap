@@ -29,6 +29,13 @@ import pmb.parse
 
 
 def menuconfig(args, pkgname, arch):
+    if pkgname.startswith("linux-"):
+        pkgname_ = pkgname.split("linux-")[1]
+        logging.info("PROTIP: You can simply do 'pmbootstrap menuconfig " +
+                     pkgname_ + "'")
+    else:
+        pkgname = "linux-" + pkgname
+
     # Read apkbuild
     aport = pmb.build.find_aport(args, pkgname, False)
     if not aport:
