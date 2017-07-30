@@ -1,5 +1,6 @@
 language: "python"
 python: "3.6"
+sudo: required
 addons:
   apt:
     sources:
@@ -7,5 +8,8 @@ addons:
     packages:
     - shellcheck
 install: "pip install flake8"
-script: "test/static_code_analysis.sh"
+script: 
+  - test/static_code_analysis.sh
+  - yes "" | ./pmbootstrap.py init
+  - test/check_checksums.py
 
