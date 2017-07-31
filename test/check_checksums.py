@@ -7,7 +7,11 @@ def get_changed_files():
     try:
         raw = subprocess.check_output(['git', 'diff', '--name-only', os.environ['TRAVIS_COMMIT_RANGE']])
     except (KeyError, subprocess.CalledProcessError) as e:
-        raw = subprocess.check_output(['git', 'diff', '--name-only', 'HEAD~1'])
+        if 'TRAVIS_PULL_REQUEST' in os.environ and os.environ['TRAVIS_PULL_REQUEST'] == "true":
+            branch = os.environ['TRAVIS_PULL_REQUEST_BRANCH']
+            raw = subprocess.check_output(['git', 'diff', '--name-only', 'master...{}'.format(branch)])
+        else:
+            raw = subprocess.check_output(['git', 'diff', '--name-only', 'HEAD~1'])
     return raw.decode().splitlines()
 
 
@@ -56,6 +60,9 @@ def check_checksums(package):
 if __name__ == "__main__":
     if 'TRAVIS_COMMIT_RANGE' in os.environ:
         print('Checking commit range: {}'.format(os.environ['TRAVIS_COMMIT_RANGE']))
+    if 'TRAVIS_PULL_REQUEST_BRANCH' in os.environ:
+        print('Checking PR branch: {}'.format(os.environ['TRAVIS_PULL_REQUEST_BRANCH']))
+
     packages = get_changed_packages()
 
     if len(packages) == 0:
