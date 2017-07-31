@@ -47,6 +47,8 @@ def check_checksums(package):
         print("** The checksums are correct")
     else:
         print(result)
+        result = check_output_always(['git', 'diff']).decode()
+        print(result)
         print("** The checksums are not correct")
         exit(1)
 
