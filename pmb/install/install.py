@@ -97,6 +97,8 @@ def install(args):
 
     # Explicitly call build on the install packages, to re-build them or any
     # dependency, in case the version increased
+    if args.extra_packages.lower() != "none":
+        install_packages += args.extra_packages.split(",")
     if args.add:
         install_packages += args.add.split(",")
     for pkgname in install_packages:

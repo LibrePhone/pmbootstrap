@@ -92,6 +92,14 @@ def init(args):
                                      default=args.timestamp_based_rebuild)
     cfg["pmbootstrap"]["timestamp_based_rebuild"] = str(answer)
 
+    # Extra packages to be installed to rootfs
+    logging.info("Additional packages that will be installed to rootfs."
+                 " Specify them in a comma separated list (e.g.: vim,file)"
+                 " or \"none\"")
+    cfg["pmbootstrap"]["extra_packages"] = pmb.helpers.cli.ask(args, "Extra packages",
+                                                               None, args.extra_packages,
+                                                               validation_regex="^(|[-\w\s]+(?:,[-\w\s]*)*)$")
+
     # Do not save aports location to config file
     del cfg["pmbootstrap"]["aports"]
 
