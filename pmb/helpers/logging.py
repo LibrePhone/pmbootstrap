@@ -18,6 +18,7 @@ along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
 import logging
 import os
+import sys
 
 
 class log_handler(logging.StreamHandler):
@@ -31,7 +32,9 @@ class log_handler(logging.StreamHandler):
             msg = self.format(record)
 
             # INFO or higher: Write to stdout
-            if not self._args.quiet and record.levelno >= logging.INFO:
+            if (not self._args.details_to_stdout and
+                not self._args.quiet and
+                    record.levelno >= logging.INFO):
                 stream = self.stream
                 stream.write(msg)
                 stream.write(self.terminator)
@@ -71,10 +74,15 @@ def init(args):
     Set log format and add the log file descriptor to args.logfd, add the
     verbose log level.
     """
-    # Open logfile
+    # Create work folder (because usually the log file is in there)
     if not os.path.exists(args.work):
         os.makedirs(args.work)
-    setattr(args, "logfd", open(args.log, "a+"))
+
+    # Open logfile
+    if args.details_to_stdout:
+        setattr(args, "logfd", sys.stdout)
+    else:
+        setattr(args, "logfd", open(args.log, "a+"))
 
     # Set log format
     root_logger = logging.getLogger()

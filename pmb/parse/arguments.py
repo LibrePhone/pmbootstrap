@@ -107,7 +107,12 @@ def arguments():
                         " gets stored (chroots, caches, built packages)")
 
     # Logging
-    parser.add_argument("-l", "--log", dest="log", default=None)
+    parser.add_argument("-l", "--log", dest="log", default=None,
+                        help="path to log file")
+    parser.add_argument("--details-to-stdout", dest="details_to_stdout",
+                        help="print details (e.g. build output) to stdout,"
+                             " instead of writing to the log",
+                        action="store_true")
     parser.add_argument("-v", "--verbose", dest="verbose",
                         action="store_true", help="write even more to the"
                         " logfiles (this may reduce performance)")
