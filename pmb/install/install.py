@@ -127,6 +127,17 @@ def install(args):
     fix_mount_folders(args)
     pmb.chroot.shutdown(args, True)
 
+    # Convert system image to sparse using img2simg
+    if args.deviceinfo["flash_sparse"] == "true":
+        logging.info("(native) make sparse system image")
+        pmb.chroot.apk.install(args, ["libsparse"])
+        sys_image = args.device + ".img"
+        sys_image_sparse = args.device + "-sparse.img"
+        pmb.chroot.user(args, ["img2simg", sys_image, sys_image_sparse],
+                        working_dir="/home/user/rootfs/")
+        pmb.chroot.user(args, ["mv", "-f", sys_image_sparse, sys_image],
+                        working_dir="/home/user/rootfs/")
+
     # Kernel flash information
     logging.info("*** (5/5) FLASHING TO DEVICE ***")
     logging.info("Run the following to flash your installation to the"

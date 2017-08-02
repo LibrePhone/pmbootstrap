@@ -184,6 +184,7 @@ deviceinfo_attributes = [
     "flash_offset_second",
     "flash_offset_tags",
     "flash_pagesize",
+    "flash_sparse",
     "kernel_cmdline",
 
     # weston
