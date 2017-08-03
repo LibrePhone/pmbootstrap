@@ -18,19 +18,26 @@
 
 set -e
 DIR="$(cd "$(dirname "$0")" && pwd -P)"
-cd "$DIR"/..
 
 # Shell: shellcheck
-sh_files="test/static_code_analysis.sh $(find . -name '*.trigger')"
-echo "Test with shellcheck: $sh_files"
+cd "$DIR"/..
+sh_files="
+	./test/static_code_analysis.sh
+	./aports/main/postmarketos-mkinitfs/init.sh.in
+	./aports/main/postmarketos-mkinitfs/init_functions.sh
+	$(find . -name '*.trigger')
+"
 for file in ${sh_files}; do
-	shellcheck "${file}"
+	echo "Test with shellcheck: $file"
+	cd "$DIR/../$(dirname "$file")"
+	shellcheck -x "$(basename "$file")"
 done
 
 # Python: flake8
 # E501: max line length
 # F401: imported, but not used, does not make sense in __init__ files
 # E402: module import not on top of file, not possible for testcases
+cd "$DIR"/..
 echo "Test with flake8: *.py"
 echo "NOTE: Run 'autopep8 -ria $PWD' to fix code style issues"
 py_files="$(find . -name '*.py')"
@@ -42,4 +49,3 @@ flake8 --filename=__init__.py --ignore "F401,$_ignores" $py_files
 
 # Done
 echo "Success!"
-

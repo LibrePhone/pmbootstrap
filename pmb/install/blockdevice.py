@@ -46,7 +46,7 @@ def mount_sdcard(args):
                                        args.work + "/chroot_native/dev/install")
 
 
-def create_and_mount_image(args):
+def create_and_mount_image(args, size):
     # Short variables for paths
     chroot = args.work + "/chroot_native"
     img_path = "/home/user/rootfs/" + args.device + ".img"
@@ -62,7 +62,6 @@ def create_and_mount_image(args):
                                img_path_outside)
 
     # Create empty image file
-    size = pmb.config.install_size_image
     logging.info("(native) create " + args.device + ".img (" + size + ")")
     logging.info("WARNING: Make sure, that your target device's partition"
                  " table has allocated at least " + size + " as system partition!")
@@ -80,7 +79,7 @@ def create_and_mount_image(args):
                                        "/chroot_native/dev/install")
 
 
-def create(args):
+def create(args, size):
     """
     Create /dev/install (the "install blockdevice").
     """
@@ -89,4 +88,4 @@ def create(args):
     if args.sdcard:
         mount_sdcard(args)
     else:
-        create_and_mount_image(args)
+        create_and_mount_image(args, size)

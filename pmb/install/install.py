@@ -30,13 +30,39 @@ import pmb.install.blockdevice
 import pmb.install
 
 
-def copy_files(args):
+def mount_device_rootfs(args):
     # Mount the device rootfs
     logging.info("(native) copy rootfs_" + args.device + " to" +
                  " /mnt/install/")
     mountpoint = "/mnt/rootfs_" + args.device
     pmb.helpers.mount.bind(args, args.work + "/chroot_rootfs_" + args.device,
                            args.work + "/chroot_native" + mountpoint)
+    return mountpoint
+
+
+def get_chroot_size(args):
+    # Mount the device rootfs
+    mountpoint = mount_device_rootfs(args)
+
+    # Run the du command
+    result = pmb.chroot.root(args, ["sh", "-c", "du -cm . | grep total$ | cut -f1"],
+                             working_dir=mountpoint, return_stdout=True)
+    return result
+
+
+def get_chroot_boot_size(args):
+    # Mount the device rootfs
+    mountpoint = mount_device_rootfs(args)
+
+    # Run the du command
+    result = pmb.chroot.root(args, ["sh", "-c", "du -cm ./boot | grep total$ | cut -f1"],
+                             working_dir=mountpoint, return_stdout=True)
+    return result
+
+
+def copy_files(args):
+    # Mount the device rootfs
+    mountpoint = mount_device_rootfs(args)
 
     # Get all folders inside the device rootfs
     folders = []
@@ -111,14 +137,17 @@ def install(args):
     for flavor in pmb.chroot.other.kernel_flavors_installed(args, suffix):
         pmb.chroot.initfs.build(args, flavor, suffix)
 
+    size_image = str(int(get_chroot_size(args)) + 50) + "M"
+    size_boot = str(int(get_chroot_boot_size(args)) + 5) + "M"
+
     # Finally set the user password
     set_user_password(args)
 
     # Partition and fill image/sdcard
     logging.info("*** (3/5) PREPARE INSTALL BLOCKDEVICE ***")
     pmb.chroot.shutdown(args, True)
-    pmb.install.blockdevice.create(args)
-    pmb.install.partition(args)
+    pmb.install.blockdevice.create(args, size_image)
+    pmb.install.partition(args, size_boot)
     pmb.install.format(args)
 
     # Just copy all the files

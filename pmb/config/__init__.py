@@ -214,8 +214,6 @@ install_device_packages = [
     # other
     "ttf-droid"
 ]
-install_size_image = "835M"
-install_size_boot = "100M"
 
 
 #

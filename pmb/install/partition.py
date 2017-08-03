@@ -48,12 +48,11 @@ def partitions_mount(args):
         pmb.helpers.mount.bind_blockdevice(args, source, target)
 
 
-def partition(args):
+def partition(args, size_boot):
     """
     Partition /dev/install and create /dev/install{p1,p2}
     """
 
-    size_boot = pmb.config.install_size_boot
     logging.info("(native) partition /dev/install (boot: " + size_boot +
                  ", root: the rest)")
     commands = [
