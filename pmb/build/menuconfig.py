@@ -29,6 +29,7 @@ import pmb.parse
 
 
 def menuconfig(args, pkgname, arch):
+    # Pkgname: allow omitting "linux-" prefix
     if pkgname.startswith("linux-"):
         pkgname_ = pkgname.split("linux-")[1]
         logging.info("PROTIP: You can simply do 'pmbootstrap menuconfig " +
@@ -37,9 +38,7 @@ def menuconfig(args, pkgname, arch):
         pkgname = "linux-" + pkgname
 
     # Read apkbuild
-    aport = pmb.build.find_aport(args, pkgname, False)
-    if not aport:
-        raise RuntimeError("Package " + pkgname + ": Could not find aport!")
+    aport = pmb.build.find_aport(args, pkgname)
     apkbuild = pmb.parse.apkbuild(args, aport + "/APKBUILD")
 
     # Set up build tools and makedepends
@@ -52,8 +51,8 @@ def menuconfig(args, pkgname, arch):
     logging.info("(native) extract kernel source")
     pmb.chroot.user(args, ["abuild", "unpack"], "native", "/home/user/build")
     logging.info("(native) apply patches")
-    pmb.chroot.user(args, ["abuild", "prepare"], "native", "/home/user/build",
-                    log=False)
+    pmb.chroot.user(args, ["CARCH=" + arch, "abuild", "prepare"], "native",
+                    "/home/user/build", log=False)
 
     # Run abuild menuconfig
     cmd = []
@@ -65,7 +64,7 @@ def menuconfig(args, pkgname, arch):
     pmb.chroot.user(args, cmd, "native", "/home/user/build", log=False)
 
     # Update config + checksums
-    logging.info("copy kernel config back to aport-folder")
+    logging.info("Copy kernel config back to aport-folder")
     source = args.work + "/chroot_native/home/user/build/src/build/.config"
     if not os.path.exists(source):
         raise RuntimeError("No kernel config generated!")
