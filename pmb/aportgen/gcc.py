@@ -57,7 +57,33 @@ def generate(args, pkgname):
         # Do not package libstdc++, do not add "g++-$ARCH" here (already
         # did that explicitly in the subpackages variable above, so
         # pmbootstrap picks it up properly).
-        '*subpackages="$subpackages libstdc++:libcxx:*': None
+        '*subpackages="$subpackages libstdc++:libcxx:*': None,
+
+        # libstdc++.a is not reproducible by default (.a files are archives of
+        # object files, and these object files are inside the .a file in a random
+        # order!). The best way would be to patch this upstream in gcc, but for now
+        # we repackage the .a files to make sure, that they are reproducible.
+        '*package() {*': """package() {
+            # Repack the *.a files to be reproducible (see #64)
+            _temp="$_builddir"/_reproducible-patch
+            cd "$_builddir"
+            for f in $(find -name '*.a'); do
+                # Copy to a temporary folder
+                echo "Repack $f to be reproducible"
+                mkdir -p "$_temp"
+                cd "$_temp"
+                cp "$_builddir"/"$f" .
+
+                # Repack with a sorted file order
+                ar x *.a
+                rm *.a
+                ar r sorted.a $(find -name '*.o' | sort)
+
+                # Copy back and clean up
+                cp -v sorted.a "$_builddir"/"$f"
+                cd ..
+                rm -r "$_temp"
+            done"""
     }
 
     pmb.aportgen.core.rewrite(
