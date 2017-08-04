@@ -22,6 +22,11 @@ def get_changed_packages():
         if not file.startswith("aports/"):
             continue
         name = file.split("/")[2]
+        package_path = "/".join(file.split("/")[0:3])
+        apkbuild_path = os.path.join(package_path, "APKBUILD")
+        if not os.path.exists(apkbuild_path):
+            print("No APKBUILD found at {}".format(package_path))
+            continue
         packages.add(name)
     return packages
 
