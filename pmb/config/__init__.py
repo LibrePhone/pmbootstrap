@@ -16,6 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
+import multiprocessing
 import os
 
 #
@@ -47,6 +48,7 @@ defaults = {
     "config": os.path.expanduser("~") + "/.config/pmbootstrap.cfg",
     "device": "samsung-i9100",
     "extra_packages": "none",
+    "jobs": str(multiprocessing.cpu_count() + 1),
     "timestamp_based_rebuild": True,
     "log": "$WORK/log.txt",
     "mirror_alpine": "https://nl.alpinelinux.org/alpine/",

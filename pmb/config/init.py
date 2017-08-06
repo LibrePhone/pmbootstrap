@@ -18,7 +18,6 @@ along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
 import logging
 import os
-import multiprocessing
 
 import pmb.config
 import pmb.helpers.cli
@@ -76,13 +75,10 @@ def init(args):
     cfg["pmbootstrap"]["work"] = ask_for_work_path(args)
 
     # Parallel job count
-    default = args.jobs
-    if not default:
-        default = multiprocessing.cpu_count() + 1
     logging.info("How many jobs should run parallel on this machine, when"
                  " compiling?")
     cfg["pmbootstrap"]["jobs"] = pmb.helpers.cli.ask(args, "Jobs",
-                                                     None, default, validation_regex="[1-9][0-9]*")
+                                                     None, args.jobs, validation_regex="[1-9][0-9]*")
 
     # Timestamp based rebuilds
     logging.info("Rebuild packages, when the last modified timestamp changed,"

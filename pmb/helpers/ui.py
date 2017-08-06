@@ -23,7 +23,7 @@ import glob
 def list(args):
     """
     Get all UIs, for which aports are available
-    :returns: ["none", "postmarketos-ui-one", "psotmarketos-ui-two", ...]
+    :returns: ["postmarketos-ui-one", "postmarketos-ui-two", ..., "none"]
     """
     ret = []
     for path in glob.glob(args.aports + "/main/postmarketos-ui-*"):
