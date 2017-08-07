@@ -259,7 +259,6 @@ def arguments():
                              " forward. Simply enable it in pmb/config/__init__.py"
                              " in build_device_architectures, zap your package cache"
                              " (otherwise you will have issues with noarch packages)"
-                             " and try again. Some other things might break, but"
-                             " they should be easy to fix them.")
+                             " and try again.")
 
     return args

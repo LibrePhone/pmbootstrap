@@ -16,6 +16,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
+import os
+import logging
 import pmb.config
 
 
@@ -134,6 +136,15 @@ def apkbuild(args, path):
             else:
                 ret[attribute] = ""
 
+    # Sanity check: pkgname
+    suffix = "/" + ret["pkgname"] + "/APKBUILD"
+    if not os.path.realpath(path).endswith(suffix):
+        logging.info("Folder: '" + os.path.dirname(path) + "'")
+        logging.info("Pkgname: '" + ret["pkgname"] + "'")
+        raise RuntimeError("The pkgname must be equal to the name of"
+                           " the folder, that contains the APKBUILD!")
+
+    # Fill cache
     ret = replace_variables(ret)
     ret = cut_off_function_names(ret)
     args.cache["apkbuild"][path] = ret
