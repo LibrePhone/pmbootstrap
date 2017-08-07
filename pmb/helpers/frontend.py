@@ -124,12 +124,16 @@ def stats(args):
 
 
 def log(args):
+    if args.clear_log:
+        pmb.helpers.run.user(args, ["truncate", "-s", "0", args.log], log=False)
     pmb.helpers.run.user(args, ["tail", "-f", args.log, "-n", args.lines],
                          log=False)
 
 
 def log_distccd(args):
     logpath = "/home/user/distccd.log"
+    if args.clear_log:
+        pmb.chroot.user(args, ["truncate", "-s", "0", logpath], log=False)
     pmb.chroot.user(args, ["tail", "-f", logpath, "-n", args.lines], log=False)
 
 

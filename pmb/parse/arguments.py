@@ -134,11 +134,10 @@ def arguments():
         "log_distccd",
         help="follow the distccd logfile")
     for action in [log, log_distccd]:
-        action.add_argument(
-            "-n",
-            "--lines",
-            default="30",
-            help="count of initial output lines")
+        action.add_argument("-n", "--lines", default="30",
+                            help="count of initial output lines")
+        action.add_argument("-c", "--clear", help="clear the log",
+                            action="store_true", dest="clear_log")
 
     # Action: zap
     zap = sub.add_parser("zap", help="safely delete chroot folders")
