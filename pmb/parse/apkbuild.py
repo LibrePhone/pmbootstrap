@@ -128,13 +128,17 @@ def apkbuild(args, path):
                     value = []
             ret[attribute] = value
 
-    # Add missing entries
+    # Add missing keys
     for attribute, options in pmb.config.apkbuild_attributes.items():
         if attribute not in ret:
             if options["array"]:
                 ret[attribute] = []
             else:
                 ret[attribute] = ""
+
+    # Properly format values
+    ret = replace_variables(ret)
+    ret = cut_off_function_names(ret)
 
     # Sanity check: pkgname
     suffix = "/" + ret["pkgname"] + "/APKBUILD"
@@ -145,7 +149,5 @@ def apkbuild(args, path):
                            " the folder, that contains the APKBUILD!")
 
     # Fill cache
-    ret = replace_variables(ret)
-    ret = cut_off_function_names(ret)
     args.cache["apkbuild"][path] = ret
     return ret
