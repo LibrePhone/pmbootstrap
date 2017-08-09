@@ -241,7 +241,6 @@ def arguments():
 
     # Add a caching dict (caches parsing of files etc. for the current session)
     setattr(args, "cache", {"apkindex": {},
-                            "apkindex_files": {},
                             "apkbuild": {},
                             "apk_min_version_checked": [],
                             "apk_repository_list_updated": [],

@@ -122,9 +122,21 @@ def install_is_necessary(args, build, arch, package, packages_installed):
     if package not in packages_installed:
         return True
 
+    # Make sure, that we really have a binary package
+    data_repo = pmb.parse.apkindex.read_any_index(args, package, arch)
+    if not data_repo:
+        logging.warning("WARNING: Internal error in pmbootstrap," +
+                        " package '" + package + "' for " + arch +
+                        " has not been built yet, but it should have"
+                        " been. Rebuilding it with force. Please "
+                        " report this, if there is no ticket about this"
+                        " yet!")
+        pmb.build.package(args, package, arch, True)
+        return install_is_necessary(args, build, arch, package,
+                                    packages_installed)
+
     # Compare the installed version vs. the version in the repos
     data_installed = packages_installed[package]
-    data_repo = pmb.parse.apkindex.read_any_index(args, package, arch)
     compare = pmb.parse.apkindex.compare_version(data_installed["version"],
                                                  data_repo["version"])
     # a) Installed newer (should not happen normally)

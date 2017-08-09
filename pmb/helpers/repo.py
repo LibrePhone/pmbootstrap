@@ -128,10 +128,6 @@ def apkindex_files(args, arch=None):
     if not arch:
         arch = args.arch_native
 
-    # Try to get a cached result first.
-    if arch in args.cache["apkindex_files"]:
-        return args.cache["apkindex_files"][arch]
-
     # Local user repository (for packages compiled with pmbootstrap)
     ret = [args.work + "/packages/" + arch + "/APKINDEX.tar.gz"]
 
@@ -151,5 +147,4 @@ def apkindex_files(args, arch=None):
         ret.append(args.work + "/cache_apk_" + arch + "/APKINDEX." +
                    hash(url) + ".tar.gz")
 
-    args.cache["apkindex_files"][arch] = ret
     return ret

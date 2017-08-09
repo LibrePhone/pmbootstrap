@@ -53,8 +53,7 @@ def package(args, pkgname, carch, force=False, buildinfo=False):
                                               suffix)
 
     # Skip already built versions
-    if not force and not pmb.build.is_necessary(
-            args, carch_buildenv, apkbuild):
+    if not force and not pmb.build.is_necessary(args, carch, apkbuild):
         return
 
     # Initialize build environment, install/build makedepends
