@@ -34,8 +34,8 @@ def core(args, cmd, log_message, log, return_stdout, check=True,
         working_dir_old = os.getcwd()
         os.chdir(working_dir)
 
+    ret = None
     try:
-        ret = None
         if log:
             if return_stdout:
                 ret = subprocess.check_output(cmd).decode("utf-8")

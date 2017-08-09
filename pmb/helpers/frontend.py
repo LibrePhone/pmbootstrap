@@ -34,6 +34,7 @@ import pmb.helpers.other
 import pmb.helpers.run
 import pmb.install
 import pmb.parse
+import pmb.qemu
 
 
 def _parse_suffix(args):
@@ -113,6 +114,10 @@ def parse_apkindex(args):
                                args.package)
         result = result[args.package]
     print(json.dumps(result, indent=4))
+
+
+def qemu(args):
+    pmb.qemu.run(args)
 
 
 def shutdown(args):

@@ -120,3 +120,41 @@ def cpu_emulation_required(args, arch):
 
     # No match: then it's required
     return True
+
+
+def uname_to_qemu(arch):
+    """
+    Convert the most common architectures returned by 'uname' to those
+    used by the QEMU binary
+    """
+    mapping = {
+        "aarch64": "aarch64",
+        "arm": "arm",
+        "armeb": "arm",
+        "armel": "arm",
+        "armhf": "arm",
+        "x86_64": "x86_64",
+        "amd64": "x86_64",
+    }
+    if arch in mapping:
+        return mapping[arch]
+
+    raise ValueError("Can not map host architecture '" + arch + "'"
+                     " to the right QEMU value")
+
+
+def qemu_to_pmos_device(arch):
+    """
+    Convert the architecture used in the QEMU binary to the aport name in
+    postmarketOS defining the device
+    """
+    mapping = {
+        "arm": "qemu-vexpress",
+        "aarch64": "qemu-aarch64",
+        "x86_64": "qemu-amd64",
+    }
+    if arch in mapping:
+        return mapping[arch]
+
+    raise ValueError("Can not map QEMU value '" + arch + "'"
+                     " to the right postmarketOS device")

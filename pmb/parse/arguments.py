@@ -218,6 +218,16 @@ def arguments():
     parse_apkindex.add_argument("apkindex_path")
     parse_apkindex.add_argument("package", default=None, nargs="?")
 
+    # Action: qemu
+    qemu = sub.add_parser("qemu")
+    qemu.add_argument("--arch", choices=["aarch64", "arm", "x86_64"],
+                      help="emulate a different architecture")
+    qemu.add_argument("--cmdline", help="override kernel commandline")
+    qemu.add_argument("-m", "--memory", type=int, default=1024,
+                      help="guest RAM (default: 1024)")
+    qemu.add_argument("-p", "--port", type=int, default=2222,
+                      help="ssh port (default: 2222)")
+
     # Use defaults from the user's config file
     args = parser.parse_args()
     cfg = pmb.config.load(args)
