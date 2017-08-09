@@ -137,7 +137,7 @@ def install(args):
     for flavor in pmb.chroot.other.kernel_flavors_installed(args, suffix):
         pmb.chroot.initfs.build(args, flavor, suffix)
 
-    size_image = str(int(get_chroot_size(args)) + 50) + "M"
+    size_image = str(int(float(get_chroot_size(args)) * 1.15)) + "M"
     size_boot = str(int(get_chroot_boot_size(args)) + 5) + "M"
 
     # Finally set the user password
