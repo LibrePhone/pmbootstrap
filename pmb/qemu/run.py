@@ -18,6 +18,7 @@ along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
 import logging
 import os
+import shutil
 
 import pmb.build
 import pmb.chroot
@@ -48,13 +49,12 @@ def system_image(args, device):
 
 def which_qemu(args, arch):
     """
-    Finds the qemu executable or raises and exception otherwise
+    Finds the qemu executable or raises an exception otherwise
     """
     executable = "qemu-system-" + arch
-    try:
-        pmb.helpers.run.user(args, ["which", executable])
+    if shutil.which(executable):
         return executable
-    except RuntimeError:
+    else:
         raise RuntimeError("Could not find the '" + executable + "' executable"
                            " in your PATH. Please install it in order to"
                            " run qemu.")
