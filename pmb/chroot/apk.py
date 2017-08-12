@@ -25,6 +25,7 @@ import pmb.config
 import pmb.parse.apkindex
 import pmb.parse.arch
 import pmb.parse.depends
+import pmb.parse.version
 
 
 def update_repository_list(args, suffix="native", check=False):
@@ -93,8 +94,8 @@ def check_min_version(args, suffix="native"):
     # Compare
     version_installed = installed(args, suffix)["apk-tools"]["version"]
     version_min = pmb.config.apk_tools_static_min_version
-    if pmb.parse.apkindex.compare_version(
-            version_installed, version_min) == -1:
+    if pmb.parse.version.compare(version_installed,
+                                 version_min) == -1:
         raise RuntimeError("You have an outdated version of the 'apk' package"
                            " manager installed (your version: " + version_installed +
                            ", expected at least: " + version_min + "). Delete"
@@ -137,8 +138,8 @@ def install_is_necessary(args, build, arch, package, packages_installed):
 
     # Compare the installed version vs. the version in the repos
     data_installed = packages_installed[package]
-    compare = pmb.parse.apkindex.compare_version(data_installed["version"],
-                                                 data_repo["version"])
+    compare = pmb.parse.version.compare(data_installed["version"],
+                                        data_repo["version"])
     # a) Installed newer (should not happen normally)
     if compare == 1:
         logging.info("WARNING: " + arch + " package '" + package +

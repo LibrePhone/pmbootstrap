@@ -28,6 +28,7 @@ import pmb.config
 import pmb.config.load
 import pmb.parse.apkindex
 import pmb.helpers.http
+import pmb.parse.version
 
 
 def read_signature_info(tar):
@@ -162,7 +163,7 @@ def init(args):
     version = index_data["version"]
     version_min = pmb.config.apk_tools_static_min_version
     apk_name = "apk-tools-static-" + version + ".apk"
-    if pmb.parse.apkindex.compare_version(version, version_min) == -1:
+    if pmb.parse.version.compare(version, version_min) == -1:
         raise RuntimeError("You have an outdated version of apk-tools-static"
                            " (your version: " + version +
                            ", expected at least:"

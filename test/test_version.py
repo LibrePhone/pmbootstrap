@@ -23,9 +23,9 @@ import pytest
 # Import from parent directory
 sys.path.append(os.path.abspath(
     os.path.join(os.path.dirname(__file__) + "/..")))
-import pmb.parse.apkindex
 import pmb.helpers.git
 import pmb.helpers.logging
+import pmb.parse.version
 
 
 @pytest.fixture
@@ -40,30 +40,39 @@ def args(request):
 
 
 def test_version(args):
-    # clone official test file from apk-tools
+    # Fail after the first error or print a grand total of failures
+    keep_going = False
+
+    # Clone official test file from apk-tools
     pmb.helpers.git.clone(args, "apk-tools")
     path = args.work + "/cache_git/apk-tools/test/version.data"
 
+    # Iterate over the cases from the list
     mapping = {-1: "<", 0: "=", 1: ">"}
+    count = 0
+    errors = []
     with open(path) as handle:
         for line in handle:
             split = line.split(" ")
             a = split[0]
-            b = split[2].rstrip()
+            b = split[2].split("#")[0].rstrip()
             expected = split[1]
+            print("(#" + str(count) + ") " + line.rstrip())
+            result = pmb.parse.version.compare(a, b)
+            real = mapping[result]
 
-            # Alpine packages nowadays always have '-r' in their version
-            if "-r" not in a or "-r" not in b:
-                continue
+            count += 1
+            if real != expected:
+                if keep_going:
+                    errors.append(line.rstrip() + " (got: '" + real +
+                                  "')")
+                else:
+                    assert real == expected
 
-            print(line.rstrip())
-            try:
-                result = pmb.parse.apkindex.compare_version(a, b)
-                real = mapping[result]
-            except TypeError:
-                # FIXME: Bug in Python:
-                # https://bugs.python.org/issue14894
-                # When this happens in pmbootstrap, it will also raise the
-                                # TypeError exception.
-                continue
-            assert(real == expected)
+    print("---")
+    print("total: " + str(count))
+    print("errors: " + str(len(errors)))
+    print("---")
+    for error in errors:
+        print(error)
+    assert errors == []

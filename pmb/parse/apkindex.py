@@ -16,36 +16,12 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
-import distutils.version
 import logging
 import os
 import tarfile
 import pmb.chroot.apk
 import pmb.helpers.repo
-
-
-def compare_version(a_str, b_str):
-    """
-    http://stackoverflow.com/a/11887885
-    LooseVersion behaves just like apk's version check, at least
-    for all package versions, that have "-r".
-
-    :returns:
-        (a <  b): -1
-        (a == b):  0
-        (a >  b):  1
-    """
-    if a_str is None:
-        a_str = "0"
-    if b_str is None:
-        b_str = "0"
-    a = distutils.version.LooseVersion(a_str)
-    b = distutils.version.LooseVersion(b_str)
-    if a < b:
-        return -1
-    if a == b:
-        return 0
-    return 1
+import pmb.parse.version
 
 
 def parse_next_block(args, path, lines, start):
@@ -160,7 +136,7 @@ def parse_add_block(path, strict, ret, block, pkgname=None):
         # version
         version_old = ret[pkgname]["version"]
         version_new = block["version"]
-        if compare_version(version_old, version_new) == 1:
+        if pmb.parse.version.compare(version_old, version_new) == 1:
             return
 
     # Add it to the result set

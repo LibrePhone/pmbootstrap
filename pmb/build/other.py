@@ -26,6 +26,7 @@ import pmb.chroot
 import pmb.helpers.run
 import pmb.helpers.file
 import pmb.parse.apkindex
+import pmb.parse.version
 
 
 def find_aport(args, package, must_exist=True):
@@ -194,8 +195,7 @@ def is_necessary(args, arch, apkbuild, apkindex_path=None):
 
     # a) Binary repo has a newer version
     version_old = index_data["version"]
-    if pmb.parse.apkindex.compare_version(version_old,
-                                          version_new) == 1:
+    if pmb.parse.version.compare(version_old, version_new) == 1:
         logging.warning("WARNING: Package '" + package + "' in your aports folder"
                         " has version " + version_new + ", but the binary package"
                         " repositories already have version " + version_old + "!")
