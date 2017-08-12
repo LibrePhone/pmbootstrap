@@ -51,19 +51,10 @@ def generate(args, pkgname):
         LANG_FORTRAN=false
         LANG_ADA=false
         options="!strip !tracedeps"
-    """
 
-    replace_simple = {
-        # Do not package libstdc++, do not add "g++-$ARCH" here (already
-        # did that explicitly in the subpackages variable above, so
-        # pmbootstrap picks it up properly).
-        '*subpackages="$subpackages libstdc++:libcxx:*': None,
-
-        # libstdc++.a is not reproducible by default (.a files are archives of
-        # object files, and these object files are inside the .a file in a random
-        # order!). The best way would be to patch this upstream in gcc, but for now
-        # we repackage the .a files to make sure, that they are reproducible.
-        '*package() {*': """package() {
+        # Wrap the package function, to make the resulting package
+        # lazy-reproducible
+        package() {
             # Repack the *.a files to be reproducible (see #64)
             _temp="$_builddir"/_reproducible-patch
             cd "$_builddir"
@@ -83,7 +74,28 @@ def generate(args, pkgname):
                 cp -v sorted.a "$_builddir"/"$f"
                 cd ..
                 rm -r "$_temp"
-            done"""
+            done
+
+            # Unmodified package function from the gcc APKBUILD
+            _package
+
+            # Workaround for: postmarketOS/binary-package-repo#1
+            echo "Replacing hardlinks with symlinks"
+            rm -v "$pkgdir"/usr/bin/"$CTARGET"-c++
+            ln -s -v /usr/bin/"$CTARGET"-g++ "$pkgdir"/usr/bin/"$CTARGET"-c++
+            rm -v "$pkgdir"/usr/bin/"$CTARGET"-gcc-"$pkgver"
+            ln -s -v /usr/bin/"$CTARGET"-gcc "$pkgdir"/usr/bin/"$CTARGET"-gcc-"$pkgver"
+        }
+    """
+
+    replace_simple = {
+        # Do not package libstdc++, do not add "g++-$ARCH" here (already
+        # did that explicitly in the subpackages variable above, so
+        # pmbootstrap picks it up properly).
+        '*subpackages="$subpackages libstdc++:libcxx:*': None,
+
+        # Rename package to _package, so we can wrap it (see above)
+        '*package() {*': "_package() {"
     }
 
     pmb.aportgen.core.rewrite(
