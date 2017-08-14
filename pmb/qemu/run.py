@@ -40,7 +40,8 @@ def system_image(args, device):
         logging.debug("Could not find system image: " + path)
         img_command = "pmbootstrap install"
         if device != args.device:
-            img_command = "pmbootstrap init' and '" + img_command
+            img_command = ("pmbootstrap config device " + device +
+                           "' and '" + img_command)
         message = "The system image '{0}' has not been generated yet, please" \
                   " run '{1}' first.".format(device, img_command)
         raise RuntimeError(message)

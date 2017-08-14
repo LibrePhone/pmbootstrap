@@ -101,3 +101,8 @@ def init(args):
     log_handler._args = args
     handler.setFormatter(formatter)
     root_logger.addHandler(handler)
+
+
+def disable():
+    logger = logging.getLogger()
+    logger.disabled = True

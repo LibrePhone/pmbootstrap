@@ -21,6 +21,8 @@ along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
 import json
+import sys
+
 import pmb.aportgen
 import pmb.build
 import pmb.config
@@ -78,6 +80,25 @@ def chroot(args):
     pmb.chroot.apk.check_min_version(args, suffix)
     logging.info("(" + suffix + ") % " + " ".join(args.command))
     pmb.chroot.root(args, args.command, suffix, log=False)
+
+
+def config(args):
+    pmb.helpers.logging.disable()
+    if args.name and args.name not in pmb.config.defaults:
+        valid_keys = ", ".join(sorted(pmb.config.defaults.keys()))
+        print("The variable name you have specified is invalid.")
+        print("The following are supported: " + valid_keys)
+        sys.exit(1)
+
+    cfg = pmb.config.load(args)
+    if args.value:
+        cfg["pmbootstrap"][args.name] = args.value
+        pmb.config.save(args, cfg)
+    elif args.name:
+        value = cfg["pmbootstrap"].get(args.name, "")
+        print(value)
+    else:
+        cfg.write(sys.stdout)
 
 
 def index(args):

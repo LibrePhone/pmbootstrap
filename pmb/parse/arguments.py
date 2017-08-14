@@ -218,6 +218,12 @@ def arguments():
     parse_apkindex.add_argument("apkindex_path")
     parse_apkindex.add_argument("package", default=None, nargs="?")
 
+    # Action: config
+    config = sub.add_parser("config",
+                            help="get and set pmbootstrap options")
+    config.add_argument("name", nargs="?", help="variable name")
+    config.add_argument("value", nargs="?", help="set variable to value")
+
     # Action: qemu
     qemu = sub.add_parser("qemu")
     qemu.add_argument("--arch", choices=["aarch64", "arm", "x86_64"],
