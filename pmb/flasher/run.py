@@ -33,9 +33,6 @@ def run(args, action, flavor=None):
     _cmdline = args.deviceinfo["kernel_cmdline"]
     if "cmdline" in args and args.cmdline:
         _cmdline = args.cmdline
-    _base = args.deviceinfo["flash_offset_base"]
-    if _base == "":
-        _base = "0x10000000"
 
     # Variable setup
     vars = {
@@ -43,12 +40,6 @@ def run(args, action, flavor=None):
         "$FLAVOR": flavor if flavor is not None else "",
         "$IMAGE": "/home/user/rootfs/" + args.device + ".img",
         "$KERNEL_CMDLINE": _cmdline,
-        "$OFFSET_BASE": _base,
-        "$OFFSET_KERNEL": args.deviceinfo["flash_offset_kernel"],
-        "$OFFSET_RAMDISK": args.deviceinfo["flash_offset_ramdisk"],
-        "$OFFSET_SECOND": args.deviceinfo["flash_offset_second"],
-        "$OFFSET_TAGS": args.deviceinfo["flash_offset_tags"],
-        "$PAGE_SIZE": args.deviceinfo["flash_pagesize"],
         "$PARTITION_INITFS": args.deviceinfo["flash_heimdall_partition_initfs"],
         "$PARTITION_KERNEL": args.deviceinfo["flash_heimdall_partition_kernel"],
     }

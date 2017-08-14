@@ -236,9 +236,8 @@ Flasher abstraction. Allowed variables:
 $BOOT: Path to the /boot partition
 $FLAVOR: Kernel flavor
 $IMAGE: Path to the system partition image
-$KERNEL_CMDLINE: Kernel commandline
 
-Fastboot specific: $OFFSET_BASE, $OFFSET_KERNEL, $OFFSET_RAMDISK, $OFFSET_TAGS, $PAGE_SIZE
+Fastboot specific: $KERNEL_CMDLINE
 Heimdall specific: $PARTITION_KERNEL, $PARTITION_INITFS
 """
 flashers = {
@@ -249,14 +248,8 @@ flashers = {
                     "list_devices": [["fastboot", "devices", "-l"]],
                     "flash_system": [["fastboot", "flash", "system", "$IMAGE"]],
                     "flash_kernel": [["fastboot", "flash", "boot", "$BOOT/boot.img-$FLAVOR"]],
-                    "boot": [["fastboot",
-                              "--base", "$OFFSET_BASE",
-                              "--kernel-offset", "$OFFSET_KERNEL",
-                              "--ramdisk-offset", "$OFFSET_RAMDISK",
-                              "--tags-offset", "$OFFSET_TAGS",
-                              "--page-size", "$PAGE_SIZE",
-                              "-c", "$KERNEL_CMDLINE",
-                              "boot", "$BOOT/vmlinuz-$FLAVOR", "$BOOT/initramfs-$FLAVOR"]],
+                    "boot": [["fastboot", "-c", "$KERNEL_CMDLINE", "boot", "$BOOT/boot.img-$FLAVOR"]],
+
         },
     },
     # Some Samsung devices need the initramfs to be baked into the kernel (e.g.
