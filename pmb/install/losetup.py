@@ -27,7 +27,8 @@ import pmb.chroot
 
 
 def init(args):
-    pmb.helpers.run.root(args, ["modprobe", "loop"])
+    if not glob.glob("/dev/loop*"):
+        pmb.helpers.run.root(args, ["modprobe", "loop"])
     loopdevices = [loopdev for loopdev in glob.glob("/dev/loop*") if not os.path.isdir(loopdev)]
     for loopdev in loopdevices:
         pmb.helpers.mount.bind_blockdevice(args, loopdev,
