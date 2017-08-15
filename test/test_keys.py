@@ -23,7 +23,7 @@ import glob
 import filecmp
 
 # Import from parent directory
-sys.path.append(os.path.abspath(
+sys.path.append(os.path.realpath(
     os.path.join(os.path.dirname(__file__) + "/..")))
 import pmb.parse.apkindex
 import pmb.helpers.git

@@ -21,7 +21,7 @@ import sys
 import pytest
 
 # Import from parent directory
-sys.path.append(os.path.abspath(
+sys.path.append(os.path.realpath(
     os.path.join(os.path.dirname(__file__) + "/..")))
 import pmb.aportgen
 import pmb.config

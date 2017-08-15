@@ -25,7 +25,7 @@ def ismount(folder):
     Ismount() implementation, that works for mount --bind.
     Workaround for: https://bugs.python.org/issue29707
     """
-    folder = os.path.abspath(os.path.realpath(folder))
+    folder = os.path.realpath(os.path.realpath(folder))
     with open("/proc/mounts", "r") as handle:
         for line in handle:
             words = line.split()
@@ -86,7 +86,7 @@ def umount_all_list(prefix, source="/proc/mounts"):
     :returns: a list of folders, that need to be umounted
     """
     ret = []
-    prefix = os.path.abspath(prefix)
+    prefix = os.path.realpath(prefix)
     with open(source, "r") as handle:
         for line in handle:
             words = line.split()

@@ -39,7 +39,7 @@ def zap(args):
         patterns += ["cache_http"]
 
     for pattern in patterns:
-        pattern = os.path.abspath(args.work + "/" + pattern)
+        pattern = os.path.realpath(args.work + "/" + pattern)
         matches = glob.glob(pattern)
         for match in matches:
             if pmb.helpers.cli.confirm(args, "Remove " + match + "?"):

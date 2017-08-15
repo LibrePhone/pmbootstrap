@@ -21,7 +21,7 @@ import sys
 import pytest
 
 # Import from parent directory
-sys.path.append(os.path.abspath(
+sys.path.append(os.path.realpath(
     os.path.join(os.path.dirname(__file__) + "/..")))
 import pmb.build.other
 import pmb.chroot.apk
@@ -84,7 +84,7 @@ def out_of_sync_files(args):
 def test_aport_in_sync_with_git(args):
     aports = temp_aports_repo(args)
     ret_in_sync = []
-    ret_out_of_sync = [args.aports + "/main/alpine-base/APKBUILD"]
+    ret_out_of_sync = [os.path.realpath(args.aports + "/main/alpine-base/APKBUILD")]
 
     # In sync (no files changed)
     assert out_of_sync_files(args) == ret_in_sync

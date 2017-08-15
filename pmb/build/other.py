@@ -103,7 +103,7 @@ def aports_files_out_of_sync_with_git(args, package=None):
     # Filter out a specific package
     if package:
         ret = []
-        prefix = os.path.abspath(
+        prefix = os.path.realpath(
             pmb.build.other.find_aport(
                 args, package)) + "/"
         for file in aports_files_out_of_sync_with_git(args):
@@ -137,10 +137,10 @@ def aports_files_out_of_sync_with_git(args, package=None):
             working_dir=git_root, return_stdout=True)
 
         # Set absolute path, filter out aports files
-        aports_absolute = os.path.abspath(args.aports)
+        aports_absolute = os.path.realpath(args.aports)
         files = tracked.rstrip().split("\n") + untracked.rstrip().split("\n")
         for file in files:
-            file = os.path.abspath(git_root + "/" + file)
+            file = os.path.realpath(git_root + "/" + file)
             if file.startswith(aports_absolute):
                 ret.append(file)
     else:

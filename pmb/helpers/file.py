@@ -66,7 +66,7 @@ def symlink(args, file, link):
     """
     if os.path.exists(link):
         if (os.path.islink(link) and
-                os.path.abspath(os.readlink(link)) == os.path.abspath(file)):
+                os.path.realpath(os.readlink(link)) == os.path.realpath(file)):
             return
         raise RuntimeError("File exists: " + link)
     elif os.path.islink(link):

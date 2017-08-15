@@ -54,7 +54,7 @@ def build(args, apk_path):
     repo_diff = pmb.helpers.repo.diff(args, repo_before)
 
     # Diff the apk contents
-    staging_path = os.path.abspath(os.path.dirname(apk_path) + "/../")
+    staging_path = os.path.realpath(os.path.dirname(apk_path) + "/../")
     for file in repo_diff:
         file_staging = staging_path + "/" + file
         file_work = args.work + "/packages/" + file

@@ -24,7 +24,7 @@ def test_chroot_interactive_shell():
     """
     Open a shell with 'pmbootstrap chroot' and pass 'echo hello_world\n' as stdin.
     """
-    pmb_src = os.path.abspath(os.path.join(os.path.dirname(__file__) + "/.."))
+    pmb_src = os.path.realpath(os.path.join(os.path.dirname(__file__) + "/.."))
     os.chdir(pmb_src)
     ret = subprocess.check_output(["./pmbootstrap.py", "-q", "chroot"], timeout=300,
                                   input="echo hello_world\n", universal_newlines=True,

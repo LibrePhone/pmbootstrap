@@ -21,7 +21,7 @@ import sys
 import pytest
 
 # Import from parent directory
-sys.path.append(os.path.abspath(
+sys.path.append(os.path.realpath(
     os.path.join(os.path.dirname(__file__) + "/..")))
 import pmb.build.other
 import pmb.helpers.logging
@@ -73,7 +73,7 @@ def cache_files_out_of_sync(args, is_out_of_sync):
     new = []
     if is_out_of_sync:
         aport = pmb.build.other.find_aport(args, "hello-world")
-        new = [os.path.abspath(aport + "/APKBUILD")]
+        new = [os.path.realpath(aport + "/APKBUILD")]
     args.cache["aports_files_out_of_sync_with_git"] = new
 
 

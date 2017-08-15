@@ -24,7 +24,7 @@ import time
 import logging
 
 # Import from parent directory
-pmb_src = os.path.abspath(os.path.join(os.path.dirname(__file__) + "/.."))
+pmb_src = os.path.realpath(os.path.join(os.path.dirname(__file__) + "/.."))
 sys.path.append(pmb_src)
 import pmb.build.package
 import pmb.helpers.logging
