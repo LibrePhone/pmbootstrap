@@ -1,56 +1,74 @@
 # pmbootstrap
+
+[**Introduction**](https://ollieparanoid.github.io/post/postmarketOS) | [**Security Warning**](https://ollieparanoid.github.io/post/security-warning/) | [**Supported Devices**](https://github.com/postmarketOS/pmbootstrap/wiki/Devices) | [![travis badge](https://api.travis-ci.org/postmarketOS/pmbootstrap.png?branch=master)](https://travis-ci.org/postmarketOS/pmbootstrap)
+
 Sophisticated chroot/build/flash tool to develop and install postmarketOS.
 
-[Static code analysis](https://github.com/postmarketOS/pmbootstrap/blob/master/test/static_code_analysis.sh) status: [![travis badge](https://api.travis-ci.org/postmarketOS/pmbootstrap.png?branch=master)](https://travis-ci.org/postmarketOS/pmbootstrap)
+For in-depth information please refer to the [postmarketOS wiki](https://github.com/postmarketOS/pmbootstrap/wiki).
 
 ## Requirements
-* Linux distribution
-* Python 3
+* Linux distribution (`x86_64` or `aarch64`)
+* Python 3.4+
 * OpenSSL
 
-## Important links
-* [postmarketOS introduction](https://ollieparanoid.github.io/post/postmarketOS)
-* [Security warning](https://ollieparanoid.github.io/post/security-warning/)
-* [Porting progress](https://github.com/postmarketOS/pmbootstrap/wiki/Devices)
-
-
 ## Usage
-**Check out the [porting guide](https://github.com/postmarketOS/pmbootstrap/wiki/Porting-to-a-new-device) for a practical start!**
 
-Run `./pmbootstrap.py init` first, to select a target device and the work folder, which will contain all the chroots and other data.
-After that, you can run any command. All dependencies (e.g. chroots) will be installed automatically, if they are not available yet.
+Assuming you have a supported device, you can build and flash a postmarketOS image by running through the following steps. For new devices check the [porting guide](https://github.com/postmarketOS/pmbootstrap/wiki/Porting-to-a-new-device).
 
-Here are some examples:
+First, clone the git repository and initialize your pmbootstrap environment:
 
+```shell
+$ git clone https://github.com/postmarketOS/pmbootstrap
+$ cd pmbootstrap
+$ ./pmbootstrap.py init
+```
 
-`./pmbootstrap.py --help`:
-List all available commands
+While running any pmbootstrap command, it's always useful to have a log open in a separate window where further details can be seen:
 
-`./pmbootstrap.py log`:
-Run tail -f on the logfile, which contains detailed output. Do this in a second terminal, while executing another `pmbootstrap` command to get all the details.
+```shell
+$ ./pmbootstrap.py log
+```
 
-`./pmbootstrap.py chroot`:
-Open a shell inside a native Alpine Linux chroot (~6 MB install size).
+It's now time to run a full build which will create the boot and system images:
 
-`./pmbootstrap.py chroot -- ls -l /home/user`
-Execute `ls -l /home/user` inside the chroot. Make sure, that you use `--` before the command, so all following options (e.g. `-l`) do not get interpreted by pmbootstrap, but passed correctly to your command.
+```shell
+$ ./pmbootstrap.py install
+```
 
-`./pmbootstrap.py chroot --suffix=buildroot_armhf`:
-Open a shell inside an `armhf` Alpine Linux chroot, with qemu user mode emulation and binfmt support automatically set up.
+Once your device is connected and is ready to be flashed (e.g. via fastboot), you can run a flash of the kernel (boot) and system partitions:
 
-`./pmbootstrap.py build hello-world`:
-Build the "hello-world" package (specify any package from the `aports`-folder here).
+```shell
+$ ./pmbootstrap.py flasher flash_kernel
+$ ./pmbootstrap.py flasher flash_system
+```
 
-`./pmbootstrap.py build hello-world --arch=armhf`:
-Build the "hello-world" package for `armhf` inside the `armhf` chroot, with the cross-compiler installed in the native chroot (chroots are connected via distcc).
+After a reboot, the device will provide a USB network interface, which we request an IP from, and telnet into to open the full-disk encryption on the main system partition:
 
-`./pmbootstrap.py install`:
-Generate a system image file with a full postmarketOS installation. All required packages get built first, if they do not exist yet. You will get asked for the "user" password and the root partition password.
+```shell
+$ dhclient -v enp0s20f0u1
+$ telnet 172.16.42.1
 
-`./pmbootstrap.py install --sdcard=/dev/mmcblk0`:
-Format and partition the SD card `/dev/mmcblk0`, and put a full postmarketOS installation on it
+Trying 172.16.42.1...
+Connected to 172.16.42.1.
+Escape character is '^]'.
 
+Enter passphrase for /dev/mapper/mmcblk0p25p2: 
+Connection closed by foreign host.
+```
 
-## Testsuite
-Simply install `pytest` (via your package manager or via pip) and run it inside the pmbootstrap folder.
+Once the partition has been unlocked it is possible to connect via SSH:
+
+```shell
+$ ssh user@172.16.42.1
+```
+
+## Development
+
+### Testing
+
+Install `pytest` (via your package manager or pip) and run it inside the pmbootstrap folder.
+
+## License
+
+[GPLv3](LICENSE)
 
