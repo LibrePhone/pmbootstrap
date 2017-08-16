@@ -105,6 +105,22 @@ def set_user_password(args):
             pass
 
 
+def copy_ssh_key(args):
+    """
+    Offer to copy user's SSH public key to the device if it exists
+    """
+    user_ssh_pubkey = os.path.expanduser("~/.ssh/id_rsa.pub")
+    target = args.work + "/chroot_native/mnt/install/home/user/.ssh"
+    if os.path.exists(user_ssh_pubkey):
+        if pmb.helpers.cli.confirm(args, "Would you like to copy your SSH public key to the device?"):
+            pmb.helpers.run.root(args, ["mkdir", target])
+            pmb.helpers.run.root(args, ["chmod", "700", target])
+            pmb.helpers.run.root(args, ["cp", user_ssh_pubkey, target + "/authorized_keys"])
+            pmb.helpers.run.root(args, ["chown", "-R", "12345:12345", target])
+    else:
+        logging.info("NOTE: No public SSH key found, you will only be able to use SSH password authentication!")
+
+
 def install(args):
     # Install required programs in native chroot
     logging.info("*** (1/5) PREPARE NATIVE CHROOT ***")
@@ -140,7 +156,7 @@ def install(args):
     size_image = str(int(float(get_chroot_size(args)) * 1.15)) + "M"
     size_boot = str(int(get_chroot_boot_size(args)) + 5) + "M"
 
-    # Finally set the user password
+    # Set the user password
     set_user_password(args)
 
     # Partition and fill image/sdcard
@@ -154,6 +170,10 @@ def install(args):
     logging.info("*** (4/5) FILL INSTALL BLOCKDEVICE ***")
     copy_files(args)
     fix_mount_folders(args)
+
+    # If user has a ssh pubkey, offer to copy it to device
+    copy_ssh_key(args)
+
     pmb.chroot.shutdown(args, True)
 
     # Convert system image to sparse using img2simg
