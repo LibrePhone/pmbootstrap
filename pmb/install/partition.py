@@ -51,14 +51,19 @@ def partitions_mount(args):
 def partition(args, size_boot):
     """
     Partition /dev/install and create /dev/install{p1,p2}
-    """
 
-    logging.info("(native) partition /dev/install (boot: " + size_boot +
+    size_boot: size of the boot partition in bytes.
+    """
+    # Convert to MB and print info
+    mb_boot = str(round(size_boot / 1024 / 1024)) + "M"
+    logging.info("(native) partition /dev/install (boot: " + mb_boot +
                  ", root: the rest)")
+
+    # Actual partitioning with 'parted'
     commands = [
         ["mktable", "msdos"],
-        ["mkpart", "primary", "ext2", "2048s", size_boot],
-        ["mkpart", "primary", size_boot, "100%"],
+        ["mkpart", "primary", "ext2", "2048s", mb_boot],
+        ["mkpart", "primary", mb_boot, "100%"],
         ["set", "1", "boot", "on"]
     ]
     for command in commands:

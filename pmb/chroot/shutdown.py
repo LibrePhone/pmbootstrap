@@ -68,6 +68,11 @@ def shutdown(args, only_install_related=False):
             path = path_outside[len(chroot):]
             pmb.install.losetup.umount(args, path)
 
+    # Umount device rootfs chroot
+    chroot_rootfs = args.work + "/chroot_rootfs_" + args.device
+    if os.path.exists(chroot_rootfs):
+        pmb.helpers.mount.umount_all(args, chroot_rootfs)
+
     if not only_install_related:
         # Clean up the rest
         pmb.helpers.mount.umount_all(args, args.work)

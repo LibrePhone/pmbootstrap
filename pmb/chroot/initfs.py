@@ -25,6 +25,11 @@ import pmb.helpers.cli
 
 
 def build(args, flavor, suffix):
+    # Bail out when '-s' is set
+    if args.skip_initfs:
+        logging.info("NOTE: Skipped initramfs generation (-s)!")
+        return
+
     # Update mkinitfs and hooks
     pmb.chroot.apk.install(args, ["postmarketos-mkinitfs"], suffix)
     pmb.chroot.initfs_hooks.update(args, suffix)

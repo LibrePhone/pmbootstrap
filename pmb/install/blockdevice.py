@@ -47,6 +47,11 @@ def mount_sdcard(args):
 
 
 def create_and_mount_image(args, size):
+    """
+    Create a new image file, and mount it as /dev/install.
+
+    :param size: of the whole image in bytes
+    """
     # Short variables for paths
     chroot = args.work + "/chroot_native"
     img_path = "/home/user/rootfs/" + args.device + ".img"
@@ -61,15 +66,18 @@ def create_and_mount_image(args, size):
             raise RuntimeError("Failed to remove old image file: " +
                                img_path_outside)
 
-    # Create empty image file
-    logging.info("(native) create " + args.device + ".img (" + size + ")")
+    # Convert to MB and ask for confirmation
+    mb = str(round(size / 1024 / 1024)) + "M"
+    logging.info("(native) create " + args.device + ".img (" + mb + ")")
     logging.info("WARNING: Make sure, that your target device's partition"
-                 " table has allocated at least " + size + " as system partition!")
-    if not pmb.helpers.cli.confirm(args):
+                 " table has allocated at least " + mb + " as system"
+                 " partition!")
+    if not pmb.helpers.cli.confirm(args, default=True):
         raise RuntimeError("Aborted.")
 
+    # Create empty image file
     pmb.chroot.user(args, ["mkdir", "-p", "/home/user/rootfs"])
-    pmb.chroot.root(args, ["truncate", "-s", size, img_path])
+    pmb.chroot.root(args, ["truncate", "-s", mb, img_path])
 
     # Mount to /dev/install
     logging.info("(native) mount /dev/install (" + args.device + ".img)")
@@ -82,6 +90,8 @@ def create_and_mount_image(args, size):
 def create(args, size):
     """
     Create /dev/install (the "install blockdevice").
+
+    :param size: of the whole image in bytes
     """
     pmb.helpers.mount.umount_all(
         args, args.work + "/chroot_native/dev/install")

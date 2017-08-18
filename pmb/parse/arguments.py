@@ -103,6 +103,9 @@ def arguments():
     parser.add_argument("-j", "--jobs", help="parallel jobs when compiling")
     parser.add_argument("-p", "--aports",
                         help="postmarketos aports paths")
+    parser.add_argument("-s", "--skip-initfs", dest="skip_initfs",
+                        help="do not re-generate the initramfs",
+                        action="store_true")
     parser.add_argument("-w", "--work", help="folder where all data"
                         " gets stored (chroots, caches, built packages)")
 

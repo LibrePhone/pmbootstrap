@@ -17,6 +17,21 @@ You should have received a copy of the GNU General Public License
 along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
 import os
+import pmb.helpers.run
+
+
+def folder_size(args, path):
+    """
+    Run `du` to calculate the size of a folder (this is less code and
+    faster than doing the same task in pure Python).
+
+    :returns: folder size in bytes
+    """
+    output = pmb.helpers.run.root(args, ["du", "--summarize",
+                                         "--block-size=1",
+                                         path], return_stdout=True)
+    ret = int(output.split("\t")[0])
+    return ret
 
 
 def check_grsec(args):
