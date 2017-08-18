@@ -164,4 +164,4 @@ def log_distccd(args):
 
 
 def zap(args):
-    pmb.chroot.zap(args)
+    pmb.chroot.zap(args, packages=args.packages, http=args.http)

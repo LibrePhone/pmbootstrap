@@ -23,7 +23,7 @@ import pmb.chroot
 import pmb.helpers.run
 
 
-def zap(args):
+def zap(args, confirm=True, packages=False, http=False):
     pmb.chroot.shutdown(args)
     patterns = [
         "chroot_native",
@@ -33,14 +33,14 @@ def zap(args):
 
     # Only ask for removal, if the user specificed the extra '-p' switch.
     # Deleting the packages by accident is really annoying.
-    if args.packages:
+    if packages:
         patterns += ["packages"]
-    if args.http:
+    if http:
         patterns += ["cache_http"]
 
     for pattern in patterns:
         pattern = os.path.realpath(args.work + "/" + pattern)
         matches = glob.glob(pattern)
         for match in matches:
-            if pmb.helpers.cli.confirm(args, "Remove " + match + "?"):
+            if not confirm or pmb.helpers.cli.confirm(args, "Remove " + match + "?"):
                 pmb.helpers.run.root(args, ["rm", "-rf", match])

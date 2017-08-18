@@ -17,12 +17,14 @@ You should have received a copy of the GNU General Public License
 along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
 import logging
+import glob
 import os
 
 import pmb.config
 import pmb.helpers.cli
 import pmb.helpers.devices
 import pmb.helpers.ui
+import pmb.chroot.zap
 
 
 def ask_for_work_path(args):
@@ -39,7 +41,7 @@ def ask_for_work_path(args):
             ret = os.path.expanduser(pmb.helpers.cli.ask(
                 args, "Work path", None, args.work, False))
             os.makedirs(ret, 0o700, True)
-            os.makedirs(ret + "/chroot_native", 0o755, True)
+            os.makedirs(ret + "/cache_http", 0o700, True)
             return ret
         except OSError:
             logging.fatal("ERROR: Could not create this folder, or write"
@@ -102,9 +104,18 @@ def init(args):
     # Save config
     pmb.config.save(args, cfg)
 
+    if len(glob.glob(args.work + "/chroot_*")) and pmb.helpers.cli.confirm(args, "Zap existing chroots to apply configuration?", default=True):
+        if not os.path.exists(args.aports + "/device/device-" + args.device + "/deviceinfo"):
+            setattr(args, "deviceinfo", None)
+        else:
+            setattr(args, "deviceinfo", pmb.parse.deviceinfo(args))
+        # Do not zap any existing packages or cache_http directories
+        pmb.chroot.zap(args, confirm=False)
+
     logging.info(
         "WARNING: The applications in the chroots do not get updated automatically.")
     logging.info("Run 'pmbootstrap zap' to delete all chroots once a day before"
                  " working with pmbootstrap!")
     logging.info("It only takes a few seconds, and all packages are cached.")
+
     logging.info("Done!")
