@@ -72,6 +72,8 @@ def init(args):
     cfg["pmbootstrap"]["device"] = pmb.helpers.cli.ask(args, "Device",
                                                        None, args.device, False, "[a-z0-9]+-[a-z0-9]+")
 
+    device_exists = os.path.exists(args.aports + "/device/device-" + cfg["pmbootstrap"]["device"] + "/deviceinfo")
+
     # UI and work folder
     cfg["pmbootstrap"]["ui"] = ask_for_ui(args)
     cfg["pmbootstrap"]["work"] = ask_for_work_path(args)
@@ -104,11 +106,10 @@ def init(args):
     # Save config
     pmb.config.save(args, cfg)
 
-    if len(glob.glob(args.work + "/chroot_*")) and pmb.helpers.cli.confirm(args, "Zap existing chroots to apply configuration?", default=True):
-        if not os.path.exists(args.aports + "/device/device-" + args.device + "/deviceinfo"):
-            setattr(args, "deviceinfo", None)
-        else:
-            setattr(args, "deviceinfo", pmb.parse.deviceinfo(args))
+    if (device_exists and
+            len(glob.glob(args.work + "/chroot_*")) and
+            pmb.helpers.cli.confirm(args, "Zap existing chroots to apply configuration?", default=True)):
+        setattr(args, "deviceinfo", pmb.parse.deviceinfo(args, device=cfg["pmbootstrap"]["device"]))
         # Do not zap any existing packages or cache_http directories
         pmb.chroot.zap(args, confirm=False)
 
