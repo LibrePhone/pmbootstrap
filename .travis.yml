@@ -8,8 +8,9 @@ addons:
     packages:
     - shellcheck
 install: "pip install flake8"
-script: 
+script:
   - test/static_code_analysis.sh
   - yes "" | ./pmbootstrap.py init
   - test/check_checksums.py
-
+notifications:
+  - email: false
