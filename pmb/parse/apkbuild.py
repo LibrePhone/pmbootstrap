@@ -112,10 +112,15 @@ def apkbuild(args, path):
             if line_value.startswith("\""):
                 end_char = "\""
             value = ""
+            first_line = i
             while i < len(lines) - 1:
                 value += line_value.replace("\"", "").strip()
-                if not end_char or line_value.endswith(end_char):
+                if not end_char:
                     break
+                elif line_value.endswith(end_char):
+                    # This check is needed to allow line break directly after opening quote
+                    if i != first_line or line_value.count(end_char) > 1:
+                        break
                 value += " "
                 i += 1
                 line_value = lines[i][:-1]
