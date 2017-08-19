@@ -56,6 +56,7 @@ defaults = {
     "work": os.path.expanduser("~") + "/.local/var/pmbootstrap",
     "port_distccd": "33632",
     "ui": "weston",
+    "keymap": "",
 
     # aes-xts-plain64 would be better, but this is not supported on LineageOS
     # kernel configs
@@ -191,6 +192,9 @@ deviceinfo_attributes = [
 
     # weston
     "weston_pixman_type",
+
+    # keymaps
+    "keymaps",
 ]
 
 #
