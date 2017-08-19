@@ -69,6 +69,10 @@ def package(args, pkgname, carch, force=False, buildinfo=False):
                                    build=False)
             pmb.chroot.distccd.start(args, carch_buildenv)
 
+    # Avoid re-building for circular dependencies
+    if not force and not pmb.build.is_necessary(args, carch, apkbuild):
+        return
+
     # Configure abuild.conf
     pmb.build.other.configure_abuild(args, suffix)
 
@@ -115,5 +119,9 @@ def package(args, pkgname, carch, force=False, buildinfo=False):
     # Symlink noarch packages
     if "noarch" in apkbuild["arch"]:
         pmb.build.symlink_noarch_package(args, output)
+
+    # Clear APKINDEX cache
+    pmb.parse.apkindex.clear_cache(args, args.work + "/packages/" +
+                                   carch_buildenv + "/APKINDEX.tar.gz")
 
     return output

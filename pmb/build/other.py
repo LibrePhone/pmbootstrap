@@ -232,6 +232,10 @@ def is_necessary(args, arch, apkbuild, apkindex_path=None):
 
 def index_repo(args, arch=None):
     """
+    Recreate the APKINDEX.tar.gz for a specific repo, and clear the parsing
+    cache for that file for the current pmbootstrap session (to prevent
+    rebuilding packages twice, in case the rebuild takes less than a second).
+
     :param arch: when not defined, re-index all repos
     """
     pmb.build.init(args)
@@ -253,6 +257,8 @@ def index_repo(args, arch=None):
         ]
         for command in commands:
             pmb.chroot.user(args, command, working_dir=path_repo_chroot)
+        pmb.parse.apkindex.clear_cache(args, args.work + path +
+                                       "/APKINDEX.tar.gz")
 
 
 def symlink_noarch_package(args, arch_apk):

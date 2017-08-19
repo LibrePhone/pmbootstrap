@@ -22,17 +22,6 @@ import pmb.chroot.apk
 import pmb.parse.apkindex
 
 
-def apkindex(args, pkgname, arch):
-    """
-    Non-recursively get the dependencies of one package in any APKINDEX.
-    """
-    index_data = pmb.parse.apkindex.read_any_index(args, pkgname, arch)
-    if index_data:
-        return index_data["depends"]
-    else:
-        return None
-
-
 def recurse_error_message(pkgname, in_aports, in_apkindexes):
     ret = "Could not find package '" + pkgname + "'"
     if in_aports:
@@ -59,40 +48,60 @@ def recurse(args, pkgnames, arch=None, in_apkindexes=True, in_aports=True,
                     str(in_apkindexes))
 
     # Sanity check
-    if not apkindex and not in_aports:
-        raise RuntimeError("Set at least one of apkindex or aports to True.")
+    if not in_apkindexes and not in_aports:
+        raise RuntimeError("Set at least one of in_apkindexes or in_aports to"
+                           " True.")
 
+    # Iterate over todo-list until is is empty
     todo = list(pkgnames)
     ret = []
     while len(todo):
         # Skip already passed entries
-        pkgname = todo.pop(0)
-        if pkgname in ret:
+        pkgname_depend = todo.pop(0)
+        if pkgname_depend in ret:
             continue
 
-        # Get depends
-        logging.verbose("Getting depends of single package: " + pkgname)
+        # Get depends and pkgname from aports
+        logging.verbose("Get dependencies of: " + pkgname_depend)
         depends = None
         if in_aports:
-            aport = pmb.build.find_aport(args, pkgname, False)
+            aport = pmb.build.find_aport(args, pkgname_depend, False)
             if aport:
                 logging.verbose("-> Found aport: " + aport)
                 apkbuild = pmb.parse.apkbuild(args, aport + "/APKBUILD")
                 depends = apkbuild["depends"]
+                if pkgname_depend in apkbuild["subpackages"]:
+                    pkgname = pkgname_depend
+                else:
+                    pkgname = apkbuild["pkgname"]
+
+        # Get depends and pkgname from APKINDEX
         if depends is None and in_apkindexes:
             logging.verbose("-> Search through APKINDEX files")
-            depends = apkindex(args, pkgname, arch)
-        if depends is None and strict:
+            index_data = pmb.parse.apkindex.read_any_index(args, pkgname_depend,
+                                                           arch)
+            if index_data:
+                depends = index_data["depends"]
+                pkgname = index_data["pkgname"]
+
+        # Nothing found
+        if pkgname is None and strict:
             raise RuntimeError(
                 recurse_error_message(
                     pkgname,
                     in_aports,
                     in_apkindexes))
 
-        # Append to todo/ret
-        logging.verbose("-> Depends: " + str(depends))
-        if depends:
-            todo += depends
-        ret.append(pkgname)
+        # Append to todo/ret (unless it is a duplicate)
+        if pkgname != pkgname_depend:
+            logging.verbose("-> '" + pkgname_depend + "' is provided by '" +
+                            pkgname + "'")
+        if pkgname in ret:
+            logging.verbose("-> '" + pkgname + "' already found")
+        else:
+            logging.verbose("-> '" + pkgname + "' depends on: " + str(depends))
+            if depends:
+                todo += depends
+            ret.append(pkgname)
 
     return ret

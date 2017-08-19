@@ -198,6 +198,15 @@ def parse(args, path, strict=False):
     return ret
 
 
+def clear_cache(args, path):
+    logging.verbose("Clear APKINDEX cache for: " + path)
+    if path in args.cache["apkindex"]:
+        del args.cache["apkindex"][path]
+    else:
+        logging.verbose("Nothing to do, path was not in cache:" +
+                        str(args.cache["apkindex"].keys()))
+
+
 def read(args, package, path, must_exist=True):
     """
     Get information about a single package from an APKINDEX.tar.gz file.
