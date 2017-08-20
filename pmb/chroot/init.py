@@ -34,11 +34,15 @@ def copy_resolv_conf(args, suffix="native"):
     Use pythons super fast file compare function (due to caching)
     and copy the /etc/resolv.conf to the chroot, in case it is
     different from the host.
+    If the file doesn't exist, create an empty file with 'touch'.
     """
     host = "/etc/resolv.conf"
     chroot = args.work + "/chroot_" + suffix + host
-    if not os.path.exists(chroot) or not filecmp.cmp(host, chroot):
-        pmb.helpers.run.root(args, ["cp", host, chroot])
+    if os.path.exists(host):
+        if not os.path.exists(chroot) or not filecmp.cmp(host, chroot):
+            pmb.helpers.run.root(args, ["cp", host, chroot])
+    else:
+        pmb.helpers.run.root(args, ["touch", chroot])
 
 
 def init(args, suffix="native"):
