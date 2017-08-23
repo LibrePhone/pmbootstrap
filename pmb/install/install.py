@@ -27,6 +27,7 @@ import pmb.chroot.initfs
 import pmb.config
 import pmb.helpers.run
 import pmb.install.blockdevice
+import pmb.install.file
 import pmb.install
 
 
@@ -181,6 +182,7 @@ def install(args):
     # because that doesn't always happen automatically yet, e.g. when the user
     # installed a hook without pmbootstrap - see #69 for more info)
     pmb.chroot.apk.install(args, install_packages, suffix)
+    pmb.install.file.write_os_release(args, suffix)
     for flavor in pmb.chroot.other.kernel_flavors_installed(args, suffix):
         pmb.chroot.initfs.build(args, flavor, suffix)
 
