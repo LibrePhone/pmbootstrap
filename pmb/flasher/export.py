@@ -48,13 +48,18 @@ def symlinks(args, flavor, folder):
         "uImage-" + flavor: "Kernel, legacy u-boot image format",
         "vmlinuz-" + flavor: "Linux kernel",
         args.device + ".img": "System partition",
+        "pmos-" + args.device + ".zip": "Android recovery flashable zip",
     }
 
     # Generate a list of patterns
     path_native = args.work + "/chroot_native"
     path_boot = args.work + "/chroot_rootfs_" + args.device + "/boot"
+    path_buildroot = args.work + "/chroot_buildroot_" + args.deviceinfo["arch"]
     patterns = [path_boot + "/*-" + flavor,
-                path_native + "/home/user/rootfs/" + args.device + ".img"]
+                path_native + "/home/user/rootfs/" + args.device + ".img",
+                path_buildroot +
+                "/var/lib/postmarketos-android-recovery-installer/pmos-" +
+                args.device + ".zip"]
 
     # Generate a list of files from the patterns
     files = []

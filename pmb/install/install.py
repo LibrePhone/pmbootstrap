@@ -28,14 +28,17 @@ import pmb.config
 import pmb.helpers.run
 import pmb.install.blockdevice
 import pmb.install.file
+import pmb.install.recovery
 import pmb.install
 
 
-def mount_device_rootfs(args):
-    # Mount the device rootfs
+def mount_device_rootfs(args, suffix="native"):
+    """
+    Mount the device rootfs.
+    """
     mountpoint = "/mnt/rootfs_" + args.device
     pmb.helpers.mount.bind(args, args.work + "/chroot_rootfs_" + args.device,
-                           args.work + "/chroot_native" + mountpoint)
+                           args.work + "/chroot_" + suffix + mountpoint)
     return mountpoint
 
 
@@ -153,45 +156,7 @@ def setup_keymap(args):
         logging.info("NOTE: No valid keymap specified for device")
 
 
-def install(args):
-    # Install required programs in native chroot
-    logging.info("*** (1/5) PREPARE NATIVE CHROOT ***")
-    pmb.chroot.apk.install(args, pmb.config.install_native_packages,
-                           build=False)
-
-    # List all packages to be installed (including the ones specified by --add)
-    # and upgrade the installed packages/apkindexes
-    logging.info("*** (2/5) CREATE DEVICE ROOTFS (" + args.device + ") ***")
-    install_packages = (pmb.config.install_device_packages +
-                        ["device-" + args.device])
-    if args.ui.lower() != "none":
-        install_packages += ["postmarketos-ui-" + args.ui]
-    suffix = "rootfs_" + args.device
-    pmb.chroot.apk.upgrade(args, suffix)
-
-    # Explicitly call build on the install packages, to re-build them or any
-    # dependency, in case the version increased
-    if args.extra_packages.lower() != "none":
-        install_packages += args.extra_packages.split(",")
-    if args.add:
-        install_packages += args.add.split(",")
-    for pkgname in install_packages:
-        pmb.build.package(args, pkgname, args.deviceinfo["arch"])
-
-    # Install all packages to device rootfs chroot (and rebuild the initramfs,
-    # because that doesn't always happen automatically yet, e.g. when the user
-    # installed a hook without pmbootstrap - see #69 for more info)
-    pmb.chroot.apk.install(args, install_packages, suffix)
-    pmb.install.file.write_os_release(args, suffix)
-    for flavor in pmb.chroot.other.kernel_flavors_installed(args, suffix):
-        pmb.chroot.initfs.build(args, flavor, suffix)
-
-    # Set the user password
-    set_user_password(args)
-
-    # Set the keymap if the device requires it
-    setup_keymap(args)
-
+def install_system_image(args):
     # Partition and fill image/sdcard
     logging.info("*** (3/5) PREPARE INSTALL BLOCKDEVICE ***")
     pmb.chroot.shutdown(args, True)
@@ -249,3 +214,72 @@ def install(args):
     logging.info("* If the above steps do not work, you can also create"
                  " symlinks to the generated files with 'pmbootstrap flasher"
                  " export [export_folder]' and flash outside of pmbootstrap.")
+
+
+def install_recovery_zip(args):
+    logging.info("*** (3/4) CREATING RECOVERY-FLASHABLE ZIP ***")
+    suffix = "buildroot_" + args.deviceinfo["arch"]
+    mount_device_rootfs(args, suffix)
+    pmb.install.recovery.create_zip(args, suffix)
+
+    # Flash information
+    logging.info("*** (4/4) FLASHING TO DEVICE ***")
+    logging.info("Run the following to flash your installation to the"
+                 " target device:")
+    logging.info("* pmbootstrap flasher --method adb sideload")
+    logging.info("  Flashes the installer zip to your device:")
+
+    # Export information
+    logging.info("* If this does not work, you can also create a"
+                 " symlink to the generated zip with 'pmbootstrap flasher"
+                 " export --android-recovery-zip [export_folder]' and"
+                 " flash outside of pmbootstrap.")
+
+
+def install(args):
+    # Number of steps for the different installation methods.
+    steps = 4 if args.android_recovery_zip else 5
+
+    # Install required programs in native chroot
+    logging.info("*** (1/{}) PREPARE NATIVE CHROOT ***".format(steps))
+    pmb.chroot.apk.install(args, pmb.config.install_native_packages,
+                           build=False)
+
+    # List all packages to be installed (including the ones specified by --add)
+    # and upgrade the installed packages/apkindexes
+    logging.info('*** (2/{0}) CREATE DEVICE ROOTFS ("{1}") ***'.format(steps,
+                 args.device))
+    install_packages = (pmb.config.install_device_packages +
+                        ["device-" + args.device])
+    if args.ui.lower() != "none":
+        install_packages += ["postmarketos-ui-" + args.ui]
+    suffix = "rootfs_" + args.device
+    pmb.chroot.apk.upgrade(args, suffix)
+
+    # Explicitly call build on the install packages, to re-build them or any
+    # dependency, in case the version increased
+    if args.extra_packages.lower() != "none":
+        install_packages += args.extra_packages.split(",")
+    if args.add:
+        install_packages += args.add.split(",")
+    for pkgname in install_packages:
+        pmb.build.package(args, pkgname, args.deviceinfo["arch"])
+
+    # Install all packages to device rootfs chroot (and rebuild the initramfs,
+    # because that doesn't always happen automatically yet, e.g. when the user
+    # installed a hook without pmbootstrap - see #69 for more info)
+    pmb.chroot.apk.install(args, install_packages, suffix)
+    pmb.install.file.write_os_release(args, suffix)
+    for flavor in pmb.chroot.other.kernel_flavors_installed(args, suffix):
+        pmb.chroot.initfs.build(args, flavor, suffix)
+
+    # Set the user password
+    set_user_password(args)
+
+    # Set the keymap if the device requires it
+    setup_keymap(args)
+
+    if args.android_recovery_zip:
+        install_recovery_zip(args)
+    else:
+        install_system_image(args)

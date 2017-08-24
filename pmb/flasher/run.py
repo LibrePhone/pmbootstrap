@@ -24,7 +24,7 @@ def run(args, action, flavor=None):
     pmb.flasher.init(args)
 
     # Verify action
-    method = args.deviceinfo["flash_methods"]
+    method = args.flash_method or args.deviceinfo["flash_methods"]
     cfg = pmb.config.flashers[method]
     if action not in cfg["actions"]:
         raise RuntimeError("action " + action + " is not"
@@ -42,6 +42,9 @@ def run(args, action, flavor=None):
         "$KERNEL_CMDLINE": _cmdline,
         "$PARTITION_INITFS": args.deviceinfo["flash_heimdall_partition_initfs"],
         "$PARTITION_KERNEL": args.deviceinfo["flash_heimdall_partition_kernel"],
+        "$RECOVERY_ZIP": "/mnt/buildroot_" + args.deviceinfo["arch"] +
+                         "/var/lib/postmarketos-android-recovery-installer"
+                         "/pmos-" + args.device + ".zip",
     }
 
     # Run the commands of each action

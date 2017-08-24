@@ -25,12 +25,8 @@ def arguments_flasher(subparser):
     ret = subparser.add_parser("flasher", help="flash something to the"
                                " target device")
     sub = ret.add_subparsers(dest="action_flasher")
-
-    # Other
-    sub.add_parser("flash_system", help="flash the system partition")
-    sub.add_parser("list_flavors", help="list installed kernel flavors" +
-                   " inside the device rootfs chroot on this computer")
-    sub.add_parser("list_devices", help="show connected devices")
+    ret.add_argument("--method", help="override flash method",
+                     dest="flash_method", default=None)
 
     # Boot, flash kernel, export
     boot = sub.add_parser("boot", help="boot a kernel once")
@@ -41,6 +37,13 @@ def arguments_flasher(subparser):
                                            " kernel, initramfs, boot.img, ...)")
     for action in [boot, flash_kernel, export]:
         action.add_argument("--flavor", default=None)
+
+    # Other
+    sub.add_parser("flash_system", help="flash the system partition")
+    sub.add_parser("list_flavors", help="list installed kernel flavors" +
+                   " inside the device rootfs chroot on this computer")
+    sub.add_parser("list_devices", help="show connected devices")
+    sub.add_parser("sideload", help="sideload recovery zip")
 
     # Export: additional arguments
     export.add_argument("export_folder", help="export folder, defaults to"
@@ -181,6 +184,16 @@ def arguments():
                          " added to the rootfs (e.g. 'vim,gcc')")
     install.add_argument("--no-fde", help="do not use full disk encryption",
                          action="store_false", dest="full_disk_encryption")
+    install.add_argument("--android-recovery-zip",
+                         help="generate TWRP flashable zip",
+                         action="store_true", dest="android_recovery_zip")
+    install.add_argument("--recovery-flash-bootimg",
+                         help="include kernel in recovery flashable zip",
+                         action="store_true", dest="recovery_flash_bootimg")
+    install.add_argument("--recovery-install-partition", default="system",
+                         help="partition to flash from recovery,"
+                              "eg. external_sd",
+                         dest="recovery_install_partition")
 
     # Action: menuconfig / parse_apkbuild
     menuconfig = sub.add_parser("menuconfig", help="run menuconfig on"

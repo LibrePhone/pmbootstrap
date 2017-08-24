@@ -95,6 +95,25 @@ def list_devices(args):
     pmb.flasher.run(args, "list_devices")
 
 
+def sideload(args):
+    # Mount the buildroot
+    suffix = "buildroot_" + args.deviceinfo["arch"]
+    mountpoint = "/mnt/" + suffix
+    pmb.helpers.mount.bind(args, args.work + "/chroot_" + suffix,
+                           args.work + "/chroot_native/" + mountpoint)
+
+    # Missing recovery zip error
+    zip_path = ("/var/lib/postmarketos-android-recovery-installer/pmos-" +
+                args.device + ".zip")
+    if not os.path.exists(args.work + "/chroot_native" + mountpoint +
+                          zip_path):
+        raise RuntimeError("The recovery zip has not been generated yet,"
+                           " please run 'pmbootstrap install' with the"
+                           " '--android-recovery-zip' parameter first!")
+
+    pmb.flasher.run(args, "sideload")
+
+
 def export(args):
     # Create the export folder
     if not os.path.exists(args.export_folder):
@@ -123,5 +142,7 @@ def frontend(args):
         list_flavors(args)
     if action == "list_devices":
         list_devices(args)
+    if action == "sideload":
+        sideload(args)
     if action == "export":
         export(args)
