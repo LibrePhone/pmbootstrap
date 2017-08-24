@@ -8,6 +8,7 @@ For in-depth information please refer to the [postmarketOS wiki](https://github.
 
 ## Requirements
 * Linux distribution (`x86_64` or `aarch64`)
+* 2 GB of RAM recommended for compiling
 * Python 3.4+
 * OpenSSL
 
