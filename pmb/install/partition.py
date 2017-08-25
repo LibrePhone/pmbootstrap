@@ -59,7 +59,10 @@ def partition(args, size_boot):
     logging.info("(native) partition /dev/install (boot: " + mb_boot +
                  ", root: the rest)")
 
-    # Actual partitioning with 'parted'
+    # Actual partitioning with 'parted'. Using check=False, because parted
+    # sometimes "fails to inform the kernel". In case it really failed with
+    # partitioning, the follow-up mounting/formatting will not work, so it
+    # will stop there (see #463).
     commands = [
         ["mktable", "msdos"],
         ["mkpart", "primary", "ext2", "2048s", mb_boot],
@@ -68,7 +71,7 @@ def partition(args, size_boot):
     ]
     for command in commands:
         pmb.chroot.root(args, ["parted", "-s", "/dev/install"] +
-                        command)
+                        command, check=False)
 
     # Mount new partitions
     partitions_mount(args)
