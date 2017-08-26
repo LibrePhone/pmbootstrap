@@ -63,5 +63,8 @@ def confirm(args, question="Continue?", default=False):
     :returns: True for "y", False for "n"
     """
     default_str = "y" if default else "n"
+    if (args.assume_yes):
+        logging.info(question + " (y/n) [" + default_str + "]: y")
+        return True
     answer = ask(args, question, ["y", "n"], default_str, True, "(y|n)")
     return answer == "y"

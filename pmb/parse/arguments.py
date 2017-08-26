@@ -111,6 +111,11 @@ def arguments():
                         action="store_true")
     parser.add_argument("-w", "--work", help="folder where all data"
                         " gets stored (chroots, caches, built packages)")
+    parser.add_argument("-y", "--assume-yes", help="Assume 'yes' to all"
+                        " question prompts. WARNING: this option will"
+                        " cause normal 'are you sure?' prompts to be"
+                        " disabled!",
+                        action="store_true")
 
     # Logging
     parser.add_argument("-l", "--log", dest="log", default=None,
