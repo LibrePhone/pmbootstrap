@@ -145,7 +145,8 @@ def install_is_necessary(args, build, arch, package, packages_installed):
         logging.info("WARNING: " + arch + " package '" + package +
                      "' installed version " + data_installed["version"] +
                      " is newer, than the version in the repositories: " +
-                     data_repo["version"])
+                     data_repo["version"] +
+                     " See also: <https://postmarketos.org/warning-repo>")
         return False
 
     # b) Repo newer

@@ -198,7 +198,8 @@ def is_necessary(args, arch, apkbuild, apkindex_path=None):
     if pmb.parse.version.compare(version_old, version_new) == 1:
         logging.warning("WARNING: Package '" + package + "' in your aports folder"
                         " has version " + version_new + ", but the binary package"
-                        " repositories already have version " + version_old + "!")
+                        " repositories already have version " + version_old + "!"
+                        " See also: <https://postmarketos.org/warning-repo2>")
         return False
 
     # b) Aports folder has a newer version

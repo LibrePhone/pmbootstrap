@@ -128,5 +128,5 @@ def frontend(args):
             build(args, flavor, suffix)
 
     if action in ["ls", "extract"]:
-        link = "https://github.com/postmarketOS/pmbootstrap/wiki/initramfs-development"
+        link = "https://wiki.postmarketos.org/wiki/Initramfs_development"
         logging.info("See also: <" + link + ">")
