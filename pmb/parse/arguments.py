@@ -156,6 +156,9 @@ def arguments():
                      " the precious, self-compiled packages")
     zap.add_argument("-hc", "--http", action="store_true", help="also delete http"
                      "cache")
+    zap.add_argument("-m", "--mismatch-bins", action="store_true", help="also delete"
+                     " binary packages that are newer than the corresponding"
+                     " package in aports")
 
     # Action: stats
     stats = sub.add_parser("stats", help="show ccache stats")
