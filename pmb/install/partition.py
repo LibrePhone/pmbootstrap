@@ -16,8 +16,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
-import os
 import logging
+import os
+import time
 import pmb.chroot
 import pmb.config
 import pmb.install.losetup
@@ -33,9 +34,17 @@ def partitions_mount(args):
         prefix = pmb.install.losetup.device_by_back_file(args, img_path)
 
     partition_prefix = None
-    for symbol in ["p", ""]:
-        if os.path.exists(prefix + symbol + "1"):
-            partition_prefix = symbol
+    tries = 20
+    for i in range(tries):
+        for symbol in ["p", ""]:
+            if os.path.exists(prefix + symbol + "1"):
+                partition_prefix = symbol
+        if partition_prefix is not None:
+            break
+        logging.debug("NOTE: (" + str(i + 1) + "/" + str(tries) + ") failed to find"
+                      " the install partition. Retrying...")
+        time.sleep(0.1)
+
     if partition_prefix is None:
         raise RuntimeError("Unable to find the partition prefix,"
                            " expected the first partition of " +
