@@ -19,6 +19,7 @@ along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 import logging
 
 import pmb.chroot
+import pmb.helpers.frontend
 
 
 def create_zip(args, suffix):
@@ -27,6 +28,7 @@ def create_zip(args, suffix):
     """
     zip_root = "/var/lib/postmarketos-android-recovery-installer/"
     rootfs = "/mnt/rootfs_" + args.device
+    flavor = pmb.helpers.frontend._parse_flavor(args)
 
     # Install recovery installer package in buildroot
     pmb.chroot.apk.install(args,
@@ -52,7 +54,7 @@ def create_zip(args, suffix):
         # Move config file from /tmp/ to zip root
         ["mv", "/tmp/install_options", "install_options"],
         # Copy boot.img to zip root
-        ["cp", rootfs + "/boot/boot.img-" + args.device, "boot.img"],
+        ["cp", rootfs + "/boot/boot.img-" + flavor, "boot.img"],
         # Create tar archive of the rootfs
         ["tar", "-pczf", "rootfs.tar.gz", "--exclude", "./home/user/*",
          "-C", rootfs, "."],

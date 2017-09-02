@@ -25,34 +25,12 @@ import pmb.install
 import pmb.chroot.apk
 import pmb.chroot.initfs
 import pmb.chroot.other
-
-
-def parse_flavor_arg(args):
-    """
-    Verify the flavor argument if specified, or return a default value.
-    """
-    # Make sure, that at least one kernel is installed
-    suffix = "rootfs_" + args.device
-    pmb.chroot.apk.install(args, ["device-" + args.device], suffix)
-
-    # Parse and verify the flavor argument
-    flavor = args.flavor
-    flavors = pmb.chroot.other.kernel_flavors_installed(args, suffix)
-    if flavor:
-        if flavor not in flavors:
-            raise RuntimeError("No kernel installed with flavor " + flavor + "!" +
-                               " Run 'pmbootstrap flasher list_flavors' to get a list.")
-        return flavor
-    if not len(flavors):
-        raise RuntimeError(
-            "No kernel flavors installed in chroot " + suffix + "! Please let"
-            " your device package depend on a package starting with 'linux-'.")
-    return flavors[0]
+import pmb.helpers.frontend
 
 
 def kernel(args):
     # Rebuild the initramfs, just to make sure (see #69)
-    flavor = parse_flavor_arg(args)
+    flavor = pmb.helpers.frontend._parse_flavor(args)
     pmb.chroot.initfs.build(args, flavor, "rootfs_" + args.device)
 
     # Generate the paths and run the flasher
@@ -126,7 +104,7 @@ def export(args):
                      " install' first (without the 'sdcard' parameter).")
 
     # Rebuild the initramfs, just to make sure (see #69)
-    flavor = parse_flavor_arg(args)
+    flavor = pmb.helpers.frontend._parse_flavor(args)
     pmb.chroot.initfs.build(args, flavor, "rootfs_" + args.device)
 
     pmb.flasher.export(args, flavor, args.export_folder)

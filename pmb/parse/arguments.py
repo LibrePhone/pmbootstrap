@@ -192,6 +192,9 @@ def arguments():
                          " added to the rootfs (e.g. 'vim,gcc')")
     install.add_argument("--no-fde", help="do not use full disk encryption",
                          action="store_false", dest="full_disk_encryption")
+    install.add_argument("--flavor",
+                         help="Specify kernel flavor to include in recovery"
+                              " flashable zip", default=None)
     install.add_argument("--android-recovery-zip",
                          help="generate TWRP flashable zip",
                          action="store_true", dest="android_recovery_zip")

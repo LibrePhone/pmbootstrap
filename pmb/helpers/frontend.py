@@ -39,6 +39,29 @@ import pmb.parse
 import pmb.qemu
 
 
+def _parse_flavor(args):
+    """
+    Verify the flavor argument if specified, or return a default value.
+    """
+    # Make sure, that at least one kernel is installed
+    suffix = "rootfs_" + args.device
+    pmb.chroot.apk.install(args, ["device-" + args.device], suffix)
+
+    # Parse and verify the flavor argument
+    flavor = args.flavor
+    flavors = pmb.chroot.other.kernel_flavors_installed(args, suffix)
+    if flavor:
+        if flavor not in flavors:
+            raise RuntimeError("No kernel installed with flavor " + flavor + "!" +
+                               " Run 'pmbootstrap flasher list_flavors' to get a list.")
+        return flavor
+    if not len(flavors):
+        raise RuntimeError(
+            "No kernel flavors installed in chroot " + suffix + "! Please let"
+            " your device package depend on a package starting with 'linux-'.")
+    return flavors[0]
+
+
 def _parse_suffix(args):
     if args.rootfs:
         return "rootfs_" + args.device
