@@ -28,6 +28,11 @@ def deviceinfo(args, device=None):
     if not device:
         device = args.device
 
+    if not os.path.exists(args.aports):
+        logging.fatal("Aports directory is missing")
+        logging.fatal("Please provide a path to the aports directory using the -p flag")
+        raise RuntimeError("Aports directory missing")
+
     aport = args.aports + "/device/device-" + device
     if not os.path.exists(aport) or not os.path.exists(aport + "/deviceinfo"):
         logging.fatal("You will need to create a device-specific package")

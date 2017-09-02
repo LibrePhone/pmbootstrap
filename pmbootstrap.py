@@ -20,50 +20,7 @@ along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 import sys
-import logging
-import os
-import traceback
-import pmb.config
-import pmb.helpers.frontend
-import pmb.helpers.logging
-import pmb.helpers.other
-import pmb.parse
-
-
-def main():
-    # Parse arguments, set up logging
-    args = pmb.parse.arguments()
-    pmb.helpers.logging.init(args)
-
-    # Wrap everything to display nice error messages
-    try:
-        # Sanity check
-        pmb.helpers.other.check_grsec(args)
-
-        # Initialize or require config
-        if args.action == "init":
-            return pmb.config.init(args)
-        elif not os.path.exists(args.config):
-            logging.critical("Please specify a config file, or run"
-                             " 'pmbootstrap init' to generate one.")
-            return 1
-
-        # Run the function with the action's name (in pmb/helpers/frontend.py)
-        if args.action:
-            getattr(pmb.helpers.frontend, args.action)(args)
-        else:
-            logging.info("Run pmbootstrap -h for usage information.")
-
-        # Print finish timestamp
-        logging.info("Done")
-
-    except Exception as e:
-        logging.info("ERROR: " + str(e))
-        logging.info("Run 'pmbootstrap log' for details.")
-        logging.info("See also: <https://postmarketos.org/troubleshooting>")
-        logging.debug(traceback.format_exc())
-        return 1
-
+import pmb
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(pmb.main())
