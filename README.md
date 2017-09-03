@@ -1,10 +1,10 @@
 # pmbootstrap
 
-[**Introduction**](https://ollieparanoid.github.io/post/postmarketOS) | [**Security Warning**](https://ollieparanoid.github.io/post/security-warning/) | [**Supported Devices**](https://wiki.postmarketos.org/wiki/Supported_devices) | [![travis badge](https://api.travis-ci.org/postmarketOS/pmbootstrap.png?branch=master)](https://travis-ci.org/postmarketOS/pmbootstrap)
+[**Introduction**](https://postmarketos.org/blog/2017/05/26/intro/) | [**Security Warning**](https://ollieparanoid.github.io/post/security-warning/) | [**Supported Devices**](https://wiki.postmarketos.org/wiki/Supported_devices) | [![travis badge](https://api.travis-ci.org/postmarketOS/pmbootstrap.png?branch=master)](https://travis-ci.org/postmarketOS/pmbootstrap)
 
 Sophisticated chroot/build/flash tool to develop and install postmarketOS.
 
-For in-depth information please refer to the [postmarketOS wiki](https://github.com/postmarketOS/pmbootstrap/wiki).
+For in-depth information please refer to the [postmarketOS wiki](https://wiki.postmarketos.org).
 
 ## Requirements
 * Linux distribution (`x86_64` or `aarch64`)
