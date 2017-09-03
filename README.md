@@ -8,6 +8,7 @@ For in-depth information please refer to the [postmarketOS wiki](https://wiki.po
 
 ## Requirements
 * Linux distribution (`x86_64` or `aarch64`)
+  * Note: [Windows subsystem for Linux (WSL)](https://en.wikipedia.org/wiki/Windows_Subsystem_for_Linux) does **not** work! Please use [VirtualBox](https://www.virtualbox.org/) instead.
 * 2 GB of RAM recommended for compiling
 * Python 3.4+
 * OpenSSL
