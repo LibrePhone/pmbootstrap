@@ -1,6 +1,6 @@
 # pmbootstrap
 
-[**Introduction**](https://ollieparanoid.github.io/post/postmarketOS) | [**Security Warning**](https://ollieparanoid.github.io/post/security-warning/) | [**Supported Devices**](https://github.com/postmarketOS/pmbootstrap/wiki/Devices) | [![travis badge](https://api.travis-ci.org/postmarketOS/pmbootstrap.png?branch=master)](https://travis-ci.org/postmarketOS/pmbootstrap)
+[**Introduction**](https://ollieparanoid.github.io/post/postmarketOS) | [**Security Warning**](https://ollieparanoid.github.io/post/security-warning/) | [**Supported Devices**](https://wiki.postmarketos.org/wiki/Supported_devices) | [![travis badge](https://api.travis-ci.org/postmarketOS/pmbootstrap.png?branch=master)](https://travis-ci.org/postmarketOS/pmbootstrap)
 
 Sophisticated chroot/build/flash tool to develop and install postmarketOS.
 
@@ -14,7 +14,7 @@ For in-depth information please refer to the [postmarketOS wiki](https://github.
 
 ## Usage
 
-Assuming you have a supported device, you can build and flash a postmarketOS image by running through the following steps. For new devices check the [porting guide](https://github.com/postmarketOS/pmbootstrap/wiki/Porting-to-a-new-device).
+Assuming you have a supported device, you can build and flash a postmarketOS image by running through the following steps. For new devices check the [porting guide](https://wiki.postmarketos.org/wiki/Porting_to_a_new_device).
 
 First, clone the git repository and initialize your pmbootstrap environment:
 
@@ -53,7 +53,7 @@ Trying 172.16.42.1...
 Connected to 172.16.42.1.
 Escape character is '^]'.
 
-Enter passphrase for /dev/mapper/mmcblk0p25p2: 
+Enter passphrase for /dev/mapper/mmcblk0p25p2:
 Connection closed by foreign host.
 ```
 
@@ -72,4 +72,3 @@ Install `pytest` (via your package manager or pip) and run it inside the pmboots
 ## License
 
 [GPLv3](LICENSE)
-
