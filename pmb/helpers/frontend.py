@@ -140,6 +140,10 @@ def flasher(args):
     pmb.flasher.frontend(args)
 
 
+def export(args):
+    pmb.export.frontend(args)
+
+
 def menuconfig(args):
     pmb.build.menuconfig(args, args.package, args.deviceinfo["arch"])
 
@@ -174,7 +178,8 @@ def stats(args):
 
 def log(args):
     if args.clear_log:
-        pmb.helpers.run.user(args, ["truncate", "-s", "0", args.log], log=False)
+        pmb.helpers.run.user(args, ["truncate", "-s", "0", args.log],
+                             log=False)
     pmb.helpers.run.user(args, ["tail", "-f", args.log, "-n", args.lines],
                          log=False)
 
@@ -187,4 +192,5 @@ def log_distccd(args):
 
 
 def zap(args):
-    pmb.chroot.zap(args, packages=args.packages, http=args.http, mismatch_bins=args.mismatch_bins)
+    pmb.chroot.zap(args, packages=args.packages, http=args.http,
+                   mismatch_bins=args.mismatch_bins)

@@ -212,8 +212,8 @@ def install_system_image(args):
 
     # Export information
     logging.info("* If the above steps do not work, you can also create"
-                 " symlinks to the generated files with 'pmbootstrap flasher"
-                 " export [export_folder]' and flash outside of pmbootstrap.")
+                 " symlinks to the generated files with 'pmbootstrap export'"
+                 " and flash outside of pmbootstrap.")
 
 
 def install_recovery_zip(args):
@@ -231,9 +231,8 @@ def install_recovery_zip(args):
 
     # Export information
     logging.info("* If this does not work, you can also create a"
-                 " symlink to the generated zip with 'pmbootstrap flasher"
-                 " export --android-recovery-zip [export_folder]' and"
-                 " flash outside of pmbootstrap.")
+                 " symlink to the generated zip with 'pmbootstrap"
+                 " export' and flash outside of pmbootstrap.")
 
 
 def install(args):

@@ -21,6 +21,21 @@ import pmb.config
 import pmb.parse.arch
 
 
+def arguments_export(subparser):
+    ret = subparser.add_parser("export", help="create convenience symlinks"
+                               " to generated image files (system, kernel,"
+                               " initramfs, boot.img, ...)")
+
+    ret.add_argument("export_folder", help="export folder, defaults to"
+                                           " /tmp/postmarketOS-export",
+                     default="/tmp/postmarketOS-export", nargs="?")
+    ret.add_argument("--odin", help="odin flashable tar"
+                                    " (boot.img/kernel+initramfs only)",
+                     action="store_true", dest="odin_flashable_tar")
+    ret.add_argument("--flavor", default=None)
+    return ret
+
+
 def arguments_flasher(subparser):
     ret = subparser.add_parser("flasher", help="flash something to the"
                                " target device")
@@ -28,29 +43,22 @@ def arguments_flasher(subparser):
     ret.add_argument("--method", help="override flash method",
                      dest="flash_method", default=None)
 
-    # Boot, flash kernel, export
+    # Boot, flash kernel
     boot = sub.add_parser("boot", help="boot a kernel once")
     boot.add_argument("--cmdline", help="override kernel commandline")
     flash_kernel = sub.add_parser("flash_kernel", help="flash a kernel")
-    export = sub.add_parser("export", help="create convenience symlinks to the"
-                                           " generated image files (system,"
-                                           " kernel, initramfs, boot.img, ...)")
-    for action in [boot, flash_kernel, export]:
+    for action in [boot, flash_kernel]:
         action.add_argument("--flavor", default=None)
 
-    # Other
+    # Actions without extra arguments
     sub.add_parser("flash_system", help="flash the system partition")
+    sub.add_parser("sideload", help="sideload recovery zip")
     sub.add_parser("list_flavors", help="list installed kernel flavors" +
                    " inside the device rootfs chroot on this computer")
     sub.add_parser("list_devices", help="show connected devices")
-    sub.add_parser("sideload", help="sideload recovery zip")
 
-    # Export: additional arguments
-    export.add_argument("export_folder", help="export folder, defaults to"
-                                              " /tmp/postmarketOS-export",
-                        default="/tmp/postmarketOS-export", nargs="?")
-    export.add_argument("--odin", help="odin flashable tar (boot.img/kernel+initramfs only)",
-                        action="store_true", dest="odin_flashable_tar")
+    # Deprecated "pmbootstrap flasher export"
+    arguments_export(sub)
     return ret
 
 
@@ -136,6 +144,7 @@ def arguments():
     sub.add_parser("shutdown", help="umount, unregister binfmt")
     sub.add_parser("index", help="re-index all repositories with custom built"
                    " packages (do this after manually removing package files)")
+    arguments_export(sub)
     arguments_flasher(sub)
     arguments_initfs(sub)
 

@@ -16,6 +16,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
-from pmb.flasher.init import init
-from pmb.flasher.run import run
-from pmb.flasher.frontend import frontend
+from pmb.export.frontend import frontend
+from pmb.export.odin import odin
+from pmb.export.symlinks import symlinks

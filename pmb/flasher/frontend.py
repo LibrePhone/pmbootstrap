@@ -25,6 +25,7 @@ import pmb.install
 import pmb.chroot.apk
 import pmb.chroot.initfs
 import pmb.chroot.other
+import pmb.export.frontend
 import pmb.helpers.frontend
 
 
@@ -92,24 +93,6 @@ def sideload(args):
     pmb.flasher.run(args, "sideload")
 
 
-def export(args):
-    # Create the export folder
-    if not os.path.exists(args.export_folder):
-        pmb.helpers.run.user(args, ["mkdir", "-p", args.export_folder])
-
-    # System image note
-    img_path = "/home/user/rootfs/" + args.device + ".img"
-    if not os.path.exists(args.work + "/chroot_native" + img_path):
-        logging.info("NOTE: To export the system image, run 'pmbootstrap"
-                     " install' first (without the 'sdcard' parameter).")
-
-    # Rebuild the initramfs, just to make sure (see #69)
-    flavor = pmb.helpers.frontend._parse_flavor(args)
-    pmb.chroot.initfs.build(args, flavor, "rootfs_" + args.device)
-
-    pmb.flasher.export(args, flavor, args.export_folder)
-
-
 def frontend(args):
     action = args.action_flasher
     if action in ["boot", "flash_kernel"]:
@@ -123,4 +106,7 @@ def frontend(args):
     if action == "sideload":
         sideload(args)
     if action == "export":
-        export(args)
+        logging.info("WARNING: 'pmbootstrap flasher export' is deprecated and"
+                     " will be removed soon. The new syntax is 'pmbootstrap"
+                     " export'.")
+        pmb.export.frontend(args)
