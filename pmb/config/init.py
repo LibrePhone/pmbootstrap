@@ -129,6 +129,8 @@ def init(args):
     # Save config
     pmb.config.save(args, cfg)
 
+    # Zap existing chroots
+    setattr(args, "work", cfg["pmbootstrap"]["work"])
     if (device_exists and
             len(glob.glob(args.work + "/chroot_*")) and
             pmb.helpers.cli.confirm(args, "Zap existing chroots to apply configuration?", default=True)):
