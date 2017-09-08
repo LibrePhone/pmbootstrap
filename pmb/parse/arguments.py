@@ -231,6 +231,15 @@ def arguments():
     build.add_argument("--arch")
     build.add_argument("--force", action="store_true")
     build.add_argument("--buildinfo", action="store_true")
+    build.add_argument("--strict", action="store_true", help="(slower) zap and install only"
+                       " required depends when building, to detect dependency errors")
+    build.add_argument("--noarch-arch", dest="noarch_arch", default=None,
+                       help="which architecture to use to build 'noarch'"
+                            " packages. Defaults to the native arch normally,"
+                            " and to the device arch when --strict is set."
+                            " Override in case of strict mode failing on"
+                            " dependencies, which only exist for a certain"
+                            " arch.")
     for action in [checksum, build, aportgen]:
         action.add_argument("packages", nargs="+")
 

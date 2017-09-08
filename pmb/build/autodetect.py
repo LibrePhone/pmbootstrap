@@ -22,8 +22,12 @@ import pmb.chroot.apk
 import pmb.parse.arch
 
 
-def carch(args, apkbuild, carch):
+def carch(args, apkbuild, carch, strict=False):
     if "noarch" in apkbuild["arch"]:
+        if "noarch_arch" in args and args.noarch_arch:
+            return args.noarch_arch
+        if strict:
+            return args.deviceinfo["arch"]
         return args.arch_native
     if carch:
         if "all" not in apkbuild["arch"] and carch not in apkbuild["arch"]:
@@ -40,8 +44,6 @@ def carch(args, apkbuild, carch):
 
 def suffix(args, apkbuild, carch):
     if carch == args.arch_native:
-        return "native"
-    if "noarch" in apkbuild["arch"]:
         return "native"
 
     pkgname = apkbuild["pkgname"]

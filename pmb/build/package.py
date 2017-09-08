@@ -29,7 +29,7 @@ import pmb.parse
 import pmb.parse.arch
 
 
-def package(args, pkgname, carch, force=False, buildinfo=False):
+def package(args, pkgname, carch, force=False, buildinfo=False, strict=False):
     """
     Build a package with Alpine Linux' abuild.
 
@@ -47,7 +47,7 @@ def package(args, pkgname, carch, force=False, buildinfo=False):
     # Autodetect the build environment
     apkbuild = pmb.parse.apkbuild(args, aport + "/APKBUILD")
     pkgname = apkbuild["pkgname"]
-    carch_buildenv = pmb.build.autodetect.carch(args, apkbuild, carch)
+    carch_buildenv = pmb.build.autodetect.carch(args, apkbuild, carch, strict)
     suffix = pmb.build.autodetect.suffix(args, apkbuild, carch_buildenv)
     cross = pmb.build.autodetect.crosscompile(args, apkbuild, carch_buildenv,
                                               suffix)
@@ -59,7 +59,11 @@ def package(args, pkgname, carch, force=False, buildinfo=False):
     # Initialize build environment, install/build makedepends
     pmb.build.init(args, suffix)
     if len(apkbuild["makedepends"]):
-        pmb.chroot.apk.install(args, apkbuild["makedepends"], suffix)
+        if strict:
+            for makedepend in apkbuild["makedepends"]:
+                package(args, makedepend, carch_buildenv, strict=True)
+        else:
+            pmb.chroot.apk.install(args, apkbuild["makedepends"], suffix)
     if cross:
         pmb.chroot.apk.install(args, ["gcc-" + carch_buildenv,
                                       "g++-" + carch_buildenv,
@@ -87,7 +91,7 @@ def package(args, pkgname, carch, force=False, buildinfo=False):
                      " cross-compiling in the native chroot. This will probably"
                      " fail!")
 
-    # Run abuild with ignored dependencies
+    # Run abuild
     pmb.build.copy_to_buildpath(args, pkgname, suffix)
     cmd = []
     env = {"CARCH": carch_buildenv}
@@ -100,7 +104,11 @@ def package(args, pkgname, carch, force=False, buildinfo=False):
         env["DISTCC_HOSTS"] = "127.0.0.1:" + args.port_distccd
     for key, value in env.items():
         cmd += [key + "=" + value]
-    cmd += ["abuild", "-d"]
+    cmd += ["abuild"]
+    if strict:
+        cmd += ["-r"]  # install depends with abuild
+    else:
+        cmd += ["-d"]  # do not install depends with abuild
     if force:
         cmd += ["-f"]
     pmb.chroot.user(args, cmd, suffix, "/home/user/build")
@@ -120,8 +128,11 @@ def package(args, pkgname, carch, force=False, buildinfo=False):
     if "noarch" in apkbuild["arch"]:
         pmb.build.symlink_noarch_package(args, output)
 
-    # Clear APKINDEX cache
+    # Clean up (APKINDEX cache, depends when strict)
     pmb.parse.apkindex.clear_cache(args, args.work + "/packages/" +
                                    carch_buildenv + "/APKINDEX.tar.gz")
+    if strict:
+        logging.info("(" + suffix + ") uninstall makedepends")
+        pmb.chroot.user(args, ["abuild", "undeps"], suffix, "/home/user/build")
 
     return output

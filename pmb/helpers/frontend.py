@@ -79,9 +79,11 @@ def aportgen(args):
 
 
 def build(args):
+    if args.strict:
+        pmb.chroot.zap(args, False)
     for package in args.packages:
         pmb.build.package(args, package, args.arch, args.force,
-                          args.buildinfo)
+                          args.buildinfo, args.strict)
 
 
 def build_init(args):
