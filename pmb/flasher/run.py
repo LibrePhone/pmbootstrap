@@ -40,8 +40,9 @@ def run(args, action, flavor=None):
         "$FLAVOR": flavor if flavor is not None else "",
         "$IMAGE": "/home/user/rootfs/" + args.device + ".img",
         "$KERNEL_CMDLINE": _cmdline,
-        "$PARTITION_INITFS": args.deviceinfo["flash_heimdall_partition_initfs"],
-        "$PARTITION_KERNEL": args.deviceinfo["flash_heimdall_partition_kernel"],
+        "$PARTITION_KERNEL": args.deviceinfo["flash_heimdall_partition_kernel"] or "KERNEL",
+        "$PARTITION_INITFS": args.deviceinfo["flash_heimdall_partition_initfs"] or "RECOVERY",
+        "$PARTITION_SYSTEM": args.deviceinfo["flash_heimdall_partition_system"] or "SYSTEM",
         "$RECOVERY_ZIP": "/mnt/buildroot_" + args.deviceinfo["arch"] +
                          "/var/lib/postmarketos-android-recovery-installer"
                          "/pmos-" + args.device + ".zip",
