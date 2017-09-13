@@ -65,8 +65,7 @@ def zap(args, confirm=True, packages=False, http=False, mismatch_bins=False):
 
 
 def binaries(args):
-    for arch_dir in os.scandir(os.path.realpath(args.work + "/packages/")):
-        arch = arch_dir.name
+    for arch in os.listdir(os.path.realpath(args.work + "/packages/")):
         arch_pkg_path = os.path.realpath(args.work) + "/packages/" + arch
         bin_apks = pmb.parse.apkindex.parse(args, arch_pkg_path + "/APKINDEX.tar.gz")
         for bin_apk in bin_apks:
