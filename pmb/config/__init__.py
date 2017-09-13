@@ -242,9 +242,10 @@ Flasher abstraction. Allowed variables:
 $BOOT: Path to the /boot partition
 $FLAVOR: Kernel flavor
 $IMAGE: Path to the system partition image
+$PARTITION_SYSTEM: Partition to flash the system image
 
 Fastboot specific: $KERNEL_CMDLINE
-Heimdall specific: $PARTITION_KERNEL, $PARTITION_INITFS, $PARTITION_SYSTEM
+Heimdall specific: $PARTITION_KERNEL, $PARTITION_INITFS
 """
 flashers = {
     "fastboot": {
@@ -252,7 +253,7 @@ flashers = {
         "actions":
                 {
                     "list_devices": [["fastboot", "devices", "-l"]],
-                    "flash_system": [["fastboot", "flash", "system", "$IMAGE"]],
+                    "flash_system": [["fastboot", "flash", "$PARTITION_SYSTEM", "$IMAGE"]],
                     "flash_kernel": [["fastboot", "flash", "boot", "$BOOT/boot.img-$FLAVOR"]],
                     "boot": [["fastboot", "-c", "$KERNEL_CMDLINE", "boot", "$BOOT/boot.img-$FLAVOR"]],
 
