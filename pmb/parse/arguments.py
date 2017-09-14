@@ -172,6 +172,8 @@ def arguments():
     zap.add_argument("-m", "--mismatch-bins", action="store_true", help="also delete"
                      " binary packages that are newer than the corresponding"
                      " package in aports")
+    zap.add_argument("-d", "--distfiles", action="store_true", help="also delete"
+                     " downloaded files cache")
 
     # Action: stats
     stats = sub.add_parser("stats", help="show ccache stats")
