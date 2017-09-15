@@ -19,6 +19,7 @@ along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 import logging
 import os
 import shutil
+import re
 
 import pmb.build
 import pmb.chroot
@@ -134,6 +135,43 @@ def qemu_command(args, arch, device, img_path):
     return command
 
 
+def resize_image(args, img_size_new, img_path):
+    """
+    Truncates the system image to a specific size. The value must be larger than the
+    current image size, and it must be specified in MiB or GiB units (powers of 1024).
+
+    :param img_size_new: new image size in M or G
+    :param img_path: the path to the system image
+    """
+    # current image size in bytes
+    img_size = os.path.getsize(img_path)
+
+    # make sure we have at least 1 integer followed by either M or G
+    pattern = re.compile("^[0-9]+[M|G]$")
+    if not pattern.match(img_size_new):
+        raise RuntimeError("You must specify the system image size in [M]iB or [G]iB, e.g. 2048M or 2G")
+
+    # remove M or G and convert to bytes
+    img_size_new_bytes = int(img_size_new[:-1]) * 1024 * 1024
+
+    # convert further for G
+    if (img_size_new[-1] == "G"):
+        img_size_new_bytes = img_size_new_bytes * 1024
+
+    if (img_size_new_bytes >= img_size):
+        logging.info("Setting the system image size to " + img_size_new)
+        pmb.helpers.run.root(args, ["truncate", "-s", img_size_new, img_path])
+    else:
+        # convert to human-readable format
+        # Note: We convert to M here, and not G, so that we don't have to display
+        # a size like 1.25G, since decimal places are not allowed by truncate.
+        # We don't want users thinking they can use decimal numbers, and so in
+        # this example, they would need to use a size greater then 1280M instead.
+        img_size_str = str(round(img_size / 1024 / 1024)) + "M"
+
+        raise RuntimeError("The system image size must be " + img_size_str + " or greater")
+
+
 def run(args):
     """
     Run a postmarketOS image in qemu
@@ -154,6 +192,13 @@ def run(args):
     command = qemu_command(args, arch, device, img_path)
 
     logging.info("Command: " + " ".join(command))
+
+    if args.image_size:
+        resize_image(args, args.image_size, img_path)
+    else:
+        logging.info("NOTE: Run 'pmbootstrap qemu --image-size 2G' to set"
+                     " the system image size when you run out of space!")
+
     print()
     logging.info("You can connect to the Virtual Machine using the"
                  " following services:")

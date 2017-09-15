@@ -280,6 +280,7 @@ def arguments():
     qemu.add_argument("--arch", choices=["aarch64", "arm", "x86_64"],
                       help="emulate a different architecture")
     qemu.add_argument("--cmdline", help="override kernel commandline")
+    qemu.add_argument("--image-size", help="set system image size (e.g. 2048M or 2G)")
     qemu.add_argument("-m", "--memory", type=int, default=1024,
                       help="guest RAM (default: 1024)")
     qemu.add_argument("-p", "--port", type=int, default=2222,
