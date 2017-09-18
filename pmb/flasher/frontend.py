@@ -27,12 +27,16 @@ import pmb.chroot.initfs
 import pmb.chroot.other
 import pmb.export.frontend
 import pmb.helpers.frontend
+import pmb.parse.kconfig
 
 
 def kernel(args):
     # Rebuild the initramfs, just to make sure (see #69)
     flavor = pmb.helpers.frontend._parse_flavor(args)
     pmb.chroot.initfs.build(args, flavor, "rootfs_" + args.device)
+
+    # Check kernel config
+    pmb.parse.kconfig.check(args, flavor)
 
     # Generate the paths and run the flasher
     if args.action_flasher == "boot":

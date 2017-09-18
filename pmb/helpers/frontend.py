@@ -19,8 +19,10 @@ You should have received a copy of the GNU General Public License
 along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import logging
+import glob
 import json
+import logging
+import os
 import sys
 
 import pmb.aportgen
@@ -148,6 +150,25 @@ def export(args):
 
 def menuconfig(args):
     pmb.build.menuconfig(args, args.package, args.deviceinfo["arch"])
+
+
+def kconfig_check(args):
+    # Default to all kernel packages
+    packages = args.packages
+    if not packages:
+        for aport in glob.glob(args.aports + "/*/linux-*"):
+            packages.append(os.path.basename(aport).split("linux-")[1])
+
+    # Iterate over all kernels
+    error = False
+    packages.sort()
+    for package in packages:
+        if not pmb.parse.kconfig.check(args, package, details=True):
+            error = True
+
+    # At least one failure
+    if error:
+        raise RuntimeError("kconfig_check failed!")
 
 
 def parse_apkbuild(args):

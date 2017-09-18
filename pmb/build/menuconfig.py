@@ -72,3 +72,6 @@ def menuconfig(args, pkgname, arch):
     target = aport + "/" + config
     pmb.helpers.run.user(args, ["cp", source, target])
     pmb.build.checksum(args, pkgname)
+
+    # Check config
+    pmb.parse.kconfig.check(args, apkbuild["_flavor"], details=True)

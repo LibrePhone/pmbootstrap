@@ -249,6 +249,12 @@ def arguments():
     for action in [checksum, build, aportgen]:
         action.add_argument("packages", nargs="+")
 
+    # Action: kconfig_check
+    kconfig_check = sub.add_parser("kconfig_check", help="check, whether all"
+                                   " the necessary options are"
+                                   " enabled/disabled in the kernel config")
+    kconfig_check.add_argument("packages", nargs="*")
+
     # Action: challenge
     challenge = sub.add_parser("challenge",
                                help="verify, that all files in an apk can be"

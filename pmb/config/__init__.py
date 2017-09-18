@@ -130,6 +130,14 @@ build_packages = ["abuild", "build-base", "ccache"]
 # the native chroot and a cross-compiler, without using distcc
 build_cross_native = ["linux-*"]
 
+# Necessary kernel config options
+necessary_kconfig_options = {
+    "DEVTMPFS": True,
+    "DEVTMPFS_MOUNT": False,
+    "DM_CRYPT": True,
+    "VT": True,
+}
+
 
 #
 # PARSE
