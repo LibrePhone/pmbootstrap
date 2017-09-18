@@ -64,10 +64,11 @@ def menuconfig(args, pkgname, arch):
     pmb.chroot.user(args, cmd, "native", "/home/user/build", log=False)
 
     # Update config + checksums
+    config = "config-" + apkbuild["_flavor"] + "." + arch
     logging.info("Copy kernel config back to aport-folder")
-    source = args.work + "/chroot_native/home/user/build/src/build/.config"
+    source = args.work + "/chroot_native/home/user/build/" + config
     if not os.path.exists(source):
         raise RuntimeError("No kernel config generated!")
-    target = aport + "/config-" + apkbuild["_flavor"] + "." + arch
+    target = aport + "/" + config
     pmb.helpers.run.user(args, ["cp", source, target])
     pmb.build.checksum(args, pkgname)
