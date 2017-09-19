@@ -25,7 +25,7 @@ import pmb.parse.apkindex
 def recurse_error_message(pkgname, in_aports, in_apkindexes):
     ret = "Could not find package '" + pkgname + "'"
     if in_aports:
-        ret += " aport"
+        ret += " in the aports folder"
         if in_apkindexes:
             ret += " and could not find it"
     if in_apkindexes:
@@ -64,6 +64,7 @@ def recurse(args, pkgnames, arch=None, in_apkindexes=True, in_aports=True,
         # Get depends and pkgname from aports
         logging.verbose("Get dependencies of: " + pkgname_depend)
         depends = None
+        pkgname = None
         if in_aports:
             aport = pmb.build.find_aport(args, pkgname_depend, False)
             if aport:
@@ -88,7 +89,7 @@ def recurse(args, pkgnames, arch=None, in_apkindexes=True, in_aports=True,
         if pkgname is None and strict:
             raise RuntimeError(
                 recurse_error_message(
-                    pkgname,
+                    pkgname_depend,
                     in_aports,
                     in_apkindexes))
 
