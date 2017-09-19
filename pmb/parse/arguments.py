@@ -203,6 +203,9 @@ def arguments():
                          " eg. /dev/mmcblk0")
     install.add_argument("--cipher", help="cryptsetup cipher used to"
                          " encrypt the system partition, eg. aes-xts-plain64")
+    install.add_argument("--iter-time", help="cryptsetup iteration time (in"
+                         " miliseconds) to use when encrypting the system"
+                         " partiton")
     install.add_argument("--add", help="comma separated list of packages to be"
                          " added to the rootfs (e.g. 'vim,gcc')")
     install.add_argument("--no-fde", help="do not use full disk encryption",
@@ -218,7 +221,7 @@ def arguments():
                          action="store_true", dest="recovery_flash_bootimg")
     install.add_argument("--recovery-install-partition", default="system",
                          help="partition to flash from recovery,"
-                              "eg. external_sd",
+                              " eg. external_sd",
                          dest="recovery_install_partition")
 
     # Action: menuconfig / parse_apkbuild

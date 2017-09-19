@@ -40,7 +40,8 @@ def format_and_mount_root(args):
         logging.info(
             " *** TYPE IN THE FULL DISK ENCRYPTION PASSWORD (TWICE!) ***")
         pmb.chroot.root(args, ["cryptsetup", "luksFormat", "--use-urandom",
-                               "--cipher", args.cipher, "-q", device], log=False)
+                               "--cipher", args.cipher, "-q", device,
+                               "--iter-time", args.iter_time], log=False)
         pmb.chroot.root(args, ["cryptsetup", "luksOpen", device,
                                "pm_crypt"], log=False)
         if not os.path.exists(args.work + "/chroot_native" + mountpoint):
