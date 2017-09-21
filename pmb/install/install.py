@@ -123,18 +123,35 @@ def set_user_password(args):
 
 def copy_ssh_key(args):
     """
-    Offer to copy user's SSH public key to the device if it exists
+    Offer to copy user's SSH public keys to the device if they exist
     """
-    user_ssh_pubkey = os.path.expanduser("~/.ssh/id_rsa.pub")
+    keys = []
+    for key in ["RSA", "Ed25519"]:
+        user_ssh_pubkey = os.path.expanduser("~/.ssh/id_" + key.lower() + ".pub")
+        if not os.path.exists(user_ssh_pubkey):
+            logging.info("NOTE: Public " + key + " SSH key not found. If no SSH key " +
+                         "is copied, you will need to use SSH password authentication!")
+            continue
+        if pmb.helpers.cli.confirm(
+                args, "Would you like to copy your " + key + " SSH public key to the device?"):
+            with open(user_ssh_pubkey, "r") as infile:
+                keys += infile.readlines()
+
+    if not len(keys):
+        return
+
+    authorized_keys = args.work + "/chroot_native/tmp/authorized_keys"
+    outfile = open(authorized_keys, "w")
+    for key in keys:
+        outfile.write("%s" % key)
+    outfile.close()
+
     target = args.work + "/chroot_native/mnt/install/home/user/.ssh"
-    if os.path.exists(user_ssh_pubkey):
-        if pmb.helpers.cli.confirm(args, "Would you like to copy your SSH public key to the device?"):
-            pmb.helpers.run.root(args, ["mkdir", target])
-            pmb.helpers.run.root(args, ["chmod", "700", target])
-            pmb.helpers.run.root(args, ["cp", user_ssh_pubkey, target + "/authorized_keys"])
-            pmb.helpers.run.root(args, ["chown", "-R", "12345:12345", target])
-    else:
-        logging.info("NOTE: No public SSH key found, you will only be able to use SSH password authentication!")
+    pmb.helpers.run.root(args, ["mkdir", target])
+    pmb.helpers.run.root(args, ["chmod", "700", target])
+    pmb.helpers.run.root(args, ["cp", authorized_keys, target + "/authorized_keys"])
+    pmb.helpers.run.root(args, ["rm", authorized_keys])
+    pmb.helpers.run.root(args, ["chown", "-R", "12345:12345", target])
 
 
 def setup_keymap(args):
