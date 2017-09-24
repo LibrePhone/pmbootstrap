@@ -129,8 +129,6 @@ def copy_ssh_key(args):
     for key in ["RSA", "Ed25519"]:
         user_ssh_pubkey = os.path.expanduser("~/.ssh/id_" + key.lower() + ".pub")
         if not os.path.exists(user_ssh_pubkey):
-            logging.info("NOTE: Public " + key + " SSH key not found. If no SSH key " +
-                         "is copied, you will need to use SSH password authentication!")
             continue
         if pmb.helpers.cli.confirm(
                 args, "Would you like to copy your " + key + " SSH public key to the device?"):
@@ -138,6 +136,8 @@ def copy_ssh_key(args):
                 keys += infile.readlines()
 
     if not len(keys):
+        logging.info("NOTE: Public SSH keys not found. Since no SSH keys " +
+                     "were copied, you will need to use SSH password authentication!")
         return
 
     authorized_keys = args.work + "/chroot_native/tmp/authorized_keys"
