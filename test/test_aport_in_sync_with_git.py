@@ -117,3 +117,20 @@ def test_aport_in_sync_with_git(args):
     # TODO:
     # - reinstall git, but rm .git, check again
     # - remove temporary folder
+
+
+def test_ambigious_argument(args):
+    """
+    Testcase for #151, forces "fatal: ambiguous argument" in git.
+    See also: https://stackoverflow.com/a/17639471
+    """
+
+    # Delete origin/HEAD
+    aports = temp_aports_repo(args)
+    pmb.chroot.user(args, ["git", "update-ref", "-d", "refs/remotes/origin/HEAD"],
+                    working_dir=aports)
+
+    # Check for exception
+    with pytest.raises(RuntimeError) as e:
+        out_of_sync_files(args)
+    assert "'origin/HEAD' reference" in str(e.value)

@@ -23,8 +23,9 @@ import shutil
 
 import pmb.build.other
 import pmb.chroot
-import pmb.helpers.run
 import pmb.helpers.file
+import pmb.helpers.git
+import pmb.helpers.run
 import pmb.parse.apkindex
 import pmb.parse.version
 
@@ -127,11 +128,8 @@ def aports_files_out_of_sync_with_git(args, package=None):
             git_root = git_root.rstrip()
     ret = []
     if git_root and os.path.exists(git_root):
-        # Find tracked files out of sync with upstream
-        tracked = pmb.helpers.run.user(args, ["git", "diff", "--name-only", "origin"],
-                                       working_dir=git_root, return_stdout=True)
-
-        # Find all untracked files
+        # Find all out of sync files
+        tracked = pmb.helpers.git.find_out_of_sync_files_tracked(args, git_root)
         untracked = pmb.helpers.run.user(
             args, ["git", "ls-files", "--others", "--exclude-standard"],
             working_dir=git_root, return_stdout=True)
