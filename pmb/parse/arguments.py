@@ -294,6 +294,11 @@ def arguments():
                       help="guest RAM (default: 1024)")
     qemu.add_argument("-p", "--port", type=int, default=2222,
                       help="ssh port (default: 2222)")
+    qemu.add_argument("--spice", dest="use_spice",
+                      default=False, action="store_true",
+                      help="connect to the VM using SPICE (NOTE: you need to"
+                           " have a SPICE client installed in your host"
+                           " machine)")
 
     # Use defaults from the user's config file
     args = parser.parse_args()
