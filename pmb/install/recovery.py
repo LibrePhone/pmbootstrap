@@ -19,6 +19,7 @@ along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 import logging
 
 import pmb.chroot
+import pmb.flasher
 import pmb.helpers.frontend
 
 
@@ -29,6 +30,8 @@ def create_zip(args, suffix):
     zip_root = "/var/lib/postmarketos-android-recovery-installer/"
     rootfs = "/mnt/rootfs_" + args.device
     flavor = pmb.helpers.frontend._parse_flavor(args)
+    method = args.deviceinfo["flash_methods"]
+    vars = pmb.flasher.variables(args, flavor, method)
 
     # Install recovery installer package in buildroot
     pmb.chroot.apk.install(args,
@@ -38,23 +41,30 @@ def create_zip(args, suffix):
     logging.info("(" + suffix + ") create recovery zip")
 
     # Create config file for the recovery installer
-    with open(args.work + "/chroot_" + suffix + "/tmp/install_options",
-              "w") as install_options:
-        install_options.write(
-            "\n".join(['DEVICE="{}"'.format(args.device),
-                       'FLASH_BOOTIMG="{}"'.format(
-                           str(args.recovery_flash_bootimg).lower()),
-                       'INSTALL_PARTITION="{}"'.format(
-                           args.recovery_install_partition),
-                       'CIPHER="{}"'.format(args.cipher),
-                       'FDE="{}"'.format(
-                           str(args.full_disk_encryption).lower())]))
+    options = {
+        "DEVICE": args.device,
+        "FLAVOR": flavor,
+        "FLASH_KERNEL": args.recovery_flash_kernel,
+        "ISOREC": method == "heimdall-isorec",
+        "KERNEL_PARTLABEL": vars["$PARTITION_KERNEL"],
+        "INITFS_PARTLABEL": vars["$PARTITION_INITFS"],
+        "SYSTEM_PARTLABEL": vars["$PARTITION_SYSTEM"],
+        "INSTALL_PARTITION": args.recovery_install_partition,
+        "CIPHER": args.cipher,
+        "FDE": args.full_disk_encryption,
+    }
+
+    # Write to a temporary file
+    config_temp = args.work + "/chroot_" + suffix + "/tmp/install_options"
+    with open(config_temp, "w") as handle:
+        for key, value in options.items():
+            if isinstance(value, bool):
+                value = str(value).lower()
+            handle.write(key + "='" + value + "'\n")
 
     commands = [
         # Move config file from /tmp/ to zip root
         ["mv", "/tmp/install_options", "install_options"],
-        # Copy boot.img to zip root
-        ["cp", rootfs + "/boot/boot.img-" + flavor, "boot.img"],
         # Create tar archive of the rootfs
         ["tar", "-pczf", "rootfs.tar.gz", "--exclude", "./home/user/*",
          "-C", rootfs, "."],

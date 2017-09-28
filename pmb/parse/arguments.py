@@ -216,13 +216,13 @@ def arguments():
     install.add_argument("--android-recovery-zip",
                          help="generate TWRP flashable zip",
                          action="store_true", dest="android_recovery_zip")
-    install.add_argument("--recovery-flash-bootimg",
-                         help="include kernel in recovery flashable zip",
-                         action="store_true", dest="recovery_flash_bootimg")
     install.add_argument("--recovery-install-partition", default="system",
                          help="partition to flash from recovery,"
                               " eg. external_sd",
                          dest="recovery_install_partition")
+    install.add_argument("--recovery-no-kernel",
+                         help="do not overwrite the existing kernel",
+                         action="store_false", dest="recovery_flash_kernel")
 
     # Action: menuconfig / parse_apkbuild
     menuconfig = sub.add_parser("menuconfig", help="run menuconfig on"
