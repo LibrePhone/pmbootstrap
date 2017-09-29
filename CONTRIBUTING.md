@@ -10,6 +10,7 @@ See pmbootstrap's [Development Guide](https://wiki.postmarketos.org/wiki/Develop
 ### Contributing code changes
 * [Fork](https://guides.github.com/activities/forking/) this repository, commit your changes and then make a [pull-request](https://guides.github.com/activities/forking/#making-a-pull-request) (PR).
 * Please test your code before submitting a PR.
+* We squash all commits from one PR into one commit. Please make multiple PRs if you feel like your changes should appear as multiple commits in the git log ([more information](https://wiki.postmarketos.org/wiki/FAQ#Development:_Why_do_we_use_squash_.27n.27_merge_for_pull_requests.3F)).
 
 ### Shell scripting
 * We don't write scripts for `bash`, but for `busybox`'s `ash` shell, which is POSIX compliant (plus very few features from `bash`).
