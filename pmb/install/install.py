@@ -244,7 +244,7 @@ def install_recovery_zip(args):
     logging.info("Run the following to flash your installation to the"
                  " target device:")
     logging.info("* pmbootstrap flasher --method adb sideload")
-    logging.info("  Flashes the installer zip to your device:")
+    logging.info("  Flashes the installer zip to your device.")
 
     # Export information
     logging.info("* If this does not work, you can also create a"
