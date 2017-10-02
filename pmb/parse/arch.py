@@ -26,7 +26,8 @@ def alpine_native():
 
     mapping = {
         "x86_64": "x86_64",
-        "aarch64": "aarch64"
+        "aarch64": "aarch64",
+        "armv7l": "armhf"
     }
     if machine in mapping:
         return mapping[machine]
