@@ -100,8 +100,9 @@ def copy_files_other(args):
         pmb.helpers.run.root(args, ["cp", key, rootfs + "/etc/apk/keys/"])
 
     # Create /home/user
-    pmb.helpers.run.root(args, ["mkdir", "-p", rootfs + "/home/user"])
-    pmb.helpers.run.root(args, ["chown", pmb.config.chroot_uid_user,
+    pmb.helpers.run.root(args, ["mkdir", rootfs + "/home"])
+    pmb.helpers.run.root(args, ["cp", "-a", rootfs + "/etc/skel", rootfs + "/home/user"])
+    pmb.helpers.run.root(args, ["chown", "-R", pmb.config.chroot_uid_user,
                                 rootfs + "/home/user"])
 
 
