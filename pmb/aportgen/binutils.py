@@ -53,13 +53,12 @@ def generate(args, pkgname):
                 --enable-deterministic-archives \\
                 --disable-multilib \\
                 --disable-werror \\
-                --disable-nls \\
-            || return 1
+                --disable-nls
             make
         """,
         "package": """
             cd "$builddir"
-            make install DESTDIR="$pkgdir" || return 1
+            make install DESTDIR="$pkgdir"
 
             # remove man, info folders
             rm -rf "$pkgdir"/usr/share
