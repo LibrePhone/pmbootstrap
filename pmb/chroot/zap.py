@@ -62,7 +62,7 @@ def zap(args, confirm=True, packages=False, http=False, mismatch_bins=False, dis
                 pmb.helpers.run.root(args, ["rm", "-rf", match])
 
     # Delete packages with a different version compared to aports, then re-index
-    if mismatch_bins:
+    if mismatch_bins and os.path.exists(args.work + "/packages/"):
         binaries(args)
         pmb.build.other.index_repo(args)
 
