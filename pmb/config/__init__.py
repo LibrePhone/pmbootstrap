@@ -136,6 +136,7 @@ build_cross_native = ["linux-*"]
 
 # Necessary kernel config options
 necessary_kconfig_options = {
+    "ANDROID_PARANOID_NETWORK": False,
     "DEVTMPFS": True,
     "DEVTMPFS_MOUNT": False,
     "DM_CRYPT": True,
