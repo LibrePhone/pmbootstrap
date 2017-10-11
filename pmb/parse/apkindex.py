@@ -34,10 +34,11 @@ def parse_next_block(args, path, lines, start):
                   "by reference". Example: [5]
     :param lines: all lines from the "APKINDEX" file inside the archive
     :returns: a dictionary with the following structure:
-              { "pkgname": "postmarketos-mkinitfs",
-                "version": "0.0.4-r10",
+              { "arch": "noarch",
                 "depends": ["busybox-extras", "lddtree", ... ],
+                "pkgname": "postmarketos-mkinitfs",
                 "provides": ["mkinitfs=0.0.1"],
+                "version": "0.0.4-r10",
               }
     :returns: None, when there are no more blocks
     """
@@ -45,6 +46,7 @@ def parse_next_block(args, path, lines, start):
     # Parse until we hit an empty line or end of file
     ret = {}
     mapping = {
+        "A": "arch",
         "P": "pkgname",
         "V": "version",
         "D": "depends",

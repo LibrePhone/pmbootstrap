@@ -124,9 +124,9 @@ def package(args, pkgname, carch, force=False, buildinfo=False, strict=False):
         pmb.build.buildinfo.write(args, output, carch_buildenv, suffix,
                                   apkbuild)
 
-    # Symlink noarch packages
+    # Symlink noarch package (and subpackages)
     if "noarch" in apkbuild["arch"]:
-        pmb.build.symlink_noarch_package(args, output)
+        pmb.build.symlink_noarch_packages(args)
 
     # Clean up (APKINDEX cache, depends when strict)
     pmb.parse.apkindex.clear_cache(args, args.work + "/packages/" +

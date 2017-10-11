@@ -129,7 +129,8 @@ def aports_files_out_of_sync_with_git(args, package=None):
     ret = []
     if git_root and os.path.exists(git_root):
         # Find all out of sync files
-        tracked = pmb.helpers.git.find_out_of_sync_files_tracked(args, git_root)
+        tracked = pmb.helpers.git.find_out_of_sync_files_tracked(
+            args, git_root)
         untracked = pmb.helpers.run.user(
             args, ["git", "ls-files", "--others", "--exclude-standard"],
             working_dir=git_root, return_stdout=True)
@@ -247,9 +248,9 @@ def index_repo(args, arch=None):
     for path in paths:
         path_arch = os.path.basename(path)
         path_repo_chroot = "/home/user/packages/user/" + path_arch
-        logging.info("(native) index " + path_arch + " repository")
+        logging.debug("(native) index " + path_arch + " repository")
         commands = [
-            ["apk", "index", "--output", "APKINDEX.tar.gz_",
+            ["apk", "-q", "index", "--output", "APKINDEX.tar.gz_",
              "--rewrite-arch", path_arch, "*.apk"],
             ["abuild-sign", "APKINDEX.tar.gz_"],
             ["mv", "APKINDEX.tar.gz_", "APKINDEX.tar.gz"]
@@ -260,21 +261,44 @@ def index_repo(args, arch=None):
                                        "/APKINDEX.tar.gz")
 
 
-def symlink_noarch_package(args, arch_apk):
+def symlink_noarch_packages(args):
     """
-    :param arch_apk: for example: x86_64/mypackage-1.2.3-r0.apk
+    All noarch packages from the native architecture folder (x86_64 usually)
+    get symlinked to all other architectures.
     """
-
-    for arch in pmb.config.build_device_architectures:
-        # Create the arch folder
+    # Create the arch folders
+    architectures = pmb.config.build_device_architectures
+    logging.debug("Symlink noarch-packages to " + ", ".join(architectures))
+    for arch in architectures:
         arch_folder = "/home/user/packages/user/" + arch
         arch_folder_outside = args.work + "/packages/" + arch
         if not os.path.exists(arch_folder_outside):
             pmb.chroot.user(args, ["mkdir", "-p", arch_folder])
 
-        # Add symlink, rewrite index
-        pmb.chroot.user(args, ["ln", "-sf", "../" + arch_apk, "."],
-                        working_dir=arch_folder)
+    # Create an APKINDEX *without* replaced architectures (that is much
+    # faster than reading each apk file with Python!)
+    index = "/tmp/APKINDEX_without_replaced_archs"
+    index_outside = args.work + "/chroot_native" + index
+    pmb.chroot.user(args, ["apk", "-q", "index", "--output", index, "*.apk"],
+                    working_dir="/home/user/packages/user/" + args.arch_native)
+
+    # Iterate over noarch packages
+    for package, data in pmb.parse.apkindex.parse(args, index_outside).items():
+        if data["arch"] != "noarch":
+            continue
+
+        # Create missing symlinks
+        apk_file = data["pkgname"] + "-" + data["version"] + ".apk"
+        for arch in architectures:
+            if os.path.exists(args.work + "/packages/" + arch + "/" + apk_file):
+                continue
+            arch_folder = "/home/user/packages/user/" + arch
+            source = "../" + args.arch_native + "/" + apk_file
+            pmb.chroot.user(args, ["ln", "-sf", source, "."],
+                            working_dir=arch_folder)
+
+    # Rewrite indexes
+    for arch in architectures:
         index_repo(args, arch)
 
 

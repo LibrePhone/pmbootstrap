@@ -129,7 +129,8 @@ def config(args):
 
 
 def index(args):
-    pmb.build.index_repo(args)
+    pmb.build.index_repo(args, args.arch_native)
+    pmb.build.symlink_noarch_packages(args)
 
 
 def initfs(args):
