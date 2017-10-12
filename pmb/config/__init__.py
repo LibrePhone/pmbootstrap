@@ -30,7 +30,7 @@ from pmb.config.save import save
 #
 # Exported variables (internal configuration)
 #
-version = "0.2.0"
+version = "0.3.0"
 pmb_src = os.path.normpath(os.path.realpath(__file__) + "/../../..")
 apk_keys_path = pmb_src + "/keys"
 
