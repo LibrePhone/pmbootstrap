@@ -29,9 +29,9 @@ def checksum(args, pkgname):
     pmb.build.copy_to_buildpath(args, pkgname)
     logging.info("(native) generate checksums for " + pkgname)
     pmb.chroot.user(args, ["abuild", "checksum"],
-                    working_dir="/home/user/build")
+                    working_dir="/home/pmos/build")
 
     # Copy modified APKBUILD back
-    source = args.work + "/chroot_native/home/user/build/APKBUILD"
+    source = args.work + "/chroot_native/home/pmos/build/APKBUILD"
     target = pmb.build.other.find_aport(args, pkgname) + "/"
     pmb.helpers.run.user(args, ["cp", source, target])

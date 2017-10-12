@@ -74,15 +74,21 @@ def init(args):
     Set log format and add the log file descriptor to args.logfd, add the
     verbose log level.
     """
-    # Create work folder (because usually the log file is in there)
-    if not os.path.exists(args.work):
-        os.makedirs(args.work)
-
-    # Open logfile
+    # Set log file descriptor (logfd)
     if args.details_to_stdout:
         setattr(args, "logfd", sys.stdout)
     else:
-        setattr(args, "logfd", open(args.log, "a+"))
+        # Require containing directory to exist (so we don't create the work
+        # folder and break the folder migration logic, which needs to set the
+        # version upon creation)
+        dir = os.path.dirname(args.log)
+        if os.path.exists(dir):
+            setattr(args, "logfd", open(args.log, "a+"))
+        else:
+            setattr(args, "logfd", open(os.devnull, "a+"))
+            if args.action != "init":
+                print("WARNING: Can't create log file in '" + dir + "', path"
+                      " does not exist!")
 
     # Set log format
     root_logger = logging.getLogger()

@@ -52,7 +52,7 @@ def test_challenge_build(args):
     version = apkbuild["pkgver"] + "-r" + apkbuild["pkgrel"]
     temp_path = pmb.chroot.other.tempfolder(args, "/tmp/test_challenge_build/" +
                                             args.arch_native)
-    packages_path = "/home/user/packages/user/" + args.arch_native
+    packages_path = "/home/pmos/packages/pmos/" + args.arch_native
     apk_path = packages_path + "/" + pkgname + "-" + version + ".apk"
     pmb.chroot.user(args, ["cp", apk_path, apk_path + ".buildinfo.json",
                            temp_path])

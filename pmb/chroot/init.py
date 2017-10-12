@@ -113,9 +113,16 @@ def init(args, suffix="native"):
         pmb.chroot.root(args, ["apk", "fix"], suffix,
                         auto_init=False)
 
-    # Add user (-D: don't assign password)
-    logging.debug("Add user")
-    pmb.chroot.root(args, ["adduser", "-D", "user", "-u", pmb.config.chroot_uid_user],
-                    suffix, auto_init=False)
-    pmb.chroot.root(args, ["chown", "-R", "user:user", "/home/user"],
-                    suffix)
+    # Building chroots: create "pmos" user, add symlinks to /home/pmos
+    if not suffix.startswith("rootfs_"):
+        pmb.chroot.root(args, ["adduser", "-D", "pmos", "-u",
+                        pmb.config.chroot_uid_user], suffix, auto_init=False)
+
+        # Create the links (with subfolders if necessary)
+        for target, link_name in pmb.config.chroot_home_symlinks.items():
+            link_dir = os.path.dirname(link_name)
+            if not os.path.exists(chroot + link_dir):
+                pmb.chroot.user(args, ["mkdir", "-p", link_dir], suffix)
+            pmb.chroot.user(args, ["ln", "-s", target, link_name], suffix)
+            pmb.chroot.root(args, ["chown", "pmos:pmos", target],
+                            suffix)

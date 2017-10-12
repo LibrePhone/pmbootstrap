@@ -54,7 +54,7 @@ def create_and_mount_image(args, size):
     """
     # Short variables for paths
     chroot = args.work + "/chroot_native"
-    img_path = "/home/user/rootfs/" + args.device + ".img"
+    img_path = "/home/pmos/rootfs/" + args.device + ".img"
     img_path_outside = chroot + img_path
 
     # Umount and delete existing image
@@ -76,7 +76,7 @@ def create_and_mount_image(args, size):
         raise RuntimeError("Aborted.")
 
     # Create empty image file
-    pmb.chroot.user(args, ["mkdir", "-p", "/home/user/rootfs"])
+    pmb.chroot.user(args, ["mkdir", "-p", "/home/pmos/rootfs"])
     pmb.chroot.root(args, ["truncate", "-s", mb, img_path])
 
     # Mount to /dev/install

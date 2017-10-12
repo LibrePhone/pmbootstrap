@@ -77,15 +77,15 @@ def copy_to_buildpath(args, package, suffix="native"):
                          aport)
 
     # Clean up folder
-    build = args.work + "/chroot_" + suffix + "/home/user/build"
+    build = args.work + "/chroot_" + suffix + "/home/pmos/build"
     if os.path.exists(build):
-        pmb.chroot.root(args, ["rm", "-rf", "/home/user/build"],
+        pmb.chroot.root(args, ["rm", "-rf", "/home/pmos/build"],
                         suffix=suffix)
 
     # Copy aport contents
     pmb.helpers.run.root(args, ["cp", "-r", aport + "/", build])
-    pmb.chroot.root(args, ["chown", "-R", "user:user",
-                           "/home/user/build"], suffix=suffix)
+    pmb.chroot.root(args, ["chown", "-R", "pmos:pmos",
+                           "/home/pmos/build"], suffix=suffix)
 
 
 def aports_files_out_of_sync_with_git(args, package=None):
@@ -247,7 +247,7 @@ def index_repo(args, arch=None):
 
     for path in paths:
         path_arch = os.path.basename(path)
-        path_repo_chroot = "/home/user/packages/user/" + path_arch
+        path_repo_chroot = "/home/pmos/packages/pmos/" + path_arch
         logging.debug("(native) index " + path_arch + " repository")
         commands = [
             ["apk", "-q", "index", "--output", "APKINDEX.tar.gz_",
@@ -270,7 +270,7 @@ def symlink_noarch_packages(args):
     architectures = pmb.config.build_device_architectures
     logging.debug("Symlink noarch-packages to " + ", ".join(architectures))
     for arch in architectures:
-        arch_folder = "/home/user/packages/user/" + arch
+        arch_folder = "/mnt/pmbootstrap-packages/" + arch
         arch_folder_outside = args.work + "/packages/" + arch
         if not os.path.exists(arch_folder_outside):
             pmb.chroot.user(args, ["mkdir", "-p", arch_folder])
@@ -280,7 +280,7 @@ def symlink_noarch_packages(args):
     index = "/tmp/APKINDEX_without_replaced_archs"
     index_outside = args.work + "/chroot_native" + index
     pmb.chroot.user(args, ["apk", "-q", "index", "--output", index, "*.apk"],
-                    working_dir="/home/user/packages/user/" + args.arch_native)
+                    working_dir="/mnt/pmbootstrap-packages/" + args.arch_native)
 
     # Iterate over noarch packages
     for package, data in pmb.parse.apkindex.parse(args, index_outside).items():
@@ -292,7 +292,7 @@ def symlink_noarch_packages(args):
         for arch in architectures:
             if os.path.exists(args.work + "/packages/" + arch + "/" + apk_file):
                 continue
-            arch_folder = "/home/user/packages/user/" + arch
+            arch_folder = "/mnt/pmbootstrap-packages/" + arch
             source = "../" + args.arch_native + "/" + apk_file
             pmb.chroot.user(args, ["ln", "-sf", source, "."],
                             working_dir=arch_folder)

@@ -111,7 +111,7 @@ def package(args, pkgname, carch, force=False, buildinfo=False, strict=False):
         cmd += ["-d"]  # do not install depends with abuild
     if force:
         cmd += ["-f"]
-    pmb.chroot.user(args, cmd, suffix, "/home/user/build")
+    pmb.chroot.user(args, cmd, suffix, "/home/pmos/build")
 
     # Verify output file
     path = args.work + "/packages/" + output
@@ -133,6 +133,6 @@ def package(args, pkgname, carch, force=False, buildinfo=False, strict=False):
                                    carch_buildenv + "/APKINDEX.tar.gz")
     if strict:
         logging.info("(" + suffix + ") uninstall makedepends")
-        pmb.chroot.user(args, ["abuild", "undeps"], suffix, "/home/user/build")
+        pmb.chroot.user(args, ["abuild", "undeps"], suffix, "/home/pmos/build")
 
     return output

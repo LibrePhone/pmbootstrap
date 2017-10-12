@@ -78,7 +78,7 @@ def shutdown(args, only_install_related=False):
     # Umount all losetup mounted images
     chroot = args.work + "/chroot_native"
     if pmb.helpers.mount.ismount(chroot + "/dev/loop-control"):
-        pattern = chroot + "/home/user/rootfs/*.img"
+        pattern = chroot + "/home/pmos/rootfs/*.img"
         for path_outside in glob.glob(pattern):
             path = path_outside[len(chroot):]
             pmb.install.losetup.umount(args, path)

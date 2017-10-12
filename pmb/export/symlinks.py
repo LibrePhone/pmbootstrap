@@ -49,7 +49,7 @@ def symlinks(args, flavor, folder):
     path_boot = args.work + "/chroot_rootfs_" + args.device + "/boot"
     path_buildroot = args.work + "/chroot_buildroot_" + args.deviceinfo["arch"]
     patterns = [path_boot + "/*-" + flavor,
-                path_native + "/home/user/rootfs/" + args.device + ".img",
+                path_native + "/home/pmos/rootfs/" + args.device + ".img",
                 path_buildroot +
                 "/var/lib/postmarketos-android-recovery-installer/pmos-" +
                 args.device + ".zip"]

@@ -41,7 +41,14 @@ def ask_for_work_path(args):
         try:
             ret = os.path.expanduser(pmb.helpers.cli.ask(
                 args, "Work path", None, args.work, False))
-            os.makedirs(ret, 0o700, True)
+
+            # Create the folder with a version file
+            if not os.path.exists(ret):
+                os.makedirs(ret, 0o700, True)
+                with open(ret + "/version", "w") as handle:
+                    handle.write(pmb.config.work_version + "\n")
+
+            # Make sure, that we can write into it
             os.makedirs(ret + "/cache_http", 0o700, True)
             return ret
         except OSError:
@@ -97,6 +104,10 @@ def init(args):
     if device_exists:
         cfg["pmbootstrap"]["keymap"] = ask_for_keymaps(args, device=cfg["pmbootstrap"]["device"])
 
+    # Username
+    cfg["pmbootstrap"]["user"] = pmb.helpers.cli.ask(args, "Username", None,
+                                                     args.user, False,
+                                                     "[a-z_][a-z0-9_-]*")
     # UI and work folder
     cfg["pmbootstrap"]["ui"] = ask_for_ui(args)
     cfg["pmbootstrap"]["work"] = ask_for_work_path(args)

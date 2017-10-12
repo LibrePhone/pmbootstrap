@@ -37,7 +37,7 @@ def system_image(args, device):
     Returns path to system image for specified device. In case that it doesn't
     exist, raise and exception explaining how to generate it.
     """
-    path = args.work + "/chroot_native/home/user/rootfs/" + device + ".img"
+    path = args.work + "/chroot_native/home/pmos/rootfs/" + device + ".img"
     if not os.path.exists(path):
         logging.debug("Could not find system image: " + path)
         img_command = "pmbootstrap install"
@@ -253,7 +253,7 @@ def run(args):
     print()
     logging.info("You can connect to the virtual machine using the"
                  " following services:")
-    logging.info("(ssh) ssh -p " + str(args.port) + " user@localhost")
+    logging.info("(ssh) ssh -p {port} {user}@localhost".format(**vars(args)))
     logging.info("(telnet) telnet localhost " + str(args.port + 1))
     logging.info("(telnet debug) telnet localhost " + str(args.port + 2))
 

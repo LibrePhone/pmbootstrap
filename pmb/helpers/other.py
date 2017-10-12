@@ -17,6 +17,9 @@ You should have received a copy of the GNU General Public License
 along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
 import os
+import logging
+import pmb.chroot
+import pmb.config
 import pmb.helpers.run
 
 
@@ -53,3 +56,54 @@ def check_grsec(args):
                        " Alternatively, it would be awesome if you want to add"
                        " support for hardened/grsec kernels, please see this for"
                        " more details: <" + link + ">")
+
+
+def migrate_success(args):
+    logging.info("Migration done")
+    with open(args.work + "/version", "w") as handle:
+        handle.write(pmb.config.work_version + "\n")
+
+
+def migrate_work_folder(args):
+    # Read current version
+    current = "0"
+    path = args.work + "/version"
+    if os.path.exists(path):
+        with open(path, "r") as f:
+            current = f.read().rstrip()
+
+    # Compare version, print warning or do nothing
+    required = pmb.config.work_version
+    if current == required:
+        return
+    logging.info("WARNING: Your work folder version needs to be migrated"
+                 " (from version " + current + " to " + required + ")!")
+
+    # 0 => 1
+    if current == "0" and required == "1":
+        # Ask for confirmation
+        logging.info("Changelog:")
+        logging.info("* Building chroots have a different username: "
+                     "<https://github.com/postmarketOS/pmbootstrap/issues/709>")
+        logging.info("Migration will do the following:")
+        logging.info("* Zap your chroots")
+        logging.info("* Adjust '" + args.work + "/config_abuild/abuild.conf'")
+        if not pmb.helpers.cli.confirm(args):
+            raise RuntimeError("Aborted.")
+
+        # Zap and update abuild.conf
+        pmb.chroot.zap(args, False)
+        conf = args.work + "/config_abuild/abuild.conf"
+        if os.path.exists(conf):
+            pmb.helpers.run.root(args, ["sed", "-i",
+                                        "s./home/user/./home/pmos/.g", conf])
+        # Update version file
+        migrate_success(args)
+        return
+
+    # Can't migrate, user must delete it
+    raise RuntimeError("Sorry, we can't migrate that automatically. Please run"
+                       " 'pmbootstrap shutdown', then delete your current work"
+                       " folder manually ('sudo rm -rf " + args.work +
+                       "') and start over with 'pmbootstrap init'. All your"
+                       " binary packages will be lost.")

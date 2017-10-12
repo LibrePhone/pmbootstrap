@@ -87,15 +87,15 @@ def odin(args, flavor, folder):
         pmb.chroot.root(args, command, suffix)
 
     # Move Odin flashable tar to native chroot and cleanup temp folder
-    pmb.chroot.user(args, ["mkdir", "-p", "/home/user/rootfs"])
+    pmb.chroot.user(args, ["mkdir", "-p", "/home/pmos/rootfs"])
     pmb.chroot.root(args, ["mv", "/mnt/rootfs_" + args.device + temp_folder +
-                           "/" + odin_device_tar_md5, "/home/user/rootfs/"]),
-    pmb.chroot.root(args, ["chown", "user:user",
-                           "/home/user/rootfs/" + odin_device_tar_md5])
+                           "/" + odin_device_tar_md5, "/home/pmos/rootfs/"]),
+    pmb.chroot.root(args, ["chown", "pmos:pmos",
+                           "/home/pmos/rootfs/" + odin_device_tar_md5])
     pmb.chroot.root(args, ["rmdir", temp_folder], suffix)
 
     # Create the symlink
-    file = args.work + "/chroot_native/home/user/rootfs/" + odin_device_tar_md5
+    file = args.work + "/chroot_native/home/pmos/rootfs/" + odin_device_tar_md5
     link = folder + "/" + odin_device_tar_md5
     pmb.helpers.file.symlink(args, file, link)
 

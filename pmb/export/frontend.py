@@ -14,7 +14,7 @@ def frontend(args):
         pmb.helpers.run.user(args, ["mkdir", "-p", target])
 
     # System image note
-    img_path = "/home/user/rootfs/" + args.device + ".img"
+    img_path = "/home/pmos/rootfs/" + args.device + ".img"
     if not os.path.exists(args.work + "/chroot_native" + img_path):
         logging.info("NOTE: To export the system image, run 'pmbootstrap"
                      " install' first (without the 'sdcard' parameter).")

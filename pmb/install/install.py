@@ -92,29 +92,40 @@ def copy_files_from_chroot(args):
 
 def copy_files_other(args):
     """
-    Copy over keys, create /home/user.
+    Copy over keys, create /home/{user}.
     """
     # Copy over keys
     rootfs = args.work + "/chroot_native/mnt/install"
     for key in glob.glob(args.work + "/config_apk_keys/*.pub"):
         pmb.helpers.run.root(args, ["cp", key, rootfs + "/etc/apk/keys/"])
 
-    # Create /home/user
+    # Create /home/{user}
+    homedir = rootfs + "/home/" + args.user
     pmb.helpers.run.root(args, ["mkdir", rootfs + "/home"])
-    pmb.helpers.run.root(args, ["cp", "-a", rootfs + "/etc/skel", rootfs + "/home/user"])
-    pmb.helpers.run.root(args, ["chown", "-R", pmb.config.chroot_uid_user,
-                                rootfs + "/home/user"])
+    pmb.helpers.run.root(args, ["cp", "-a", rootfs + "/etc/skel", homedir])
+    pmb.helpers.run.root(args, ["chown", "-R", "1000", homedir])
+
+
+def set_user(args):
+    """
+    Create user with UID 1000 if it doesn't exist
+    """
+    suffix = "rootfs_" + args.device
+    if not pmb.chroot.user_exists(args, args.user, suffix):
+        pmb.chroot.root(args, ["adduser", "-D", "-u", "1000", args.user],
+                        suffix)
+        pmb.chroot.root(args, ["addgroup", args.user, "wheel"], suffix)
 
 
 def set_user_password(args):
     """
     Loop until the passwords for user and root have been changed successfully.
     """
-    logging.info(" *** SET LOGIN PASSWORD FOR: 'user' ***")
+    logging.info(" *** SET LOGIN PASSWORD FOR: '" + args.user + "' ***")
     suffix = "rootfs_" + args.device
     while True:
         try:
-            pmb.chroot.root(args, ["passwd", "user"], suffix, log=False)
+            pmb.chroot.root(args, ["passwd", args.user], suffix, log=False)
             break
         except RuntimeError:
             logging.info("WARNING: Failed to set the password. Try it"
@@ -147,12 +158,12 @@ def copy_ssh_key(args):
         outfile.write("%s" % key)
     outfile.close()
 
-    target = args.work + "/chroot_native/mnt/install/home/user/.ssh"
+    target = args.work + "/chroot_native/mnt/install/home/" + args.user + "/.ssh"
     pmb.helpers.run.root(args, ["mkdir", target])
     pmb.helpers.run.root(args, ["chmod", "700", target])
     pmb.helpers.run.root(args, ["cp", authorized_keys, target + "/authorized_keys"])
     pmb.helpers.run.root(args, ["rm", authorized_keys])
-    pmb.helpers.run.root(args, ["chown", "-R", "12345:12345", target])
+    pmb.helpers.run.root(args, ["chown", "-R", "1000:1000", target])
 
 
 def setup_keymap(args):
@@ -199,9 +210,9 @@ def install_system_image(args):
         sys_image = args.device + ".img"
         sys_image_sparse = args.device + "-sparse.img"
         pmb.chroot.user(args, ["img2simg", sys_image, sys_image_sparse],
-                        working_dir="/home/user/rootfs/")
+                        working_dir="/home/pmos/rootfs/")
         pmb.chroot.user(args, ["mv", "-f", sys_image_sparse, sys_image],
-                        working_dir="/home/user/rootfs/")
+                        working_dir="/home/pmos/rootfs/")
 
     # Kernel flash information
     logging.info("*** (5/5) FLASHING TO DEVICE ***")
@@ -223,7 +234,7 @@ def install_system_image(args):
         logging.info("* pmbootstrap flasher flash_system")
         logging.info("  Flashes the system image, that has been"
                      " generated to your device:")
-        logging.info("  " + args.work + "/chroot_native/home/user/rootfs/" +
+        logging.info("  " + args.work + "/chroot_native/home/pmos/rootfs/" +
                      args.device + ".img")
         logging.info("  (NOTE: This file has a partition table,"
                      " which contains a boot- and root subpartition.)")
@@ -272,6 +283,9 @@ def install(args):
         install_packages += ["postmarketos-ui-" + args.ui]
     suffix = "rootfs_" + args.device
     pmb.chroot.apk.upgrade(args, suffix)
+
+    # Create final user and remove 'build' user
+    set_user(args)
 
     # Explicitly call build on the install packages, to re-build them or any
     # dependency, in case the version increased

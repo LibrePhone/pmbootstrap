@@ -209,7 +209,7 @@ def log(args):
 
 
 def log_distccd(args):
-    logpath = "/home/user/distccd.log"
+    logpath = "/home/pmos/distccd.log"
     if args.clear_log:
         pmb.chroot.user(args, ["truncate", "-s", "0", logpath], log=False)
     pmb.chroot.user(args, ["tail", "-f", logpath, "-n", args.lines], log=False)

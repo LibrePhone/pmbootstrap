@@ -52,7 +52,7 @@ def kernel(args):
                  " encryption is disabled):")
     logging.info("telnet " + pmb.config.default_ip)
     logging.info("Then you can connect to your device using ssh:")
-    logging.info("ssh user@" + pmb.config.default_ip)
+    logging.info("ssh " + args.user + "@" + pmb.config.default_ip)
 
 
 def list_flavors(args):
@@ -64,7 +64,7 @@ def list_flavors(args):
 
 def system(args):
     # Generate system image, install flasher
-    img_path = "/home/user/rootfs/" + args.device + ".img"
+    img_path = "/home/pmos/rootfs/" + args.device + ".img"
     if not os.path.exists(args.work + "/chroot_native" + img_path):
         raise RuntimeError("The system image has not been generated yet,"
                            " please run 'pmbootstrap install' first.")

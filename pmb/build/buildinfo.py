@@ -69,6 +69,6 @@ def write(args, apk_path, arch, suffix, apkbuild):
         handle.write(json.dumps(buildinfo, indent=4, sort_keys=True) + "\n")
 
     # Move to packages
-    pmb.chroot.root(args, ["chown", "user:user", "/tmp/buildinfo"])
-    pmb.chroot.user(args, ["mv", "/tmp/buildinfo", "/home/user/packages/user/" +
+    pmb.chroot.root(args, ["chown", "pmos:pmos", "/tmp/buildinfo"])
+    pmb.chroot.user(args, ["mv", "/tmp/buildinfo", "/home/pmos/packages/pmos/" +
                            apk_path + ".buildinfo.json"])

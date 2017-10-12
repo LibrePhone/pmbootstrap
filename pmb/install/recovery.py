@@ -66,8 +66,8 @@ def create_zip(args, suffix):
         # Move config file from /tmp/ to zip root
         ["mv", "/tmp/install_options", "install_options"],
         # Create tar archive of the rootfs
-        ["tar", "-pczf", "rootfs.tar.gz", "--exclude", "./home/user/*",
-         "-C", rootfs, "."],
+        ["tar", "-pczf", "rootfs.tar.gz", "--exclude",
+         "./home/" + args.user + "/*", "-C", rootfs, "."],
         ["build-recovery-zip"]]
     for command in commands:
         pmb.chroot.root(args, command, suffix, working_dir=zip_root)

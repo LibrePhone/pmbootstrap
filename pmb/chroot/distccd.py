@@ -29,7 +29,7 @@ def get_running_pid(args):
     """
     :returns: the running distccd's pid as integer or None
     """
-    pidfile = args.work + "/chroot_native/home/user/distccd.pid"
+    pidfile = args.work + "/chroot_native/home/pmos/distccd.pid"
     if not os.path.exists(pidfile):
         return None
     with open(pidfile, "r") as handle:
@@ -74,7 +74,7 @@ def is_running(args):
         os.kill(pid, 0)
     except OSError as err:
         if err.errno == errno.ESRCH:  # no such process
-            pmb.chroot.root(args, ["rm", "/home/user/distccd.pid"])
+            pmb.chroot.root(args, ["rm", "/home/pmos/distccd.pid"])
             return False
         elif err.errno == errno.EPERM:  # access denied
             return get_running_info(args)
@@ -88,11 +88,11 @@ def generate_cmdline(args, arch):
     path = "/usr/lib/gcc-cross-wrappers/" + arch + "/bin:" + pmb.config.chroot_path
     ret = ["PATH=" + path,
            "distccd",
-           "--pid-file", "/home/user/distccd.pid",
+           "--pid-file", "/home/pmos/distccd.pid",
            "--listen", "127.0.0.1",
            "--allow", "127.0.0.1",
            "--port", args.port_distccd,
-           "--log-file", "/home/user/distccd.log",
+           "--log-file", "/home/pmos/distccd.log",
            "--jobs", args.jobs,
            "--nice", "19",
            "--job-lifetime", "60",

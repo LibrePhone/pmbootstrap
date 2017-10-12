@@ -33,7 +33,7 @@ def clone(args, repo_name):
         pmb.chroot.apk.install(args, ["git"])
         logging.info("(native) git clone " + pmb.config.git_repos[repo_name])
         pmb.chroot.user(args, ["git", "clone", "--depth=1",
-                               pmb.config.git_repos[repo_name], repo_name], working_dir="/home/user/git/")
+                               pmb.config.git_repos[repo_name], repo_name], working_dir="/home/pmos/git/")
 
 
 def rev_parse(args, revision="HEAD"):

@@ -56,7 +56,7 @@ def temp_aports_repo(args):
     # aports_upstream repo also gets used in test_aportgen.py, so we use that.
     pmb.chroot.apk.install(args, ["git"])
     pmb.helpers.git.clone(args, "aports_upstream")
-    pmb.chroot.user(args, ["cp", "-r", "/home/user/git/aports_upstream",
+    pmb.chroot.user(args, ["cp", "-r", "/home/pmos/git/aports_upstream",
                            temp + "/aports"])
 
     # Configure git

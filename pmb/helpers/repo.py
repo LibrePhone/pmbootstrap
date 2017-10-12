@@ -101,7 +101,7 @@ def urls(args, user_repository=True, postmarketos_mirror=True):
     ret = []
     # Local user repository (for packages compiled with pmbootstrap)
     if user_repository:
-        ret.append("/home/user/packages/user")
+        ret.append("/mnt/pmbootstrap-packages")
 
     # Upstream postmarketOS binary repository
     if postmarketos_mirror and args.mirror_postmarketos:

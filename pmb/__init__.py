@@ -48,6 +48,10 @@ def main():
                              " 'pmbootstrap init' to generate one.")
             return 1
 
+        # Migrate work folder if necessary
+        if args.action not in ["shutdown", "zap", "log"]:
+            other.migrate_work_folder(args)
+
         # Run the function with the action's name (in pmb/helpers/frontend.py)
         if args.action:
             getattr(frontend, args.action)(args)

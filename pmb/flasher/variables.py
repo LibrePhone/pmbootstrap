@@ -33,7 +33,7 @@ def variables(args, flavor, method):
     vars = {
         "$BOOT": "/mnt/rootfs_" + args.device + "/boot",
         "$FLAVOR": flavor if flavor is not None else "",
-        "$IMAGE": "/home/user/rootfs/" + args.device + ".img",
+        "$IMAGE": "/home/pmos/rootfs/" + args.device + ".img",
         "$KERNEL_CMDLINE": _cmdline,
         "$PARTITION_KERNEL": args.deviceinfo["flash_heimdall_partition_kernel"] or "KERNEL",
         "$PARTITION_INITFS": args.deviceinfo["flash_heimdall_partition_initfs"] or "RECOVERY",

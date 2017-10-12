@@ -30,7 +30,7 @@ def test_umount_all_list(tmpdir):
     fake_mounts = str(tmpdir + "/mounts")
     with open(fake_mounts, "w") as handle:
         handle.write("source /test/var/cache\n")
-        handle.write("source /test/home/user/packages\n")
+        handle.write("source /test/home/pmos/packages\n")
         handle.write("source /test\n")
         handle.write("source /test/proc\n")
 
@@ -41,5 +41,5 @@ def test_umount_all_list(tmpdir):
     assert ret == ["/test/var/cache"]
 
     ret = pmb.helpers.mount.umount_all_list("/test", fake_mounts)
-    assert ret == ["/test/var/cache", "/test/proc", "/test/home/user/packages",
+    assert ret == ["/test/var/cache", "/test/proc", "/test/home/pmos/packages",
                    "/test"]

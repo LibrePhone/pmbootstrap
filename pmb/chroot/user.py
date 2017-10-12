@@ -27,6 +27,18 @@ def user(args, cmd, suffix="native", working_dir="/", log=True,
     :param log: When set to true, redirect all output to the logfile
     :param auto_init: Automatically initialize the chroot
     """
-    cmd = ["su", "user", "-c", " ".join(cmd)]
+    cmd = ["su", "pmos", "-c", " ".join(cmd)]
     return pmb.chroot.root(args, cmd, suffix, working_dir, log,
                            auto_init, return_stdout, check)
+
+
+def exists(args, username, suffix="native"):
+    """
+    Checks if username exists in the system
+
+    :param username: User name
+    :returns: bool
+    """
+    output = pmb.chroot.root(args, ["getent", "passwd", username],
+                             suffix, return_stdout=True, check=False)
+    return (output is not None)
