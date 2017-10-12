@@ -70,6 +70,9 @@ def zap(args, confirm=True, packages=False, http=False, mismatch_bins=False, dis
 def binaries(args):
     for arch in os.listdir(os.path.realpath(args.work + "/packages/")):
         arch_pkg_path = os.path.realpath(args.work) + "/packages/" + arch
+        # Delete all broken symbolic links
+        pmb.helpers.run.root(args, ["find", "-L", arch_pkg_path, "-maxdepth", "1",
+                             "-type", "l", "-delete"])
         bin_apks = pmb.parse.apkindex.parse(args, arch_pkg_path + "/APKINDEX.tar.gz")
         for bin_apk in bin_apks:
             bin_pkgname = bin_apks[bin_apk]["pkgname"]
