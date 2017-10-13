@@ -66,16 +66,16 @@ def create_and_mount_image(args, size):
             raise RuntimeError("Failed to remove old image file: " +
                                img_path_outside)
 
-    # Convert to MB and ask for confirmation
-    mb = str(round(size / 1024 / 1024)) + "M"
-    logging.info("(native) create " + args.device + ".img (" + mb + ")")
-    logging.info("WARNING: Make sure, that your target device's partition"
-                 " table has allocated at least " + mb + " as system"
-                 " partition!")
-    if not pmb.helpers.cli.confirm(args, default=True):
-        raise RuntimeError("Aborted.")
+    # Make sure there is enough free space
+    size_mb = round(size / (1024**2))
+    disk_data = os.statvfs(args.work)
+    free = round((disk_data.f_bsize * disk_data.f_bavail) / (1024**2))
+    if size_mb > free:
+        raise RuntimeError("Not enough free space to create rootfs image! (free: " + str(free) + "M, required: " + str(size_mb) + "M)")
+    mb = str(size_mb) + "M"
 
     # Create empty image file
+    logging.info("(native) create " + args.device + ".img (" + mb + ")")
     pmb.chroot.user(args, ["mkdir", "-p", "/home/pmos/rootfs"])
     pmb.chroot.root(args, ["truncate", "-s", mb, img_path])
 
