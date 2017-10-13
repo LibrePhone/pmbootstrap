@@ -63,6 +63,7 @@ defaults = {
     "ui": "weston",
     "user": "user",
     "keymap": "",
+    "timezone": "GMT",
 
     # aes-xts-plain64 would be better, but this is not supported on LineageOS
     # kernel configs

@@ -310,6 +310,9 @@ def install(args):
     # Set the keymap if the device requires it
     setup_keymap(args)
 
+    # Set timezone
+    pmb.chroot.root(args, ["setup-timezone", "-z", args.timezone], suffix)
+
     if args.android_recovery_zip:
         install_recovery_zip(args)
     else:

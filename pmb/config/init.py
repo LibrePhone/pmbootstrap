@@ -23,6 +23,7 @@ import os
 import pmb.config
 import pmb.helpers.cli
 import pmb.helpers.devices
+import pmb.helpers.run
 import pmb.helpers.ui
 import pmb.chroot.zap
 import pmb.parse.deviceinfo
@@ -86,6 +87,30 @@ def ask_for_keymaps(args, device):
                       " one from the list above.")
 
 
+def ask_for_timezone(args):
+    localtimes = ["/etc/zoneinfo/localtime", "/etc/localtime"]
+    zoneinfo_path = "/usr/share/zoneinfo/"
+    for localtime in localtimes:
+        if not os.path.exists(localtime):
+            continue
+        tz = ""
+        if os.path.exists(localtime):
+            tzpath = os.path.realpath(localtime)
+            tzpath = tzpath.rstrip()
+            if os.path.exists(tzpath):
+                try:
+                    _, tz = tzpath.split(zoneinfo_path)
+                except:
+                    pass
+        if tz:
+            logging.info("Your host timezone: " + tz)
+            if pmb.helpers.cli.confirm(args, "Use this timezone instead of GMT?",
+                                       default="y"):
+                return tz
+    logging.info("WARNING: Unable to determine timezone configuration on host, using GMT.")
+    return "GMT"
+
+
 def init(args):
     cfg = pmb.config.load(args)
 
@@ -133,6 +158,9 @@ def init(args):
     cfg["pmbootstrap"]["extra_packages"] = pmb.helpers.cli.ask(args, "Extra packages",
                                                                None, args.extra_packages,
                                                                validation_regex="^(|[-.+\w\s]+(?:,[-.+\w\s]*)*)$")
+
+    # Configure timezone info
+    cfg["pmbootstrap"]["timezone"] = ask_for_timezone(args)
 
     # Do not save aports location to config file
     del cfg["pmbootstrap"]["aports"]
