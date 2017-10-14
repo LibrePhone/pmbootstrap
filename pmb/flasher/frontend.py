@@ -47,12 +47,10 @@ def kernel(args):
         pmb.flasher.run(args, "flash_kernel", flavor)
     logging.info("You will get an IP automatically assigned to your "
                  "USB interface shortly.")
-    logging.info("Connect to the telnet session and type your LUKS password"
-                 " to boot postmarketOS (not necessary if full disk"
-                 " encryption is disabled):")
-    logging.info("telnet " + pmb.config.default_ip)
-    logging.info("Then you can connect to your device using ssh:")
-    logging.info("ssh " + args.user + "@" + pmb.config.default_ip)
+    logging.info("Then you can connect to your device using ssh after pmOS has booted:")
+    logging.info("ssh user@" + pmb.config.default_ip)
+    logging.info("NOTE: If you enabled full disk encryption, you should make sure that"
+                 " osk-sdl has been properly configured for your device")
 
 
 def list_flavors(args):
