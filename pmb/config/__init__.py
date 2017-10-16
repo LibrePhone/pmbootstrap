@@ -172,6 +172,7 @@ apkbuild_attributes = {
     "makedepends": {"array": True},
     "options": {"array": True},
     "pkgname": {"array": False},
+    "pkgdesc": {"array": False},
     "pkgrel": {"array": False},
     "pkgver": {"array": False},
     "subpackages": {"array": True},

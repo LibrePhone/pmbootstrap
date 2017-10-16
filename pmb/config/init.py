@@ -60,7 +60,9 @@ def ask_for_work_path(args):
 def ask_for_ui(args):
     ui_list = pmb.helpers.ui.list(args)
     logging.info("Available user interfaces (" +
-                 str(len(ui_list) - 1) + "): " + ", ".join(ui_list))
+                 str(len(ui_list) - 1) + "): ")
+    for ui, description in ui_list.items():
+        logging.info("* " + ui + ": " + description)
     while True:
         ret = pmb.helpers.cli.ask(args, "User interface", None, args.ui, True)
         if ret in ui_list:

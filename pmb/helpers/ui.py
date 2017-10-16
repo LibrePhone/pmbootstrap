@@ -18,16 +18,18 @@ along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
 import os
 import glob
+import pmb.parse
 
 
 def list(args):
     """
-    Get all UIs, for which aports are available
-    :returns: ["postmarketos-ui-one", "postmarketos-ui-two", ..., "none"]
+    Get all UIs, for which aports are available with their description.
+
+    :returns: {"none": "No graphical...", "weston": "Wayland reference..."}
     """
-    ret = []
-    for path in glob.glob(args.aports + "/main/postmarketos-ui-*"):
+    ret = {"none": "No graphical environment"}
+    for path in sorted(glob.glob(args.aports + "/main/postmarketos-ui-*")):
+        apkbuild = pmb.parse.apkbuild(args, path + "/APKBUILD")
         ui = os.path.basename(path).split("-", 2)[2]
-        ret.append(ui)
-    ret.append('none')
+        ret[ui] = apkbuild["pkgdesc"]
     return ret
