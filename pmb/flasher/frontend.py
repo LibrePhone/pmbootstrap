@@ -48,7 +48,7 @@ def kernel(args):
     logging.info("You will get an IP automatically assigned to your "
                  "USB interface shortly.")
     logging.info("Then you can connect to your device using ssh after pmOS has booted:")
-    logging.info("ssh user@" + pmb.config.default_ip)
+    logging.info("ssh {}@{}".format(args.user, pmb.config.default_ip))
     logging.info("NOTE: If you enabled full disk encryption, you should make sure that"
                  " osk-sdl has been properly configured for your device")
 
