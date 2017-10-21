@@ -25,6 +25,25 @@ import pmb.helpers.cli
 import pmb.config
 
 
+def previous_install(args):
+    """
+    Search the sdcard for possible existence of a previous installation of pmOS.
+    We temporarily mount the possible pmOS_boot partition as /dev/sdcardp1 inside
+    the native chroot to check the label from there.
+    """
+    label = ""
+    for blockdevice_outside in [args.sdcard + "1", args.sdcard + "p1"]:
+        if not os.path.exists(blockdevice_outside):
+            continue
+        blockdevice_inside = "/dev/sdcardp1"
+        pmb.helpers.mount.bind_blockdevice(args, blockdevice_outside,
+                                           args.work + "/chroot_native" + blockdevice_inside)
+        label = pmb.chroot.root(args, ["blkid", "-s", "LABEL", "-o", "value",
+                                blockdevice_inside], return_stdout=True)
+        pmb.helpers.run.root(args, ["umount", args.work + "/chroot_native" + blockdevice_inside])
+    return "pmOS_boot" in label
+
+
 def mount_sdcard(args):
     # Sanity checks
     if args.deviceinfo["external_disk_install"] != "true":
@@ -37,13 +56,18 @@ def mount_sdcard(args):
         if pmb.helpers.mount.ismount(path):
             raise RuntimeError(path + " is mounted! We will not attempt"
                                " to format this!")
-    if not pmb.helpers.cli.confirm(args, "EVERYTHING ON " + args.sdcard +
-                                   " WILL BE ERASED! CONTINUE?"):
-        raise RuntimeError("Aborted.")
-
     logging.info("(native) mount /dev/install (host: " + args.sdcard + ")")
     pmb.helpers.mount.bind_blockdevice(args, args.sdcard,
                                        args.work + "/chroot_native/dev/install")
+    if previous_install(args):
+        if not pmb.helpers.cli.confirm(args, "WARNING: This device has a"
+                                       " previous installation of pmOS."
+                                       " CONTINUE?"):
+            raise RuntimeError("Aborted.")
+    else:
+        if not pmb.helpers.cli.confirm(args, "EVERYTHING ON " + args.sdcard +
+                                       " WILL BE ERASED! CONTINUE?"):
+            raise RuntimeError("Aborted.")
 
 
 def create_and_mount_image(args, size):
