@@ -44,7 +44,7 @@ def menuconfig(args, pkgname, arch):
     # Set up build tools and makedepends
     pmb.build.init(args)
     depends = apkbuild["makedepends"] + ["ncurses-dev"]
-    pmb.chroot.apk.install(args, depends, build=False)
+    pmb.chroot.apk.install(args, depends)
 
     # Patch and extract sources
     pmb.build.copy_to_buildpath(args, pkgname)
