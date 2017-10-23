@@ -47,11 +47,12 @@ done
 # E501: max line length
 # F401: imported, but not used, does not make sense in __init__ files
 # E402: module import not on top of file, not possible for testcases
+# E722: do not use bare except
 cd "$DIR"/..
 echo "Test with flake8: *.py"
 echo "NOTE: Run 'autopep8 -ria $PWD' to fix code style issues"
 py_files="$(find . -name '*.py')"
-_ignores="E501,E402"
+_ignores="E501,E402,E722"
 # shellcheck disable=SC2086
 flake8 --exclude=__init__.py --ignore "$_ignores" $py_files
 # shellcheck disable=SC2086
