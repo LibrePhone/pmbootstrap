@@ -39,13 +39,19 @@ def args(request):
 
 
 def test_get_folder_size(args, tmpdir):
-    # Write five 2 KB files to tmpdir
+    # Write five 200 KB files to tmpdir
     tmpdir = str(tmpdir)
     files = 5
     for i in range(files):
         pmb.helpers.run.user(args, ["dd", "if=/dev/zero", "of=" +
                                     tmpdir + "/" + str(i), "bs=1K",
-                                    "count=2", "conv=notrunc"])
+                                    "count=200", "conv=notrunc"])
 
-    # Check if the size is correct
-    assert pmb.helpers.other.folder_size(args, tmpdir) == 20480
+    # Check if the size is correct. Unfortunately, the `du` call
+    # in pmb.helpers.other.folder_size is not very accurate, so we
+    # allow 10kb of tolerance (good enough for our use case):
+    # <https://github.com/postmarketOS/pmbootstrap/pull/760>
+    tolerance = 10240
+    size = 204800 * files
+    result = pmb.helpers.other.folder_size(args, tmpdir)
+    assert (result < size + tolerance and result > size - tolerance)

@@ -21,7 +21,6 @@ import sys
 import pytest
 import types
 import time
-import logging
 
 # Import from parent directory
 pmb_src = os.path.realpath(os.path.join(os.path.dirname(__file__) + "/.."))
@@ -108,22 +107,3 @@ def test_hash():
     url = "https://nl.alpinelinux.org/alpine/edge/testing"
     hash = "865a153c"
     assert pmb.helpers.repo.hash(url, 8) == hash
-
-
-def test_apkindex_files(args):
-    # Make sure, that we have a user's APKINDEX.tar.gz
-    pmb.build.package(args, "hello-world", args.arch_native)
-
-    # Reset the cache
-    del args.cache["apkindex_files"][args.arch_native]
-
-    # Fake the upstream folder to be the same as the normal packages folder
-    args.mirror_postmarketos = args.work + "/packages"
-
-    files = pmb.helpers.repo.apkindex_files(args)
-    for file in files:
-        assert os.path.exists(file)
-        logging.info(file)
-
-    # Test cache
-    assert files == pmb.helpers.repo.apkindex_files(args)

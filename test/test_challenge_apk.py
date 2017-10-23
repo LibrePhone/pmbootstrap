@@ -60,7 +60,7 @@ def test_apk_challenge_contents_diff(args):
 
     # Second file
     apk_b = temp_path_outside + "/b.apk"
-    pmb.chroot.user(args, ["cp", "/etc/abuild.conf", temp_path + "/" + name])
+    pmb.chroot.user(args, ["cp", "/etc/motd", temp_path + "/" + name])
     pmb.chroot.user(args, ["tar", "-czf", "b.apk", name],
                     working_dir=temp_path)
 

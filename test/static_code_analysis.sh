@@ -23,6 +23,7 @@ DIR="$(cd "$(dirname "$0")" && pwd -P)"
 cd "$DIR"/..
 sh_files="
 	./test/static_code_analysis.sh
+	./test/testcases_fast.sh
 	./aports/main/postmarketos-base/firmwareload.sh
 	./aports/main/postmarketos-mkinitfs/init.sh.in
 	./aports/main/postmarketos-mkinitfs/init_functions.sh
