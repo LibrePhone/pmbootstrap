@@ -150,7 +150,7 @@ def export(args):
 
 
 def menuconfig(args):
-    pmb.build.menuconfig(args, args.package, args.deviceinfo["arch"])
+    pmb.build.menuconfig(args, args.package)
 
 
 def kconfig_check(args):

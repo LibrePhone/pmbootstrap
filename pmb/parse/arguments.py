@@ -101,6 +101,8 @@ def arguments_initfs(subparser):
 
 def arguments():
     parser = argparse.ArgumentParser(prog="pmbootstrap")
+    arch_native = pmb.parse.arch.alpine_native()
+    arch_choices = set(pmb.config.build_device_architectures + [arch_native])
 
     # Other
     parser.add_argument("-V", "--version", action="version",
@@ -227,6 +229,7 @@ def arguments():
     # Action: menuconfig / parse_apkbuild
     menuconfig = sub.add_parser("menuconfig", help="run menuconfig on"
                                 " a kernel aport")
+    menuconfig.add_argument("--arch", choices=arch_choices)
     parse_apkbuild = sub.add_parser("parse_apkbuild")
     for action in [menuconfig, parse_apkbuild]:
         action.add_argument("package")
@@ -237,7 +240,7 @@ def arguments():
                               " (aport/APKBUILD) based on an upstream aport from Alpine")
     build = sub.add_parser("build", help="create a package for a"
                            " specific architecture")
-    build.add_argument("--arch")
+    build.add_argument("--arch", choices=arch_choices)
     build.add_argument("--force", action="store_true")
     build.add_argument("--buildinfo", action="store_true")
     build.add_argument("--strict", action="store_true", help="(slower) zap and install only"
@@ -319,7 +322,7 @@ def arguments():
             setattr(args, varname, old.replace("$WORK", args.work))
 
     # Add convenience shortcuts
-    setattr(args, "arch_native", pmb.parse.arch.alpine_native())
+    setattr(args, "arch_native", arch_native)
 
     # Add a caching dict (caches parsing of files etc. for the current session)
     setattr(args, "cache", {"apkindex": {},
