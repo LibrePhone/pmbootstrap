@@ -65,7 +65,7 @@ def _parse_flavor(args):
 
 
 def _parse_suffix(args):
-    if args.rootfs:
+    if "rootfs" in args and args.rootfs:
         return "rootfs_" + args.device
     elif args.buildroot:
         return "buildroot_" + args.deviceinfo["arch"]

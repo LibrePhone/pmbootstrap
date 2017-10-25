@@ -189,8 +189,9 @@ def arguments():
                         " to execute inside the chroot. default: sh", nargs='*')
     for action in [build_init, chroot]:
         suffix = action.add_mutually_exclusive_group()
-        suffix.add_argument("-r", "--rootfs", action="store_true",
-                            help="Chroot for the device root file system")
+        if action == chroot:
+            suffix.add_argument("-r", "--rootfs", action="store_true",
+                                help="Chroot for the device root file system")
         suffix.add_argument("-b", "--buildroot", action="store_true",
                             help="Chroot for building packages for the device "
                                  "architecture")
