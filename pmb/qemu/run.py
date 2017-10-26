@@ -120,10 +120,12 @@ def qemu_command(args, arch, device, img_path, config):
     telnet_port = str(args.port + 1)
     telnet_debug_port = str(args.port + 2)
 
-    rootfs = args.work + "/chroot_rootfs_" + device
+    suffix = "rootfs_" + device
+    rootfs = args.work + "/chroot_" + suffix
+    flavor = pmb.chroot.other.kernel_flavor_autodetect(args, suffix)
     command = [qemu_bin]
-    command += ["-kernel", rootfs + "/boot/vmlinuz-postmarketos"]
-    command += ["-initrd", rootfs + "/boot/initramfs-postmarketos"]
+    command += ["-kernel", rootfs + "/boot/vmlinuz-" + flavor]
+    command += ["-initrd", rootfs + "/boot/initramfs-" + flavor]
     command += ["-append", '"' + cmdline + '"']
     command += ["-m", str(args.memory)]
     command += ["-netdev",
