@@ -68,7 +68,10 @@ def _parse_suffix(args):
     if "rootfs" in args and args.rootfs:
         return "rootfs_" + args.device
     elif args.buildroot:
-        return "buildroot_" + args.deviceinfo["arch"]
+        if args.buildroot == "device":
+            return "buildroot_" + args.deviceinfo["arch"]
+        else:
+            return "buildroot_" + args.buildroot
     elif args.suffix:
         return args.suffix
     else:

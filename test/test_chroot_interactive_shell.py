@@ -30,3 +30,21 @@ def test_chroot_interactive_shell():
                                   input="echo hello_world\n", universal_newlines=True,
                                   stderr=subprocess.STDOUT)
     assert ret == "hello_world\n"
+
+
+def test_chroot_arguments():
+    """
+    Open a shell with 'pmbootstrap chroot' for every architecture, pass 'uname -m\n'
+    as stdin and check the output
+    """
+    pmb_src = os.path.realpath(os.path.join(os.path.dirname(__file__) + "/.."))
+    os.chdir(pmb_src)
+
+    for arch in ["armhf", "aarch64", "x86_64"]:
+        ret = subprocess.check_output(["./pmbootstrap.py", "-q", "chroot", "-b", arch],
+                                      timeout=300, input="uname -m\n",
+                                      universal_newlines=True, stderr=subprocess.STDOUT)
+        if arch == "armhf":
+            assert ret == "armv7l\n"
+        else:
+            assert ret == arch + "\n"

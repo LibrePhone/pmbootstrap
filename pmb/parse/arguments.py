@@ -192,8 +192,9 @@ def arguments():
         if action == chroot:
             suffix.add_argument("-r", "--rootfs", action="store_true",
                                 help="Chroot for the device root file system")
-        suffix.add_argument("-b", "--buildroot", action="store_true",
-                            help="Chroot for building packages for the device "
+        suffix.add_argument("-b", "--buildroot", nargs="?", const="device",
+                            choices={"device"} | arch_choices,
+                            help="Chroot for building packages, defaults to device "
                                  "architecture")
         suffix.add_argument("-s", "--suffix", default=None,
                             help="Specify any chroot suffix, defaults to"

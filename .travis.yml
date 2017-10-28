@@ -11,10 +11,13 @@ install: "pip install flake8 pytest-cov python-coveralls"
 script:
   - test/static_code_analysis.sh
   - yes "" | ./pmbootstrap.py init
+  - ./pmbootstrap.py config timestamp_based_rebuild False
   - ./pmbootstrap.py kconfig_check
   - test/testcases_fast.sh
   - test/check_checksums.py
 after_success:
   - coveralls
+after_failure:
+  - cat ~/.local/var/pmbootstrap/log.txt
 notifications:
   - email: false
