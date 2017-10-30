@@ -16,8 +16,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
-import pmb.helpers.run
 import pmb.aportgen.core
+import pmb.helpers.git
+import pmb.helpers.run
 
 
 def generate(args, pkgname):
@@ -25,6 +26,7 @@ def generate(args, pkgname):
     arch = pkgname.split("-")[1]
     path_original = "main/gcc"
     upstream = (args.work + "/cache_git/aports_upstream/" + path_original)
+    pmb.helpers.git.clone(args, "aports_upstream")
     pmb.helpers.run.user(args, ["cp", "-r", upstream, args.work + "/aportgen"])
 
     # Rewrite APKBUILD

@@ -80,6 +80,7 @@ def _parse_suffix(args):
 
 def aportgen(args):
     for package in args.packages:
+        logging.info("Generate aport: " + package)
         pmb.aportgen.generate(args, package)
 
 

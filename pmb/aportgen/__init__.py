@@ -19,33 +19,47 @@ along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 import os
 import logging
 import pmb.aportgen.binutils
-import pmb.aportgen.musl
-import pmb.aportgen.gcc
 import pmb.aportgen.busybox_static
-import pmb.helpers.git
+import pmb.aportgen.device
+import pmb.aportgen.gcc
+import pmb.aportgen.linux
+import pmb.aportgen.musl
+import pmb.config
+import pmb.helpers.cli
+
+
+def properties(pkgname):
+    """
+    Get the `pmb.config.aportgen` properties for the aport generator, based on
+    the pkgname prefix.
+
+    Example: "musl-armhf" => ("musl", "cross", {"confirm_overwrite": False})
+
+    :param pkgname: package name
+    :returns: (prefix, folder, options)
+    """
+    for folder, options in pmb.config.aportgen.items():
+        for prefix in options["prefixes"]:
+            if pkgname.startswith(prefix):
+                return (prefix, folder, options)
+    raise ValueError("No generator available for " + pkgname + "!")
 
 
 def generate(args, pkgname):
-    # Prepare git repo and temp folder
-    pmb.helpers.git.clone(args, "aports_upstream")
-    logging.info("(native) generate " + pkgname + " aport")
+    # Confirm overwrite
+    prefix, folder, options = properties(pkgname)
+    path_target = args.aports + "/" + folder + "/" + pkgname
+    if options["confirm_overwrite"] and os.path.exists(path_target):
+        logging.warning("WARNING: Target folder already exists: " + path_target)
+        if not pmb.helpers.cli.confirm(args, "Continue and overwrite?"):
+            raise RuntimeError("Aborted.")
+
+    # Run pmb.aportgen.PREFIX.generate()
     if os.path.exists(args.work + "/aportgen"):
         pmb.helpers.run.user(args, ["rm", "-r", args.work + "/aportgen"])
-
-    # Choose generator based on the name
-    if pkgname.startswith("binutils-"):
-        pmb.aportgen.binutils.generate(args, pkgname)
-    elif pkgname.startswith("musl-"):
-        pmb.aportgen.musl.generate(args, pkgname)
-    elif pkgname.startswith("gcc-"):
-        pmb.aportgen.gcc.generate(args, pkgname)
-    elif pkgname.startswith("busybox-static-"):
-        pmb.aportgen.busybox_static.generate(args, pkgname)
-    else:
-        raise ValueError("No generator available for " + pkgname + "!")
+    getattr(pmb.aportgen, prefix.replace("-", "_")).generate(args, pkgname)
 
     # Move to the aports folder
-    path_target = args.aports + "/cross/" + pkgname
     if os.path.exists(path_target):
         pmb.helpers.run.user(args, ["rm", "-r", path_target])
     pmb.helpers.run.user(

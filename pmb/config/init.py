@@ -113,19 +113,35 @@ def ask_for_timezone(args):
     return "GMT"
 
 
-def init(args):
-    cfg = pmb.config.load(args)
-
-    # Device
+def ask_for_device(args):
     devices = sorted(pmb.helpers.devices.list(args))
     logging.info("Target device (either an existing one, or a new one for"
                  " porting).")
     logging.info("Available (" + str(len(devices)) + "): " +
                  ", ".join(devices))
-    cfg["pmbootstrap"]["device"] = pmb.helpers.cli.ask(args, "Device",
-                                                       None, args.device, False, "[a-z0-9]+-[a-z0-9]+")
+    while True:
+        device = pmb.helpers.cli.ask(args, "Device", None, args.device, False,
+                                     "[a-z0-9]+-[a-z0-9]+")
+        device_exists = os.path.exists(args.aports + "/device/device-" +
+                                       device + "/deviceinfo")
+        if not device_exists:
+            logging.info("You are about to do a new device port for '" +
+                         device + "'.")
+            if not pmb.helpers.cli.confirm(args, default=True):
+                continue
 
-    device_exists = os.path.exists(args.aports + "/device/device-" + cfg["pmbootstrap"]["device"] + "/deviceinfo")
+            pmb.aportgen.generate(args, "device-" + device)
+            pmb.aportgen.generate(args, "linux-" + device)
+        break
+
+    return (device, device_exists)
+
+
+def frontend(args):
+    cfg = pmb.config.load(args)
+
+    # Device
+    cfg["pmbootstrap"]["device"], device_exists = ask_for_device(args)
 
     # Device keymap
     if device_exists:
