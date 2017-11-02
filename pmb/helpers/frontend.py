@@ -221,4 +221,5 @@ def log_distccd(args):
 
 def zap(args):
     pmb.chroot.zap(args, packages=args.packages, http=args.http,
-                   mismatch_bins=args.mismatch_bins, distfiles=args.distfiles)
+                   mismatch_bins=args.mismatch_bins, old_bins=args.old_bins,
+                   distfiles=args.distfiles)

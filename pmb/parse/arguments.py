@@ -174,6 +174,8 @@ def arguments():
     zap.add_argument("-m", "--mismatch-bins", action="store_true", help="also delete"
                      " binary packages that are newer than the corresponding"
                      " package in aports")
+    zap.add_argument("-o", "--old-bins", action="store_true", help="also delete outdated"
+                     " binary packages downloaded from mirrors (e.g. from Alpine)")
     zap.add_argument("-d", "--distfiles", action="store_true", help="also delete"
                      " downloaded files cache")
 
