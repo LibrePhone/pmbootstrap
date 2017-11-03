@@ -39,7 +39,7 @@ def run(args, action, flavor=None):
         for key, value in vars.items():
             for i in range(len(command)):
                 if key in command[i]:
-                    if not value and key != "$KERNEL_CMDLINE":
+                    if not value and key not in ["$KERNEL_CMDLINE", "$VENDOR_ID"]:
                         raise RuntimeError("Variable " + key + " found in"
                                            " action " + action + " for method " + method + ","
                                            " but the value for this variable is None! Is that"
