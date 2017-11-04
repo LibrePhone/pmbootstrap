@@ -129,5 +129,6 @@ def test_questions(args, monkeypatch, tmpdir):
 
     # Work path
     tmpdir = str(tmpdir)
-    answers = ["/dev/null", tmpdir]
+    answers = ["/dev/null", os.path.dirname(__file__), pmb.config.pmb_src,
+               tmpdir]
     assert pmb.config.init.ask_for_work_path(args) == tmpdir

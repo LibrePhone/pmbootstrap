@@ -42,6 +42,15 @@ def ask_for_work_path(args):
         try:
             ret = os.path.expanduser(pmb.helpers.cli.ask(
                 args, "Work path", None, args.work, False))
+            ret = os.path.realpath(ret)
+
+            # Work must not be inside the pmbootstrap path
+            if ret == pmb.config.pmb_src or ret.startswith(pmb.config.pmb_src +
+                                                           "/"):
+                logging.fatal("ERROR: The work path must not be inside the"
+                              " pmbootstrap path. Please specify another"
+                              " location.")
+                continue
 
             # Create the folder with a version file
             if not os.path.exists(ret):
