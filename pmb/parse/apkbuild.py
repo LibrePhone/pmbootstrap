@@ -96,8 +96,11 @@ def apkbuild(args, path):
     if path in args.cache["apkbuild"]:
         return args.cache["apkbuild"][path]
 
+    # Read the file and check line endings
     with open(path, encoding="utf-8") as handle:
         lines = handle.readlines()
+        if handle.newlines != '\n':
+            raise RuntimeError("Wrong line endings in APKBUILD: " + path)
 
     # Parse all attributes from the config
     ret = {}
