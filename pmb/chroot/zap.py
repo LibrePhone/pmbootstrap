@@ -73,6 +73,9 @@ def zap(args, confirm=True, packages=False, http=False, mismatch_bins=False,
             if not confirm or pmb.helpers.cli.confirm(args, "Remove " + match + "?"):
                 pmb.helpers.run.root(args, ["rm", "-rf", match])
 
+    # Chroots were zapped, so no repo lists exist anymore
+    args.cache["apk_repository_list_updated"].clear()
+
 
 def zap_mismatch_bins(args, confirm=True):
     if not os.path.exists(args.work + "/packages/"):
