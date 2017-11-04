@@ -72,7 +72,7 @@ def init(args, suffix="native"):
 
     # Initialize cache
     apk_cache = args.work + "/cache_apk_" + arch
-    pmb.helpers.run.root(args, ["ln", "-s", "/var/cache/apk", chroot +
+    pmb.helpers.run.root(args, ["ln", "-s", "-f", "/var/cache/apk", chroot +
                                 "/etc/apk/cache"])
 
     # Initialize /etc/apk/keys/, resolv.conf, repositories
