@@ -51,7 +51,8 @@ def arguments_flasher(subparser):
         action.add_argument("--flavor", default=None)
 
     # Flash system
-    flash_system = sub.add_parser("flash_system", help="flash the system partition")
+    flash_system = sub.add_parser(
+        "flash_system", help="flash the system partition")
     flash_system.add_argument("--partition", default=None, help="partition to flash"
                               " the system image")
 
@@ -96,6 +97,29 @@ def arguments_initfs(subparser):
             help="name of the kernel flavor (run 'pmbootstrap flasher list_flavors'"
             " to get a list of all installed flavors")
 
+    return ret
+
+
+def arguments_qemu(subparser):
+    ret = subparser.add_parser("qemu")
+    ret.add_argument("--arch", choices=["aarch64", "arm", "x86_64"],
+                     help="emulate a different architecture")
+    ret.add_argument("--cmdline", help="override kernel commandline")
+    ret.add_argument(
+        "--image-size", help="set system image size (e.g. 2048M or 2G)")
+    ret.add_argument("-m", "--memory", type=int, default=1024,
+                     help="guest RAM (default: 1024)")
+    ret.add_argument("-p", "--port", type=int, default=2222,
+                     help="SSH port (default: 2222)")
+
+    display = ret.add_mutually_exclusive_group()
+    display.add_argument("--spice", dest="spice_port", const="8077",
+                         action="store", nargs="?", default=None,
+                         help="use SPICE for 2D acceleration (default port:"
+                         " 8077)")
+    display.add_argument("--display", dest="qemu_display", const="sdl,gl=on",
+                         help="Qemu's display parameter (default: sdl,gl=on)",
+                         default="sdl,gl=on", nargs="?")
     return ret
 
 
@@ -153,6 +177,7 @@ def arguments():
     arguments_export(sub)
     arguments_flasher(sub)
     arguments_initfs(sub)
+    arguments_qemu(sub)
 
     # Action: log
     log = sub.add_parser("log", help="follow the pmbootstrap logfile")
@@ -290,22 +315,6 @@ def arguments():
                             help="get and set pmbootstrap options")
     config.add_argument("name", nargs="?", help="variable name")
     config.add_argument("value", nargs="?", help="set variable to value")
-
-    # Action: qemu
-    qemu = sub.add_parser("qemu")
-    qemu.add_argument("--arch", choices=["aarch64", "arm", "x86_64"],
-                      help="emulate a different architecture")
-    qemu.add_argument("--cmdline", help="override kernel commandline")
-    qemu.add_argument("--image-size", help="set system image size (e.g. 2048M or 2G)")
-    qemu.add_argument("-m", "--memory", type=int, default=1024,
-                      help="guest RAM (default: 1024)")
-    qemu.add_argument("-p", "--port", type=int, default=2222,
-                      help="ssh port (default: 2222)")
-    qemu.add_argument("--spice", dest="use_spice",
-                      default=False, action="store_true",
-                      help="connect to the VM using SPICE (NOTE: you need to"
-                           " have a SPICE client installed in your host"
-                           " machine)")
 
     # Use defaults from the user's config file
     args = parser.parse_args()

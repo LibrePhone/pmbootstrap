@@ -66,7 +66,7 @@ def which_qemu(args, arch):
 def which_spice(args):
     """
     Finds some SPICE executable or raises an exception otherwise
-    :returns: tuple (spice_was_found, path_to_spice_executable)
+    :returns: path_to_spice_executable or None
     """
     executables = ["remote-viewer", "spicy"]
     for executable in executables:
@@ -75,37 +75,29 @@ def which_spice(args):
     return None
 
 
-def spice_command(args):
+def command_spice(args):
     """
-    Generate the full SPICE command with arguments connect to
-    the virtual machine
-    :returns: tuple (dict, list), configuration parameters and spice command
+    Generate the full SPICE command with arguments connect to the virtual
+    machine
+    :returns: None or list with the spice command, e.g.:
+              ["spicy", "-h", "127.0.0.1", "-p", "8077"]
     """
-    parameters = {
-        "spice_addr": "127.0.0.1",
-        "spice_port": "8077"
-    }
-    if not args.use_spice:
-        parameters["enable_spice"] = False
-        return parameters, []
+    if not args.spice_port:
+        return None
+
     spice_binary = which_spice(args)
     if not spice_binary:
-        parameters["enable_spice"] = False
-        return parameters, []
-    spice_addr = parameters["spice_addr"]
-    spice_port = parameters["spice_port"]
-    commands = {
-        "spicy": ["spicy", "-h", spice_addr, "-p", spice_port],
-        "remote-viewer": [
-            "remote-viewer",
-            "spice://" + spice_addr + "?port=" + spice_port
-        ]
-    }
-    parameters["enable_spice"] = True
-    return parameters, commands[spice_binary]
+        logging.warning("WARNING: Could not find any SPICE client (spicy,"
+                        " remote-viewer) in your PATH, starting without"
+                        " SPICE support!")
+        return None
+
+    if spice_binary == "spicy":
+        return ["spicy", "-h", "127.0.0.1", "-p", args.spice_port]
+    return ["remote-viewer", "spice://127.0.0.1?port=" + args.spice_port]
 
 
-def qemu_command(args, arch, device, img_path, config):
+def command_qemu(args, arch, device, img_path, spice_enabled):
     """
     Generate the full qemu command with arguments to run postmarketOS
     """
@@ -114,11 +106,10 @@ def qemu_command(args, arch, device, img_path, config):
     cmdline = deviceinfo["kernel_cmdline"]
     if args.cmdline:
         cmdline = args.cmdline
-    logging.info("cmdline: " + cmdline)
+    logging.debug("Kernel cmdline: " + cmdline)
 
-    ssh_port = str(args.port)
-    telnet_port = str(args.port + 1)
-    telnet_debug_port = str(args.port + 2)
+    port_ssh = str(args.port)
+    port_telnet = str(args.port + 2)
 
     suffix = "rootfs_" + device
     rootfs = args.work + "/chroot_" + suffix
@@ -130,11 +121,11 @@ def qemu_command(args, arch, device, img_path, config):
     command += ["-m", str(args.memory)]
     command += ["-netdev",
                 "user,id=net0,"
-                "hostfwd=tcp::" + ssh_port + "-:22,"
-                "hostfwd=tcp::" + telnet_port + "-:23,"
-                "hostfwd=tcp::" + telnet_debug_port + "-:24"
+                "hostfwd=tcp::" + port_ssh + "-:22,"
+                "hostfwd=tcp::" + port_telnet + "-:24"
                 ",net=172.16.42.0/24,dhcpstart=" + pmb.config.default_ip
                 ]
+    command += ["-show-cursor"]
 
     if deviceinfo["dtb"] != "":
         dtb_image = rootfs + "/usr/share/dtb/" + deviceinfo["dtb"] + ".dtb"
@@ -158,7 +149,7 @@ def qemu_command(args, arch, device, img_path, config):
         command += ["-device", "virtio-gpu-pci"]
         command += ["-device", "virtio-net-device,netdev=net0"]
 
-        # add storage
+        # Add storage
         command += ["-device", "virtio-blk-device,drive=system"]
         command += ["-drive", "if=none,id=system,file={},id=hd0".format(img_path)]
 
@@ -174,14 +165,18 @@ def qemu_command(args, arch, device, img_path, config):
     if enable_kvm and os.path.exists("/dev/kvm"):
         command += ["-enable-kvm"]
     else:
-        logging.info("Warning: qemu is not using KVM and will run slower!")
+        logging.info("WARNING: Qemu is not using KVM and will run slower!")
 
-    # QXL / SPICE (2D acceleration support)
-    if config["enable_spice"]:
+    # 2D acceleration support via QXL/SPICE or virtio
+    if spice_enabled:
         command += ["-vga", "qxl"]
         command += ["-spice",
-                    "port={spice_port},addr={spice_addr}".format(**config) +
+                    "port=" + args.spice_port + ",addr=127.0.0.1" +
                     ",disable-ticketing"]
+    else:
+        if args.qemu_mesa_driver == "dri-virtio":
+            command += ["-vga", "virtio"]
+        command += ["-display", args.qemu_display]
 
     return command
 
@@ -194,18 +189,18 @@ def resize_image(args, img_size_new, img_path):
     :param img_size_new: new image size in M or G
     :param img_path: the path to the system image
     """
-    # current image size in bytes
+    # Current image size in bytes
     img_size = os.path.getsize(img_path)
 
-    # make sure we have at least 1 integer followed by either M or G
+    # Make sure we have at least 1 integer followed by either M or G
     pattern = re.compile("^[0-9]+[M|G]$")
     if not pattern.match(img_size_new):
         raise RuntimeError("You must specify the system image size in [M]iB or [G]iB, e.g. 2048M or 2G")
 
-    # remove M or G and convert to bytes
+    # Remove M or G and convert to bytes
     img_size_new_bytes = int(img_size_new[:-1]) * 1024 * 1024
 
-    # convert further for G
+    # Convert further for G
     if (img_size_new[-1] == "G"):
         img_size_new_bytes = img_size_new_bytes * 1024
 
@@ -213,8 +208,8 @@ def resize_image(args, img_size_new, img_path):
         logging.info("Setting the system image size to " + img_size_new)
         pmb.helpers.run.root(args, ["truncate", "-s", img_size_new, img_path])
     else:
-        # convert to human-readable format
-        # Note: We convert to M here, and not G, so that we don't have to display
+        # Convert to human-readable format
+        # NOTE: We convert to M here, and not G, so that we don't have to display
         # a size like 1.25G, since decimal places are not allowed by truncate.
         # We don't want users thinking they can use decimal numbers, and so in
         # this example, they would need to use a size greater then 1280M instead.
@@ -227,55 +222,43 @@ def run(args):
     """
     Run a postmarketOS image in qemu
     """
+    # Get arch, device, img_path
     arch = pmb.parse.arch.uname_to_qemu(args.arch_native)
     if args.arch:
         arch = pmb.parse.arch.uname_to_qemu(args.arch)
-
     device = pmb.parse.arch.qemu_to_pmos_device(arch)
     img_path = system_image(args, device)
-    spice_parameters, command_spice = spice_command(args)
+    logging.info("Running postmarketOS in QEMU VM (" + arch + ")")
 
-    # Workaround: qemu runs as local user and needs write permissions in the
+    # Get the Qemu and spice commands
+    spice = command_spice(args)
+    spice_enabled = True if spice else False
+    qemu = command_qemu(args, arch, device, img_path, spice_enabled)
+
+    # Workaround: Qemu runs as local user and needs write permissions in the
     # system image, which is owned by root
     if not os.access(img_path, os.W_OK):
         pmb.helpers.run.root(args, ["chmod", "666", img_path])
 
-    run_spice = spice_parameters["enable_spice"]
-    command = qemu_command(args, arch, device, img_path, spice_parameters)
-
-    logging.info("Running postmarketOS in QEMU VM (" + arch + ")")
-    logging.info("Command: " + " ".join(command))
-
+    # Resize the system image (or show hint)
     if args.image_size:
         resize_image(args, args.image_size, img_path)
     else:
         logging.info("NOTE: Run 'pmbootstrap qemu --image-size 2G' to set"
                      " the system image size when you run out of space!")
 
-    print()
-    logging.info("You can connect to the virtual machine using the"
-                 " following services:")
-    logging.info("(ssh) ssh -p {port} {user}@localhost".format(**vars(args)))
-    logging.info("(telnet) telnet localhost " + str(args.port + 1))
-    logging.info("(telnet debug) telnet localhost " + str(args.port + 2))
+    # SSH/telnet hints
+    logging.info("Connect to the VM (telnet requires 'pmbootstrap initfs"
+                 " hook_add usb-shell'):")
+    logging.info("* (ssh) ssh -p {port} {user}@localhost".format(**vars(args)))
+    logging.info("* (telnet) telnet localhost " + str(args.port + 2))
 
-    # SPICE related messages
-    if not run_spice:
-        if args.use_spice:
-            logging.warning("WARNING: Could not find any SPICE client (spicy,"
-                            " remote-viewer) in your PATH, starting without"
-                            " SPICE support!")
-        else:
-            logging.info("NOTE: Consider using --spice for potential"
-                         " performance improvements (2d acceleration)")
-
+    # Run Qemu (or Qemu + SPICE)
+    process = None
     try:
-        process = pmb.helpers.run.user(args, command, background=run_spice)
-
-        # Launch SPICE client
-        if run_spice:
-            logging.info("Command: " + " ".join(command_spice))
-            pmb.helpers.run.user(args, command_spice)
+        process = pmb.helpers.run.user(args, qemu, background=spice_enabled)
+        if spice:
+            pmb.helpers.run.user(args, spice)
     except KeyboardInterrupt:
         pass
     finally:

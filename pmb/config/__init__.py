@@ -59,6 +59,7 @@ defaults = {
     "mirror_postmarketos": "",
     "work": os.path.expanduser("~") + "/.local/var/pmbootstrap",
     "port_distccd": "33632",
+    "qemu_mesa_driver": "dri-virtio",
     "ui": "weston",
     "user": "user",
     "keymap": "",
@@ -363,3 +364,8 @@ aportgen = {
         "confirm_overwrite": True,
     }
 }
+
+#
+# QEMU
+#
+qemu_mesa_drivers = ["dri-swrast", "dri-virtio"]

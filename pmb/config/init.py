@@ -146,11 +146,29 @@ def ask_for_device(args):
     return (device, device_exists)
 
 
+def ask_for_qemu_mesa_driver(args):
+    drivers = pmb.config.qemu_mesa_drivers
+    logging.info("Which mesa driver do you prefer for your Qemu device? Only"
+                 " select something other than the default if you are having"
+                 " graphical problems (such as glitches).")
+    while True:
+        ret = pmb.helpers.cli.ask(args, "Mesa driver", drivers,
+                                  args.qemu_mesa_driver)
+        if ret in drivers:
+            return ret
+        logging.fatal("ERROR: Please specify a driver from the list. To change"
+                      " it, see qemu_mesa_drivers in pmb/config/__init__.py.")
+
+
 def frontend(args):
     cfg = pmb.config.load(args)
 
     # Device
     cfg["pmbootstrap"]["device"], device_exists = ask_for_device(args)
+
+    # Qemu mesa driver
+    if cfg["pmbootstrap"]["device"].startswith("qemu-"):
+        cfg["pmbootstrap"]["qemu_mesa_driver"] = ask_for_qemu_mesa_driver(args)
 
     # Device keymap
     if device_exists:
