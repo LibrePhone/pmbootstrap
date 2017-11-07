@@ -45,23 +45,10 @@ $ ./pmbootstrap.py flasher flash_kernel
 $ ./pmbootstrap.py flasher flash_system
 ```
 
-After a reboot, the device will provide a USB network interface, which we request an IP from, and telnet into to open the full-disk encryption on the main system partition:
+After a reboot, the device will prompt for the full-disk encryption password, which you typed in the install step (unless you have disabled full-disk encryption with `--no-fde`). Once the partition has been unlocked it is possible to connect via SSH:
 
 ```shell
 $ dhclient -v enp0s20f0u1
-$ telnet 172.16.42.1
-
-Trying 172.16.42.1...
-Connected to 172.16.42.1.
-Escape character is '^]'.
-
-Enter passphrase for /dev/mapper/mmcblk0p25p2:
-Connection closed by foreign host.
-```
-
-Once the partition has been unlocked it is possible to connect via SSH:
-
-```shell
 $ ssh user@172.16.42.1
 ```
 
