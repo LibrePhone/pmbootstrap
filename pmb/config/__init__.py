@@ -214,6 +214,7 @@ deviceinfo_attributes = [
     "flash_heimdall_partition_kernel",
     "flash_heimdall_partition_initfs",
     "flash_heimdall_partition_system",
+    "flash_fastboot_max_size",
     "flash_fastboot_vendor_id",
     "flash_offset_base",
     "flash_offset_kernel",

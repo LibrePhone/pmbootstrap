@@ -67,6 +67,15 @@ def system(args):
         raise RuntimeError("The system image has not been generated yet,"
                            " please run 'pmbootstrap install' first.")
 
+    # Do not flash if using fastboot & image is too large
+    method = args.flash_method or args.deviceinfo["flash_methods"]
+    if method == "fastboot" and args.deviceinfo["flash_fastboot_max_size"]:
+        img_size = os.path.getsize(args.work + "/chroot_native" + img_path) / 1024**2
+        max_size = int(args.deviceinfo["flash_fastboot_max_size"])
+        if img_size > max_size:
+            raise RuntimeError("The system image is too large for fastboot"
+                               " to flash.")
+
     # Run the flasher
     logging.info("(native) flash system image")
     pmb.flasher.run(args, "flash_system")
