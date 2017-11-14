@@ -55,7 +55,7 @@ defaults = {
     "jobs": str(multiprocessing.cpu_count() + 1),
     "timestamp_based_rebuild": True,
     "log": "$WORK/log.txt",
-    "mirror_alpine": "https://nl.alpinelinux.org/alpine/",
+    "mirror_alpine": "http://dl-cdn.alpinelinux.org/alpine/",
     "mirror_postmarketos": "",
     "work": os.path.expanduser("~") + "/.local/var/pmbootstrap",
     "port_distccd": "33632",
