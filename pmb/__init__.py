@@ -35,6 +35,7 @@ def main():
     # Parse arguments, set up logging
     args = parse.arguments()
     pmb_logging.init(args)
+    os.umask(0o22)
 
     # Wrap everything to display nice error messages
     try:
