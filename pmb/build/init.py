@@ -20,6 +20,7 @@ import os
 import logging
 import glob
 
+import pmb.build
 import pmb.config
 import pmb.chroot
 import pmb.chroot.apk
@@ -82,6 +83,12 @@ def init(args, suffix="native"):
     # inspect it afterwards for debugging
     pmb.chroot.root(args, ["sed", "-i", "-e", "s/^CLEANUP=.*/CLEANUP=''/",
                            "/etc/abuild.conf"], suffix)
+
+    # Qemu workaround (aarch64 only)
+    arch = pmb.parse.arch.from_chroot_suffix(args, suffix)
+    emulate = pmb.parse.arch.cpu_emulation_required(args, arch)
+    if emulate and arch == "aarch64":
+        pmb.build.qemu_workaround_aarch64(args, suffix)
 
     # Mark the chroot as initialized
     pmb.chroot.root(args, ["touch", marker], suffix)

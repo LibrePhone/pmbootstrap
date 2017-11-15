@@ -29,7 +29,8 @@ import pmb.parse
 import pmb.parse.arch
 
 
-def package(args, pkgname, carch, force=False, buildinfo=False, strict=False):
+def package(args, pkgname, carch, force=False, buildinfo=False, strict=False,
+            init_buildenv=True):
     """
     Build a package with Alpine Linux' abuild.
 
@@ -57,7 +58,8 @@ def package(args, pkgname, carch, force=False, buildinfo=False, strict=False):
         return
 
     # Initialize build environment, install/build makedepends
-    pmb.build.init(args, suffix)
+    if init_buildenv:
+        pmb.build.init(args, suffix)
     if len(apkbuild["makedepends"]):
         if strict:
             for makedepend in apkbuild["makedepends"]:
