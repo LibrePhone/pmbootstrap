@@ -29,6 +29,7 @@ sh_files="
 	./aports/main/postmarketos-mkinitfs/init_functions.sh
 	./aports/main/postmarketos-update-kernel/update-kernel.sh
 	./aports/main/postmarketos-android-recovery-installer/build_zip.sh
+	./aports/main/postmarketos-android-recovery-installer/pmos_chroot
 	./aports/main/postmarketos-android-recovery-installer/pmos_install
 	./aports/main/postmarketos-android-recovery-installer/pmos_install_functions
 	./aports/main/postmarketos-android-recovery-installer/pmos_setpw
@@ -40,7 +41,7 @@ sh_files="
 for file in ${sh_files}; do
 	echo "Test with shellcheck: $file"
 	cd "$DIR/../$(dirname "$file")"
-	shellcheck -x "$(basename "$file")"
+	shellcheck -e SC1008 -x "$(basename "$file")"
 done
 
 # Python: flake8
