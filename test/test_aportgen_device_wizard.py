@@ -107,16 +107,16 @@ def test_aportgen_device_wizard(args, monkeypatch):
     # First run
     deviceinfo, apkbuild, apkbuild_linux = generate(args, monkeypatch, answers)
     assert apkbuild["pkgname"] == "device-testsuite-testdevice"
-    assert apkbuild["pkgdesc"] == "Testsuite Testdevice"
+    assert apkbuild["pkgdesc"] == "Testsuite Testsuite Testdevice"
     assert apkbuild["depends"] == ["linux-testsuite-testdevice"]
 
     assert apkbuild_linux["pkgname"] == "linux-testsuite-testdevice"
-    assert apkbuild_linux["pkgdesc"] == "Testsuite Testdevice kernel fork"
+    assert apkbuild_linux["pkgdesc"] == "Testsuite Testsuite Testdevice kernel fork"
     assert apkbuild_linux["arch"] == ["armhf"]
     assert apkbuild_linux["_flavor"] == "testsuite-testdevice"
 
     assert deviceinfo["name"] == "Testsuite Testdevice"
-    assert deviceinfo["manufacturer"] == answers["Manufacturer"]
+    assert deviceinfo["manufacturer"] == "Testsuite"
     assert deviceinfo["arch"] == "armhf"
     assert deviceinfo["keyboard"] == "false"
     assert deviceinfo["external_disk"] == "true"

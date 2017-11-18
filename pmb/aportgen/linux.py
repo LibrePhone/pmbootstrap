@@ -22,7 +22,7 @@ import pmb.parse.apkindex
 import pmb.parse.arch
 
 
-def generate_apkbuild(args, pkgname, name, arch):
+def generate_apkbuild(args, pkgname, manufacturer, name, arch):
     device = "-".join(pkgname.split("-")[1:])
     carch = pmb.parse.arch.alpine_to_kernel(arch)
     content = """\
@@ -31,7 +31,7 @@ def generate_apkbuild(args, pkgname, name, arch):
         pkgname=\"""" + pkgname + """\"
         pkgver=3.x.x
         pkgrel=0
-        pkgdesc=\"""" + name + """ kernel fork\"
+        pkgdesc=\"""" + manufacturer + " " + name + """ kernel fork\"
         arch=\"""" + arch + """\"
         _carch=\"""" + carch + """\"
         _flavor=\"""" + device + """\"
@@ -126,4 +126,5 @@ def generate(args, pkgname):
                                     "/device/linux-lg-mako/" + file,
                                     args.work + "/aportgen/"])
 
-    generate_apkbuild(args, pkgname, deviceinfo["name"], deviceinfo["arch"])
+    generate_apkbuild(args, pkgname, deviceinfo["manufacturer"],
+                      deviceinfo["name"], deviceinfo["arch"])
