@@ -139,6 +139,7 @@ def test_aportgen_device_wizard(args, monkeypatch):
     # fastboot (mkbootimg)
     answers["overwrite"] = "y"
     answers["Flash method"] = "fastboot"
+    answers["Path"] = ""
     deviceinfo, apkbuild, apkbuild_linux = generate(args, monkeypatch, answers)
     assert apkbuild["depends"] == ["linux-testsuite-testdevice", "mkbootimg"]
     assert deviceinfo["flash_methods"] == answers["Flash method"]

@@ -316,6 +316,11 @@ def arguments():
     config.add_argument("name", nargs="?", help="variable name")
     config.add_argument("value", nargs="?", help="set variable to value")
 
+    # Action: bootimg_analyze
+    bootimg_analyze = sub.add_parser("bootimg_analyze", help="Extract all the"
+                                     " information from an existing boot.img")
+    bootimg_analyze.add_argument("path", help="path to the boot.img")
+
     # Use defaults from the user's config file
     args = parser.parse_args()
     cfg = pmb.config.load(args)
@@ -346,7 +351,7 @@ def arguments():
                             "find_aport": {}})
 
     # Add and verify the deviceinfo (only after initialization)
-    if args.action not in ("init", "config"):
+    if args.action not in ("init", "config", "bootimg_analyze"):
         setattr(args, "deviceinfo", pmb.parse.deviceinfo(args))
         arch = args.deviceinfo["arch"]
         if (arch != args.arch_native and
