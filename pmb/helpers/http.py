@@ -24,7 +24,7 @@ import urllib.request
 import pmb.helpers.run
 
 
-def download(args, url, prefix, cache=True):
+def download(args, url, prefix, cache=True, loglevel=logging.INFO):
     """
     Download a file to disk.
     """
@@ -42,7 +42,7 @@ def download(args, url, prefix, cache=True):
         pmb.helpers.run.user(args, ["rm", path])
 
     # Download the file
-    logging.info("Download " + url)
+    logging.log(loglevel, "Download " + url)
     with urllib.request.urlopen(url) as response:
         with open(path, "wb") as handle:
             shutil.copyfileobj(response, handle)

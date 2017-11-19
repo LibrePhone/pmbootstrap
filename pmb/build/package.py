@@ -25,6 +25,7 @@ import pmb.build.buildinfo
 import pmb.chroot
 import pmb.chroot.apk
 import pmb.chroot.distccd
+import pmb.helpers.repo
 import pmb.parse
 import pmb.parse.arch
 
@@ -37,6 +38,9 @@ def package(args, pkgname, carch, force=False, buildinfo=False, strict=False,
     :param force: even build, if not necessary
     :returns: output path relative to the packages folder
     """
+    # Get existing binary package indexes
+    pmb.helpers.repo.update(args)
+
     # Get aport, skip upstream only packages
     aport = pmb.build.find_aport(args, pkgname, False)
     if not aport:

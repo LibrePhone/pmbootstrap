@@ -4,13 +4,11 @@
 # aport_in_sync_with_git: clones Alpine's aports repo
 # aportgen: clones Alpine's aports repo
 # build: builds cross-compilers for aarch64 and armhf
-# keys: clones Alpine's aports repo
 # version: clones Alpine's apk repo
 disabled="
 	aport_in_sync_with_git
 	aportgen
 	build
-	keys
 	version
 "
 

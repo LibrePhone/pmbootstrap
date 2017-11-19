@@ -207,9 +207,6 @@ def frontend(args):
     # Configure timezone info
     cfg["pmbootstrap"]["timezone"] = ask_for_timezone(args)
 
-    # Do not save aports location to config file
-    del cfg["pmbootstrap"]["aports"]
-
     # Save config
     pmb.config.save(args, cfg)
 

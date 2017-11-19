@@ -4,3 +4,6 @@ Sources for the keys (must be identical, there's a testcase that verifies this):
 	https://github.com/alpinelinux/aports/tree/master/main/alpine-keys
 	http://git.alpinelinux.org/cgit/aports/tree/main/alpine-keys?h=master
 	alpine-keys package
+
+In addition, this key holds keys for the official postmarketOS repository:
+	https://github.com/postmarketOS/pmbootstrap/issues/871

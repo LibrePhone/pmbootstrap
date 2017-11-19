@@ -174,6 +174,7 @@ def arguments():
     sub.add_parser("shutdown", help="umount, unregister binfmt")
     sub.add_parser("index", help="re-index all repositories with custom built"
                    " packages (do this after manually removing package files)")
+    sub.add_parser("update", help="update all APKINDEX files")
     arguments_export(sub)
     arguments_flasher(sub)
     arguments_initfs(sub)
@@ -323,21 +324,15 @@ def arguments():
 
     # Use defaults from the user's config file
     args = parser.parse_args()
-    cfg = pmb.config.load(args)
-    for varname in cfg["pmbootstrap"]:
-        if varname not in args or not getattr(args, varname):
-            value = cfg["pmbootstrap"][varname]
-            if varname in pmb.config.defaults:
-                default = pmb.config.defaults[varname]
-                if isinstance(default, bool):
-                    value = (value.lower() == "true")
-            setattr(args, varname, value)
+    pmb.config.merge_with_args(args)
 
-    # Replace $WORK in variables from user's config
-    for varname in cfg["pmbootstrap"]:
-        old = getattr(args, varname)
+    # Replace $WORK in variables from any config
+    for key, value in pmb.config.defaults.items():
+        if key not in args:
+            continue
+        old = getattr(args, key)
         if isinstance(old, str):
-            setattr(args, varname, old.replace("$WORK", args.work))
+            setattr(args, key, old.replace("$WORK", args.work))
 
     # Add convenience shortcuts
     setattr(args, "arch_native", arch_native)

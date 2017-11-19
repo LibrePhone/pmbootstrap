@@ -26,7 +26,6 @@ import filecmp
 sys.path.append(os.path.realpath(
     os.path.join(os.path.dirname(__file__) + "/..")))
 import pmb.parse.apkindex
-import pmb.helpers.git
 import pmb.helpers.logging
 
 
@@ -42,16 +41,45 @@ def args(request):
 
 
 def test_keys(args):
-    mirror_path = os.path.join(os.path.dirname(__file__) + "../keys")
-    original_path = args.work + "/cache_git/aports_upstream/main/alpine-keys"
-    pmb.helpers.git.clone(args, "aports_upstream")
+    # Get the alpine-keys apk filename
+    pmb.chroot.init(args)
+    info = pmb.parse.apkindex.read_any_index(args, "alpine-keys")
+    version = info["version"]
+    pattern = (args.work + "/cache_apk_" + args.arch_native + "/alpine-keys-" +
+               version + ".*.apk")
+    filename = os.path.basename(glob.glob(pattern)[0])
 
-    # Check if original keys are mirrored correctly
-    for path in glob.glob(original_path + "/*.key"):
-        key = os.path.basename(path)
-        assert filecmp.cmp(original_path + "/" + key, mirror_path + "/" + key,
-                           False)
+    # Extract it to a temporary folder
+    temp = "/tmp/test_keys_extract"
+    temp_outside = args.work + "/chroot_native" + temp
+    if os.path.exists(temp_outside):
+        pmb.chroot.root(args, ["rm", "-r", temp])
+    pmb.chroot.user(args, ["mkdir", "-p", temp])
+    pmb.chroot.user(args, ["tar", "xvf", "/var/cache/apk/" + filename],
+                    working_dir=temp)
+
+    # Get all relevant key file names as {"filename": "full_outside_path"}
+    keys_upstream = {}
+    for arch in pmb.config.build_device_architectures + ["x86_64"]:
+        pattern = temp_outside + "/usr/share/apk/keys/" + arch + "/*.pub"
+        for path in glob.glob(pattern):
+            keys_upstream[os.path.basename(path)] = path
+    assert len(keys_upstream)
+
+    # Check if the keys are mirrored correctly
+    mirror_path_keys = os.path.dirname(__file__) + "/../keys"
+    for key, original_path in keys_upstream.items():
+        mirror_path = mirror_path_keys + "/" + key
+        assert filecmp.cmp(mirror_path, original_path, False)
+
+    # Find postmarketOS keys
+    keys_pmos = ["pmos-5a03a13a.rsa.pub"]
+    for key in keys_pmos:
+        assert os.path.exists(mirror_path_keys + "/" + key)
 
     # Find outdated keys, which need to be removed
-    for path in glob.glob(mirror_path + "/*.key"):
-        assert os.path.exists(original_path + "/" + os.path.basename(path))
+    glob_result = glob.glob(mirror_path_keys + "/*.pub")
+    assert len(glob_result)
+    for path in glob_result:
+        key = os.path.basename(key)
+        assert key in keys_pmos or key in keys_upstream

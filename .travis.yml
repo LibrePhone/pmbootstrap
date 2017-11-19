@@ -19,5 +19,6 @@ after_success:
   - coveralls
 after_failure:
   - cat ~/.local/var/pmbootstrap/log.txt
+  - cat ~/.local/var/pmbootstrap/log_testsuite.txt
 notifications:
   - email: false

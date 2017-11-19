@@ -18,7 +18,7 @@ along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 import os
-
+import time
 import pmb.helpers.run
 
 
@@ -58,6 +58,16 @@ def is_up_to_date(path_sources, path_target=None, lastmod_target=None):
         lastmod_target = os.path.getmtime(path_target)
 
     return lastmod_target >= lastmod_source
+
+
+def is_older_than(path, seconds):
+    """
+    Check if a single file is older than a given amount of seconds.
+    """
+    if not os.path.exists(path):
+        return True
+    lastmod = os.path.getmtime(path)
+    return lastmod + seconds < time.time()
 
 
 def symlink(args, file, link):

@@ -24,6 +24,7 @@ import os
 #
 from pmb.config.load import load
 from pmb.config.save import save
+from pmb.config.merge_with_args import merge_with_args
 
 
 #
@@ -43,6 +44,10 @@ apk_tools_static_min_version = "2.7.2-r0"
 # see migrate_work_folder()).
 work_version = "1"
 
+# Only save keys to the config file, which we ask for in 'pmbootstrap init'.
+config_keys = ["device", "extra_packages", "jobs", "timestamp_based_rebuild",
+               "work", "qemu_mesa_driver", "ui", "user", "keymap", "timezone"]
+
 # Config file/commandline default values
 # $WORK gets replaced with the actual value for args.work (which may be
 # overriden on the commandline)
@@ -56,7 +61,7 @@ defaults = {
     "timestamp_based_rebuild": True,
     "log": "$WORK/log.txt",
     "mirror_alpine": "http://dl-cdn.alpinelinux.org/alpine/",
-    "mirror_postmarketos": "",
+    "mirror_postmarketos": "http://postmarketos.brixit.nl",
     "work": os.path.expanduser("~") + "/.local/var/pmbootstrap",
     "port_distccd": "33632",
     "qemu_mesa_driver": "dri-virtio",
@@ -131,6 +136,9 @@ chroot_device_nodes = [
     [644, "c", 1, 9, "urandom"],
 ]
 
+# Age in hours that we keep the APKINDEXes before downloading them again.
+# You can force-update them with 'pmbootstrap update'.
+apkindex_retention_time = 4
 
 #
 # BUILD

@@ -35,6 +35,7 @@ import pmb.chroot.other
 import pmb.flasher
 import pmb.helpers.logging
 import pmb.helpers.other
+import pmb.helpers.repo
 import pmb.helpers.run
 import pmb.install
 import pmb.parse
@@ -114,22 +115,24 @@ def chroot(args):
 
 
 def config(args):
-    pmb.helpers.logging.disable()
-    if args.name and args.name not in pmb.config.defaults:
-        valid_keys = ", ".join(sorted(pmb.config.defaults.keys()))
-        print("The variable name you have specified is invalid.")
-        print("The following are supported: " + valid_keys)
-        sys.exit(1)
+    keys = pmb.config.config_keys
+    if args.name and args.name not in keys:
+        logging.info("NOTE: Valid config keys: " + ", ".join(keys))
+        raise RuntimeError("Invalid config key: " + args.name)
 
     cfg = pmb.config.load(args)
     if args.value:
         cfg["pmbootstrap"][args.name] = args.value
+        logging.info("Config changed: " + args.name + "='" + args.value + "'")
         pmb.config.save(args, cfg)
     elif args.name:
         value = cfg["pmbootstrap"].get(args.name, "")
         print(value)
     else:
         cfg.write(sys.stdout)
+
+    # Don't write the "Done" message
+    pmb.helpers.logging.disable()
 
 
 def index(args):
@@ -155,6 +158,10 @@ def export(args):
 
 def menuconfig(args):
     pmb.build.menuconfig(args, args.package)
+
+
+def update(args):
+    pmb.helpers.repo.update(args, True)
 
 
 def kconfig_check(args):

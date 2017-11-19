@@ -21,7 +21,7 @@ import logging
 
 
 def save(args, cfg):
-    logging.debug("save config: " + args.config)
+    logging.debug("Save config: " + args.config)
     os.makedirs(os.path.dirname(args.config), 0o700, True)
     with open(args.config, "w") as handle:
         cfg.write(handle)
