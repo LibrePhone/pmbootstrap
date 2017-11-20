@@ -56,13 +56,12 @@ def ask_for_external_storage(args):
 
 
 def ask_for_flash_method(args):
-    flash_methods = ["fastboot", "heimdall", "0xffff"]
     while True:
         logging.info("Which flash method does the device support?")
-        method = pmb.helpers.cli.ask(args, "Flash method", flash_methods,
-                                     flash_methods[0])
+        method = pmb.helpers.cli.ask(args, "Flash method", pmb.config.flash_methods,
+                                     pmb.config.flash_methods[0])
 
-        if method in flash_methods:
+        if method in pmb.config.flash_methods:
             if method == "heimdall":
                 heimdall_types = ["isorec", "bootimg"]
                 while True:
