@@ -269,7 +269,7 @@ install_device_packages = [
 # FLASH
 #
 
-flash_methods = ["fastboot", "heimdall", "0xffff"]
+flash_methods = ["fastboot", "heimdall", "0xffff", "none"]
 
 # These folders will be mounted at the same location into the native
 # chroot, before the flash programs get started.

@@ -112,6 +112,12 @@ def sideload(args):
 
 def frontend(args):
     action = args.action_flasher
+    method = args.flash_method or args.deviceinfo["flash_methods"]
+
+    if method == "none" and action in ["boot", "flash_kernel", "flash_system"]:
+        logging.info("This device doesn't support any flash method.")
+        return
+
     if action in ["boot", "flash_kernel"]:
         kernel(args)
     if action == "flash_system":
