@@ -251,10 +251,9 @@ def read_any_index(args, package, arch=None):
     # Return first match
     for index in pmb.helpers.repo.apkindex_files(args, arch):
         index_data = read(args, package, index, False)
-        logging.verbose("Search for " + package + " in " + index +
-                        " - result: " + str(index_data))
         if index_data:
+            logging.verbose(package + ": found in " + index)
             return index_data
 
-    logging.verbose("No match found in any APKINDEX.tar.gz!")
+    logging.verbose(package + ": no match found in any APKINDEX.tar.gz!")
     return None

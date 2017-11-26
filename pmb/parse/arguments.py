@@ -270,11 +270,21 @@ def arguments():
                               " (aport/APKBUILD) based on an upstream aport from Alpine")
     build = sub.add_parser("build", help="create a package for a"
                            " specific architecture")
-    build.add_argument("--arch", choices=arch_choices)
-    build.add_argument("--force", action="store_true")
+    build.add_argument("--arch", choices=arch_choices, default=arch_native,
+                       help="CPU architecture to build for (default: " +
+                       arch_native + ")")
+    build.add_argument("--force", action="store_true", help="even build if not"
+                       " necessary")
     build.add_argument("--buildinfo", action="store_true")
     build.add_argument("--strict", action="store_true", help="(slower) zap and install only"
                        " required depends when building, to detect dependency errors")
+    build.add_argument("-i", "--ignore-depends", action="store_true",
+                       help="only build and install makedepends from an"
+                       " APKBUILD, ignore the depends (old behavior). This is"
+                       " faster for device packages for example, because then"
+                       " you don't need to build and install the kernel. But it"
+                       " is incompatible with how Alpine's abuild handles it.",
+                       dest="ignore_depends")
     build.add_argument("--noarch-arch", dest="noarch_arch", default=None,
                        help="which architecture to use to build 'noarch'"
                             " packages. Defaults to the native arch normally,"

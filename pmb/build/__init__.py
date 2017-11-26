@@ -19,8 +19,8 @@ along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 # Exported functions
 from pmb.build.init import init
 from pmb.build.checksum import checksum
-from pmb.build.other import copy_to_buildpath, is_necessary, \
-    symlink_noarch_packages, find_aport, ccache_stats, index_repo
-from pmb.build.package import package
 from pmb.build.menuconfig import menuconfig
+from pmb.build.other import copy_to_buildpath, is_necessary, \
+    find_aport, ccache_stats, index_repo
+from pmb.build._package import package
 from pmb.build.qemu_workaround_aarch64 import qemu_workaround_aarch64

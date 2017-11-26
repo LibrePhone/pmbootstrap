@@ -16,7 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
-import pmb.build.package
+import pmb.build
 import pmb.chroot.apk
 
 
@@ -30,5 +30,5 @@ def qemu_workaround_aarch64(args, suffix="buildroot_aarch64"):
     """
     pkgname = "abuild-aarch64-qemu-workaround"
     pmb.build.package(args, pkgname, "aarch64", True,
-                      init_buildenv=False)
+                      skip_init_buildenv=True)
     pmb.chroot.apk.install(args, [pkgname], suffix, False)

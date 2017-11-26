@@ -3,12 +3,10 @@
 # Disable slow testcases
 # aport_in_sync_with_git: clones Alpine's aports repo
 # aportgen: clones Alpine's aports repo
-# build: builds cross-compilers for aarch64 and armhf
 # version: clones Alpine's apk repo
 disabled="
 	aport_in_sync_with_git
 	aportgen
-	build
 	version
 "
 

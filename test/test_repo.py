@@ -25,7 +25,7 @@ import time
 # Import from parent directory
 pmb_src = os.path.realpath(os.path.join(os.path.dirname(__file__) + "/.."))
 sys.path.append(pmb_src)
-import pmb.build.package
+import pmb.build
 import pmb.helpers.logging
 import pmb.helpers.repo
 

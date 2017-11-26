@@ -196,7 +196,7 @@ def install(args, packages, suffix="native", build=True):
     packages_with_depends = pmb.parse.depends.recurse(args, packages, arch,
                                                       strict=True)
 
-    # Filter out up-to-date packages
+    # Filter outdated packages (build them if required)
     packages_installed = installed(args, suffix)
     packages_todo = []
     for package in packages_with_depends:

@@ -32,7 +32,7 @@ import pmb.parse
 
 @pytest.fixture
 def args(tmpdir, request):
-    sys.argv = ["pmbootstrap.py", "chroot"]
+    sys.argv = ["pmbootstrap.py", "build", "-i", "device-testsuite-testdevice"]
     args = pmb.parse.arguments()
     args.log = args.work + "/log_testsuite.txt"
     pmb.helpers.logging.init(args)

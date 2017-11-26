@@ -246,60 +246,22 @@ def index_repo(args, arch=None):
         paths = glob.glob(args.work + "/packages/*")
 
     for path in paths:
-        path_arch = os.path.basename(path)
-        path_repo_chroot = "/home/pmos/packages/pmos/" + path_arch
-        logging.debug("(native) index " + path_arch + " repository")
-        commands = [
-            ["apk", "-q", "index", "--output", "APKINDEX.tar.gz_",
-             "--rewrite-arch", path_arch, "*.apk"],
-            ["abuild-sign", "APKINDEX.tar.gz_"],
-            ["mv", "APKINDEX.tar.gz_", "APKINDEX.tar.gz"]
-        ]
-        for command in commands:
-            pmb.chroot.user(args, command, working_dir=path_repo_chroot)
-        pmb.parse.apkindex.clear_cache(args, args.work + path +
-                                       "/APKINDEX.tar.gz")
-
-
-def symlink_noarch_packages(args):
-    """
-    All noarch packages from the native architecture folder (x86_64 usually)
-    get symlinked to all other architectures.
-    """
-    # Create the arch folders
-    architectures = pmb.config.build_device_architectures
-    logging.debug("Symlink noarch-packages to " + ", ".join(architectures))
-    for arch in architectures:
-        arch_folder = "/mnt/pmbootstrap-packages/" + arch
-        arch_folder_outside = args.work + "/packages/" + arch
-        if not os.path.exists(arch_folder_outside):
-            pmb.chroot.user(args, ["mkdir", "-p", arch_folder])
-
-    # Create an APKINDEX *without* replaced architectures (that is much
-    # faster than reading each apk file with Python!)
-    index = "/tmp/APKINDEX_without_replaced_archs"
-    index_outside = args.work + "/chroot_native" + index
-    pmb.chroot.user(args, ["apk", "-q", "index", "--output", index, "*.apk"],
-                    working_dir="/mnt/pmbootstrap-packages/" + args.arch_native)
-
-    # Iterate over noarch packages
-    for package, data in pmb.parse.apkindex.parse(args, index_outside).items():
-        if data["arch"] != "noarch":
-            continue
-
-        # Create missing symlinks
-        apk_file = data["pkgname"] + "-" + data["version"] + ".apk"
-        for arch in architectures:
-            if os.path.exists(args.work + "/packages/" + arch + "/" + apk_file):
-                continue
-            arch_folder = "/mnt/pmbootstrap-packages/" + arch
-            source = "../" + args.arch_native + "/" + apk_file
-            pmb.chroot.user(args, ["ln", "-sf", source, "."],
-                            working_dir=arch_folder)
-
-    # Rewrite indexes
-    for arch in architectures:
-        index_repo(args, arch)
+        if os.path.exists(path):
+            path_arch = os.path.basename(path)
+            path_repo_chroot = "/home/pmos/packages/pmos/" + path_arch
+            logging.debug("(native) index " + path_arch + " repository")
+            commands = [
+                ["apk", "-q", "index", "--output", "APKINDEX.tar.gz_",
+                 "--rewrite-arch", path_arch, "*.apk"],
+                ["abuild-sign", "APKINDEX.tar.gz_"],
+                ["mv", "APKINDEX.tar.gz_", "APKINDEX.tar.gz"]
+            ]
+            for command in commands:
+                pmb.chroot.user(args, command, working_dir=path_repo_chroot)
+        else:
+            logging.debug("NOTE: Can't build index for non-existing path: " +
+                          path)
+        pmb.parse.apkindex.clear_cache(args, path + "/APKINDEX.tar.gz")
 
 
 def ccache_stats(args, arch):

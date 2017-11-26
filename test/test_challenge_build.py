@@ -23,7 +23,7 @@ import pytest
 # Import from parent directory
 sys.path.append(os.path.realpath(
     os.path.join(os.path.dirname(__file__) + "/..")))
-import pmb.build.package
+import pmb.build
 import pmb.challenge.build
 import pmb.config
 import pmb.helpers.logging
