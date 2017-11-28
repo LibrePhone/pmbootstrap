@@ -270,9 +270,10 @@ def arguments():
                               " (aport/APKBUILD) based on an upstream aport from Alpine")
     build = sub.add_parser("build", help="create a package for a"
                            " specific architecture")
-    build.add_argument("--arch", choices=arch_choices, default=arch_native,
+    build.add_argument("--arch", choices=arch_choices, default=None,
                        help="CPU architecture to build for (default: " +
-                       arch_native + ")")
+                       arch_native + " or first available architecture in"
+                       " APKBUILD)")
     build.add_argument("--force", action="store_true", help="even build if not"
                        " necessary")
     build.add_argument("--buildinfo", action="store_true")
@@ -285,13 +286,6 @@ def arguments():
                        " you don't need to build and install the kernel. But it"
                        " is incompatible with how Alpine's abuild handles it.",
                        dest="ignore_depends")
-    build.add_argument("--noarch-arch", dest="noarch_arch", default=None,
-                       help="which architecture to use to build 'noarch'"
-                            " packages. Defaults to the native arch normally,"
-                            " and to the device arch when --strict is set."
-                            " Override in case of strict mode failing on"
-                            " dependencies, which only exist for a certain"
-                            " arch.")
     for action in [checksum, build, aportgen]:
         action.add_argument("packages", nargs="+")
 

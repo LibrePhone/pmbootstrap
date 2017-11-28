@@ -156,6 +156,10 @@ def apkbuild(args, path):
         raise RuntimeError("The pkgname must be equal to the name of"
                            " the folder, that contains the APKBUILD!")
 
+    # Sanity check: arch
+    if not len(ret["arch"]):
+        raise RuntimeError("Arch must not be empty: " + path)
+
     # Fill cache
     args.cache["apkbuild"][path] = ret
     return ret

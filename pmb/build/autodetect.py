@@ -22,6 +22,22 @@ import pmb.chroot.apk
 import pmb.parse.arch
 
 
+def arch(args, pkgname):
+    """
+    Find a good default in case the user did not specify for which architecture
+    a package should be built.
+
+    :returns: native architecture (x86_64 in most cases) when the APKBUILD has
+              "noarch" or "all". Otherwise the first architecture in the
+              APKBUILD.
+    """
+    aport = pmb.build.find_aport(args, pkgname)
+    apkbuild = pmb.parse.apkbuild(args, aport + "/APKBUILD")
+    if "noarch" in apkbuild["arch"] or "all" in apkbuild["arch"]:
+        return args.arch_native
+    return apkbuild["arch"][0]
+
+
 def suffix(args, apkbuild, arch):
     if arch == args.arch_native:
         return "native"

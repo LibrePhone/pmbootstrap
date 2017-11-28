@@ -27,6 +27,7 @@ import sys
 
 import pmb.aportgen
 import pmb.build
+import pmb.build.autodetect
 import pmb.config
 import pmb.challenge
 import pmb.chroot
@@ -141,7 +142,8 @@ def build(args):
 
     # Build all packages
     for package in args.packages:
-        pmb.build.package(args, package, args.arch, args.force,
+        arch_package = args.arch or pmb.build.autodetect.arch(args, package)
+        pmb.build.package(args, package, arch_package, args.force,
                           args.buildinfo, args.strict)
 
 
