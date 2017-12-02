@@ -78,11 +78,19 @@ def get_depends(args, apkbuild):
 
     :returns: list of dependency pkgnames (eg. ["sdl2", "sdl2_net"])
     """
+    # Read makedepends and depends
     ret = list(apkbuild["makedepends"])
     if "ignore_depends" not in args or not args.ignore_depends:
         ret += apkbuild["depends"]
+    ret = sorted(set(ret))
 
-    return sorted(set(ret))
+    # Don't recurse forever when a package depends on itself (#948)
+    for pkgname in [apkbuild["pkgname"]] + list(apkbuild["subpackages"]):
+        if pkgname in ret:
+            logging.verbose(apkbuild["pkgname"] + ": ignoring dependency on"
+                            " itself: " + pkgname)
+            ret.remove(pkgname)
+    return ret
 
 
 def build_depends(args, apkbuild, arch, strict):

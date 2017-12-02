@@ -112,7 +112,8 @@ def test_check_arch(args):
 
 def test_get_depends(monkeypatch):
     func = pmb.build._package.get_depends
-    apkbuild = {"depends": ["a"], "makedepends": ["c", "b"]}
+    apkbuild = {"pkgname": "test", "depends": ["a"], "makedepends": ["c", "b"],
+                "subpackages": ["d"]}
 
     # Depends + makedepends
     args = args_patched(monkeypatch, ["pmbootstrap", "build", "test"])
@@ -124,11 +125,22 @@ def test_get_depends(monkeypatch):
     args = args_patched(monkeypatch, ["pmbootstrap", "build", "-i", "test"])
     assert func(args, apkbuild) == ["b", "c"]
 
+    # Package depends on its own subpackage
+    apkbuild["makedepends"] = ["d"]
+    args = args_patched(monkeypatch, ["pmbootstrap", "build", "test"])
+    assert func(args, apkbuild) == ["a"]
+
+    # Package depends on itself
+    apkbuild["makedepends"] = ["c", "b", "test"]
+    args = args_patched(monkeypatch, ["pmbootstrap", "build", "test"])
+    assert func(args, apkbuild) == ["a", "b", "c"]
+
 
 def test_build_depends(args, monkeypatch):
     # Shortcut and fake apkbuild
     func = pmb.build._package.build_depends
-    apkbuild = {"pkgname": "test", "depends": ["a"], "makedepends": ["b"]}
+    apkbuild = {"pkgname": "test", "depends": ["a"], "makedepends": ["b"],
+                "subpackages": ["d"]}
 
     # No depends built (first makedepends + depends, then only makedepends)
     monkeypatch.setattr(pmb.build._package, "package", return_none)
