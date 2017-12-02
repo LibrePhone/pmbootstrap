@@ -44,9 +44,11 @@ def main():
         if args.action == "init":
             return config_init.frontend(args)
         elif not os.path.exists(args.config):
-            logging.critical("Please specify a config file, or run"
-                             " 'pmbootstrap init' to generate one.")
-            return 1
+            raise RuntimeError("Please specify a config file, or run"
+                               " 'pmbootstrap init' to generate one.")
+        elif not os.path.exists(args.work):
+            raise RuntimeError("Work path not found, please run 'pmbootstrap"
+                               " init' to create it.")
 
         # Migrate work folder if necessary
         if args.action not in ["shutdown", "zap", "log"]:
