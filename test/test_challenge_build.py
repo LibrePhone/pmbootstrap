@@ -65,6 +65,7 @@ def test_challenge_build(args):
                            apk_path + ".buildinfo.json"])
 
     # Challenge, output changes into a file
+    args.cache["built"] = {}
     setattr(args, "output_repo_changes", args.work + "/chroot_native/tmp/"
                   "test_challenge_build_output.txt")
     pmb.challenge.build(args, args.work + "/chroot_native/" + temp_path + "/" +

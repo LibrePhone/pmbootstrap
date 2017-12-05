@@ -30,6 +30,23 @@ import pmb.parse
 import pmb.parse.arch
 
 
+def skip_already_built(args, pkgname, arch):
+    """
+    Check if the package was already built in this session, and add it
+    to the cache in case it was not built yet.
+
+    :returns: True when it can be skipped or False
+    """
+    if arch not in args.cache["built"]:
+        args.cache["built"][arch] = []
+    if pkgname in args.cache["built"][arch]:
+        logging.verbose(pkgname + ": already checked this session,"
+                        " no need to build it or its dependencies")
+        return True
+    args.cache["built"][arch].append(pkgname)
+    return False
+
+
 def get_apkbuild(args, pkgname, arch):
     """
     Find the APKBUILD path for pkgname. When there is none, try to find it in
@@ -276,8 +293,12 @@ def package(args, pkgname, arch=None, force=False, buildinfo=False,
     :returns: None if the build was not necessary
               output path relative to the packages folder ("armhf/ab-1-r2.apk")
     """
-    # Only build when APKBUILD exists
+    # Once per session is enough
     arch = arch or args.arch_native
+    if skip_already_built(args, pkgname, arch):
+        return
+
+    # Only build when APKBUILD exists
     apkbuild = get_apkbuild(args, pkgname, arch)
     if not apkbuild:
         return
