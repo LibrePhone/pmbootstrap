@@ -62,6 +62,7 @@ def get_subpartitions_size(args):
     # Add some free space, see also:
     # https://github.com/postmarketOS/pmbootstrap/pull/336
     full *= 1.20
+    full += 50 * 1024 * 1024
     boot += 15 * 1024 * 1024
     return (full, boot)
 
