@@ -47,15 +47,27 @@ def test_qt_versions(args):
     """
     # Upstream version
     pmb.helpers.repo.update(args)
-    index_data = pmb.parse.apkindex.read_any_index(args, "qt5-qtbase", "x86_64")
+    repository = args.mirror_alpine + args.alpine_version + "/community"
+    hash = pmb.helpers.repo.hash(repository)
+    index_path = (args.work + "/cache_apk_armhf/APKINDEX." + hash +
+                  ".tar.gz")
+    index_data = pmb.parse.apkindex.read(args, "qt5-qtbase", index_path)
     pkgver_upstream = index_data["version"].split("-r")[0]
 
-    # Check our packages
+    # Iterate over our packages
     failed = []
     for path in glob.glob(args.aports + "/*/qt5-*/APKBUILD"):
+        # Read the pkgver
         apkbuild = pmb.parse.apkbuild(args, path)
         pkgname = apkbuild["pkgname"]
         pkgver = apkbuild["pkgver"]
+
+        # When we temporarily override packages from Alpine, we set the pkgver
+        # to 9999 and _pkgver contains the real version (see #994).
+        if pkgver == "9999":
+            pkgver = apkbuild["_pkgver"]
+
+        # Compare
         if pkgver == pkgver_upstream:
             continue
         failed.append(pkgname + ": " + pkgver + " != " +

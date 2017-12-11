@@ -198,6 +198,9 @@ apkbuild_attributes = {
 
     # mesa
     "_llvmver": {"array": False},
+
+    # Overridden packages
+    "_pkgver": {"array": False},
 }
 
 # Variables from deviceinfo. Reference: <https://postmarketos.org/deviceinfo>
