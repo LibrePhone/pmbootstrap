@@ -93,8 +93,13 @@ def umount_all_list(prefix, source="/proc/mounts"):
             if len(words) < 2:
                 raise RuntimeError("Failed to parse line in " + source + ": " +
                                    line)
-            if words[1].startswith(prefix):
-                ret.append(words[1])
+            mountpoint = words[1]
+            if mountpoint.startswith(prefix):
+                # Remove "\040(deleted)" suffix (#545)
+                deleted_str = r"\040(deleted)"
+                if mountpoint.endswith(deleted_str):
+                    mountpoint = mountpoint[:-len(deleted_str)]
+                ret.append(mountpoint)
     ret.sort(reverse=True)
     return ret
 
