@@ -140,6 +140,7 @@ def generate_deviceinfo(args, pkgname, name, manufacturer, arch, has_keyboard,
         deviceinfo_screen_width="800"
         deviceinfo_screen_height="600"
         deviceinfo_dev_touchscreen=""
+        deviceinfo_dev_touchscreen_calibration=""
         deviceinfo_dev_keyboard=""
 
         # Bootloader related
@@ -185,6 +186,7 @@ def generate_apkbuild(args, pkgname, name, manufacturer, arch, flash_method):
     if flash_method == "0xffff":
         depends += " uboot-tools"
     content = """\
+        # Reference: <https://postmarketos.org/devicepkg>
         pkgname=\"""" + pkgname + """\"
         pkgdesc=\"""" + manufacturer + " " + name + """\"
         pkgver=0.1
@@ -194,11 +196,15 @@ def generate_apkbuild(args, pkgname, name, manufacturer, arch, flash_method):
         arch="noarch"
         options="!check"
         depends=\"""" + depends + """\"
+        makedepends="devicepkg-dev"
         source="deviceinfo"
 
+        build() {
+            devicepkg_build $startdir $pkgname
+        }
+
         package() {
-            install -Dm644 "$srcdir"/deviceinfo \\
-                "$pkgdir"/etc/deviceinfo
+            devicepkg_package $startdir $pkgname
         }
 
         sha512sums="(run 'pmbootstrap checksum """ + pkgname + """' to fill)"

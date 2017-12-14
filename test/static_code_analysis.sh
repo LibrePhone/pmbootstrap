@@ -38,6 +38,7 @@ sh_files="
 	./aports/main/postmarketos-ui-hildon/postmarketos-ui-hildon.post-install
 	$(find . -path './aports/main/postmarketos-ui-hildon/*.sh')
 	$(find . -name '*.trigger')
+	$(find . -path './aports/main/devicepkg-dev/*.sh')
 "
 for file in ${sh_files}; do
 	echo "Test with shellcheck: $file"

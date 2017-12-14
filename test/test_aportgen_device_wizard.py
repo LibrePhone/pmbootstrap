@@ -38,13 +38,18 @@ def args(tmpdir, request):
     pmb.helpers.logging.init(args)
     request.addfinalizer(args.logfd.close)
 
-    # Fake aports folder):
+    # Fake aports folder:
     tmpdir = str(tmpdir)
     setattr(args, "_aports_real", args.aports)
     args.aports = tmpdir
-    pmb.helpers.run.user(args, ["mkdir", "-p", tmpdir + "/device"])
+
+    # Copy the devicepkg-dev package (shared device-* APKBUILD code)
+    pmb.helpers.run.user(args, ["mkdir", "-p", tmpdir + "/main"])
+    path_dev = args._aports_real + "/main/devicepkg-dev"
+    pmb.helpers.run.user(args, ["cp", "-r", path_dev, tmpdir + "/main"])
 
     # Copy the linux-lg-mako aport (we currently copy patches from there)
+    pmb.helpers.run.user(args, ["mkdir", "-p", tmpdir + "/device"])
     path_mako = args._aports_real + "/device/linux-lg-mako"
     pmb.helpers.run.user(args, ["cp", "-r", path_mako, tmpdir + "/device"])
     return args
