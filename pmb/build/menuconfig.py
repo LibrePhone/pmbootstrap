@@ -94,7 +94,7 @@ def menuconfig(args, pkgname):
     logging.info("Copy kernel config back to aport-folder")
     source = args.work + "/chroot_native/home/pmos/build/" + config
     if not os.path.exists(source):
-        raise RuntimeError("No kernel config generated!")
+        raise RuntimeError("No kernel config generated: " + source)
     target = aport + "/" + config
     pmb.helpers.run.user(args, ["cp", source, target])
     pmb.build.checksum(args, pkgname)
