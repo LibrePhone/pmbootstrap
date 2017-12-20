@@ -242,18 +242,44 @@ def read_any_index(args, package, arch=None):
     """
     Get information about a single package from any APKINDEX.tar.gz.
 
+    We iterate through the index files in the order they are listed in
+    /etc/apk/repositories (we write that file in pmbootstrap, so we know the
+    order). That way it is possible to override a package from an upstream
+    binary repository (pmOS or Alpine) with a package built locally with
+    pmbootstrap.
+
+    If a package is in multiple APKINDEX files in multiple versions, then the
+    highest one gets returned (even if it is not in the first APKINDEX we look
+    at).
+
     :param arch: defaults to native architecture
     :returns: the same format as read()
     """
     if not arch:
         arch = args.arch_native
 
-    # Return first match
+    # Iterate over indexes
+    ret = None
+    version_last = None
     for index in pmb.helpers.repo.apkindex_files(args, arch):
+        # Skip indexes without the package
         index_data = read(args, package, index, False)
-        if index_data:
-            logging.verbose(package + ": found in " + index)
-            return index_data
+        if not index_data:
+            continue
 
-    logging.verbose(package + ": no match found in any APKINDEX.tar.gz!")
-    return None
+        # Skip lower versions
+        version = index_data["version"]
+        if ret and pmb.parse.version.compare(version, version_last) == -1:
+            logging.verbose(package + ": " + version + " found in " + index +
+                            " (but " + version_last + " is bigger)")
+            continue
+
+        # Save as result
+        logging.verbose(package + ": " + version + " found in " + index)
+        ret = index_data
+        version_last = version
+
+    # No result log entry
+    if not ret:
+        logging.verbose(package + ": no match found in any APKINDEX.tar.gz!")
+    return ret
