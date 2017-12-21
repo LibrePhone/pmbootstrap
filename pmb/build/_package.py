@@ -175,10 +175,11 @@ def init_buildenv(args, apkbuild, arch, strict=False, force=False, cross=None,
     if not is_necessary_warn_depends(args, apkbuild, arch, force, built):
         return False
 
-    # Install and configure abuild, gcc, dependencies
+    # Install and configure abuild, ccache, gcc, dependencies
     if not skip_init_buildenv:
         pmb.build.init(args, suffix)
         pmb.build.other.configure_abuild(args, suffix)
+        pmb.build.other.configure_ccache(args, suffix)
     if not strict and len(depends):
         pmb.chroot.apk.install(args, depends, suffix)
 
@@ -187,11 +188,28 @@ def init_buildenv(args, apkbuild, arch, strict=False, force=False, cross=None,
         pmb.chroot.apk.install(args, ["gcc-" + arch, "g++-" + arch,
                                       "ccache-cross-symlinks"])
     if cross == "distcc":
-        pmb.chroot.apk.install(args, ["distcc"], suffix=suffix,
-                               build=False)
+        pmb.chroot.apk.install(args, ["distcc", "arch-bin-masquerade"],
+                               suffix=suffix)
         pmb.chroot.distccd.start(args, arch)
 
     return True
+
+
+def get_gcc_version(args, arch):
+    """
+    Get the GCC version for a specific arch from parsing the right APKINDEX.
+    We feed this to ccache, so it knows the right GCC version, when
+    cross-compiling in a foreign arch chroot with distcc. See the "using
+    ccache with other compiler wrappers" section of their man page:
+    <https://linux.die.net/man/1/ccache>
+    :returns: a string like "6.4.0-r5"
+    """
+    repository = args.mirror_alpine + args.alpine_version + "/main"
+    hash = pmb.helpers.repo.hash(repository)
+    index_path = (args.work + "/cache_apk_" + arch + "/APKINDEX." +
+                  hash + ".tar.gz")
+    apkindex = pmb.parse.apkindex.read(args, "gcc", index_path, True)
+    return apkindex["version"]
 
 
 def run_abuild(args, apkbuild, arch, strict=False, force=False, cross=None,
@@ -225,7 +243,9 @@ def run_abuild(args, apkbuild, arch, strict=False, force=False, cross=None,
         env["CROSS_COMPILE"] = hostspec + "-"
         env["CC"] = hostspec + "-gcc"
     if cross == "distcc":
-        env["PATH"] = "/usr/lib/distcc/bin:" + pmb.config.chroot_path
+        env["CCACHE_PREFIX"] = "distcc"
+        env["CCACHE_PATH"] = "/usr/lib/arch-bin-masquerade/" + arch + ":/usr/bin"
+        env["CCACHE_COMPILERCHECK"] = "string:" + get_gcc_version(args, arch)
         env["DISTCC_HOSTS"] = "127.0.0.1:" + args.port_distccd
 
     # Build the abuild command

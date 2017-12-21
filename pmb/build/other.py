@@ -264,15 +264,12 @@ def index_repo(args, arch=None):
         pmb.parse.apkindex.clear_cache(args, path + "/APKINDEX.tar.gz")
 
 
-def ccache_stats(args, arch):
-    suffix = "native"
-    if args.arch:
-        suffix = "buildroot_" + arch
-    pmb.chroot.user(args, ["ccache", "-s"], suffix, log=False)
-
-
-# set the correct JOBS count in abuild.conf
 def configure_abuild(args, suffix, verify=False):
+    """
+    Set the correct JOBS count in abuild.conf
+
+    :param verify: internally used to test if changing the config has worked.
+    """
     path = args.work + "/chroot_" + suffix + "/etc/abuild.conf"
     prefix = "export JOBS="
     with open(path, encoding="utf-8") as handle:
@@ -289,3 +286,27 @@ def configure_abuild(args, suffix, verify=False):
                 configure_abuild(args, suffix, True)
             return
     raise RuntimeError("Could not find " + prefix + " line in " + path)
+
+
+def configure_ccache(args, suffix="native", verify=False):
+    """
+    Set the maximum ccache size
+
+    :param verify: internally used to test if changing the config has worked.
+    """
+    # Check if the settings have been set already
+    arch = pmb.parse.arch.from_chroot_suffix(args, suffix)
+    path = args.work + "/cache_ccache_" + arch + "/ccache.conf"
+    if os.path.exists(path):
+        with open(path, encoding="utf-8") as handle:
+            for line in handle:
+                if line == ("max_size = " + args.ccache_size + "\n"):
+                    return
+    if verify:
+        raise RuntimeError("Failed to configure ccache: " + path + "\nTry to"
+                           " delete the file (or zap the chroot).")
+
+    # Set the size and verify
+    pmb.chroot.user(args, ["ccache", "--max-size", args.ccache_size],
+                    suffix)
+    configure_ccache(args, suffix, True)

@@ -118,7 +118,8 @@ def ask_for_timezone(args):
             if pmb.helpers.cli.confirm(args, "Use this timezone instead of GMT?",
                                        default="y"):
                 return tz
-    logging.info("WARNING: Unable to determine timezone configuration on host, using GMT.")
+    logging.info("WARNING: Unable to determine timezone configuration on host,"
+                 " using GMT.")
     return "GMT"
 
 
@@ -160,6 +161,43 @@ def ask_for_qemu_mesa_driver(args):
                       " it, see qemu_mesa_drivers in pmb/config/__init__.py.")
 
 
+def ask_for_build_options(args, cfg):
+    # Allow to skip build options
+    ts_rebuild = "True" if args.timestamp_based_rebuild else "False"
+    logging.info("Build options: Parallel jobs: " + args.jobs +
+                 ", ccache per arch: " + args.ccache_size +
+                 ", timestamp based rebuilds: " + ts_rebuild)
+
+    if not pmb.helpers.cli.confirm(args, "Change them?",
+                                   default=False):
+        return
+
+    # Parallel job count
+    logging.info("How many jobs should run parallel on this machine, when"
+                 " compiling?")
+    answer = pmb.helpers.cli.ask(args, "Jobs", None, args.jobs,
+                                 validation_regex="[1-9][0-9]*")
+    cfg["pmbootstrap"]["jobs"] = answer
+
+    # Ccache size
+    logging.info("We use ccache to speed up building the same code multiple"
+                 " times. How much space should the ccache folder take up per"
+                 " architecture? After init is through, you can check the current"
+                 " usage with 'pmbootstrap stats'. Answer with 0 for infinite.")
+    regex = "0|[0-9]+(k|M|G|T|Ki|Mi|Gi|Ti)"
+    answer = pmb.helpers.cli.ask(args, "Ccache size", None, args.ccache_size,
+                                 lowercase_answer=False, validation_regex=regex)
+    cfg["pmbootstrap"]["ccache_size"] = answer
+
+    # Timestamp based rebuilds
+    logging.info("Rebuild packages, when the last modified timestamp changed,"
+                 " even if the version did not change?"
+                 " This makes pmbootstrap behave more like 'make'.")
+    answer = pmb.helpers.cli.confirm(args, "Timestamp based rebuilds",
+                                     default=args.timestamp_based_rebuild)
+    cfg["pmbootstrap"]["timestamp_based_rebuild"] = str(answer)
+
+
 def frontend(args):
     cfg = pmb.config.load(args)
 
@@ -172,7 +210,8 @@ def frontend(args):
 
     # Device keymap
     if device_exists:
-        cfg["pmbootstrap"]["keymap"] = ask_for_keymaps(args, device=cfg["pmbootstrap"]["device"])
+        cfg["pmbootstrap"]["keymap"] = ask_for_keymaps(
+            args, device=cfg["pmbootstrap"]["device"])
 
     # Username
     cfg["pmbootstrap"]["user"] = pmb.helpers.cli.ask(args, "Username", None,
@@ -182,19 +221,8 @@ def frontend(args):
     cfg["pmbootstrap"]["ui"] = ask_for_ui(args)
     cfg["pmbootstrap"]["work"] = ask_for_work_path(args)
 
-    # Parallel job count
-    logging.info("How many jobs should run parallel on this machine, when"
-                 " compiling?")
-    cfg["pmbootstrap"]["jobs"] = pmb.helpers.cli.ask(args, "Jobs",
-                                                     None, args.jobs, validation_regex="[1-9][0-9]*")
-
-    # Timestamp based rebuilds
-    logging.info("Rebuild packages, when the last modified timestamp changed,"
-                 " even if the version did not change? This makes pmbootstrap"
-                 " behave more like 'make'.")
-    answer = pmb.helpers.cli.confirm(args, "Timestamp based rebuilds",
-                                     default=args.timestamp_based_rebuild)
-    cfg["pmbootstrap"]["timestamp_based_rebuild"] = str(answer)
+    # Various build options
+    ask_for_build_options(args, cfg)
 
     # Extra packages to be installed to rootfs
     logging.info("Additional packages that will be installed to rootfs."
@@ -215,7 +243,8 @@ def frontend(args):
     if (device_exists and
             len(glob.glob(args.work + "/chroot_*")) and
             pmb.helpers.cli.confirm(args, "Zap existing chroots to apply configuration?", default=True)):
-        setattr(args, "deviceinfo", pmb.parse.deviceinfo(args, device=cfg["pmbootstrap"]["device"]))
+        setattr(args, "deviceinfo", pmb.parse.deviceinfo(
+            args, device=cfg["pmbootstrap"]["device"]))
         # Do not zap any existing packages or cache_http directories
         pmb.chroot.zap(args, confirm=False)
 

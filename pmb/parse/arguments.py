@@ -207,7 +207,7 @@ def arguments():
 
     # Action: stats
     stats = sub.add_parser("stats", help="show ccache stats")
-    stats.add_argument("--arch")
+    stats.add_argument("--arch", default=arch_native, choices=arch_choices)
 
     # Action: build_init / chroot
     build_init = sub.add_parser("build_init", help="initialize build"

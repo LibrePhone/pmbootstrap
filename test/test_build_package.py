@@ -229,13 +229,13 @@ def test_run_abuild(args, monkeypatch):
     assert func(args, apkbuild, "armhf", cross="native") == (output, cmd, env)
 
     # cross=distcc
-    env = {"CARCH": "armhf",
-           "PATH": "/usr/lib/distcc/bin:" + pmb.config.chroot_path,
-           "DISTCC_HOSTS": "127.0.0.1:33632"}
-    cmd = ["CARCH=armhf", "PATH=" + "/usr/lib/distcc/bin:" +
-           pmb.config.chroot_path, "DISTCC_HOSTS=127.0.0.1:33632", "abuild",
-           "-d"]
-    assert func(args, apkbuild, "armhf", cross="distcc") == (output, cmd, env)
+    (output, cmd, env) = func(args, apkbuild, "armhf", cross="distcc")
+    assert output == "armhf/test-1-r2.apk"
+    assert env["CARCH"] == "armhf"
+    assert env["CCACHE_PREFIX"] == "distcc"
+    assert env["CCACHE_PATH"] == "/usr/lib/arch-bin-masquerade/armhf:/usr/bin"
+    assert env["CCACHE_COMPILERCHECK"].startswith("string:")
+    assert env["DISTCC_HOSTS"] == "127.0.0.1:33632"
 
 
 def test_finish(args, monkeypatch):

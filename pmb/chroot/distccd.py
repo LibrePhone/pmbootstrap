@@ -83,11 +83,16 @@ def is_running(args):
 def generate_cmdline(args, arch):
     """
     :returns: a dictionary suitable for pmb.chroot.user(), to start the distccd
-              with the cross-compiler in the path and all options set.
+              with all options set.
+    NOTE: The distcc client of the foreign arch chroot passes the
+          absolute path to the compiler, which points to
+          "/usr/lib/arch-bin-masquerade/armhf/gcc" for example. This also
+          exists in the native chroot, and points to the armhf cross-
+          compiler there (both the native and foreign chroot have the
+          arch-bin-masquerade package installed, which creates the
+          wrapper scripts).
     """
-    path = "/usr/lib/gcc-cross-wrappers/" + arch + "/bin:" + pmb.config.chroot_path
-    ret = ["PATH=" + path,
-           "distccd",
+    ret = ["distccd",
            "--pid-file", "/home/pmos/distccd.pid",
            "--listen", "127.0.0.1",
            "--allow", "127.0.0.1",
@@ -110,7 +115,7 @@ def start(args, arch):
     if info and info["cmdline"] == " ".join(cmdline):
         return
     stop(args)
-    pmb.chroot.apk.install(args, ["distcc", "gcc-cross-wrappers"])
+    pmb.chroot.apk.install(args, ["distcc", "arch-bin-masquerade"])
 
     # Start daemon with cross-compiler in path
     logging.info("(native) start distccd (" + arch + ") on 127.0.0.1:" +

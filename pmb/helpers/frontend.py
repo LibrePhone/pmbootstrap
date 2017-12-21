@@ -261,7 +261,15 @@ def shutdown(args):
 
 
 def stats(args):
-    pmb.build.ccache_stats(args, args.arch)
+    # Chroot suffix
+    suffix = "native"
+    if args.arch != args.arch_native:
+        suffix = "buildroot_" + args.arch
+
+    # Install ccache and display stats
+    pmb.chroot.apk.install(args, ["ccache"], suffix)
+    logging.info("(" + suffix + ") % ccache -s")
+    pmb.chroot.user(args, ["ccache", "-s"], suffix, log=False)
 
 
 def log(args):

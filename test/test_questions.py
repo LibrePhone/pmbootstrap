@@ -154,3 +154,21 @@ def test_questions(args, monkeypatch, tmpdir):
     answers = ["/dev/null", os.path.dirname(__file__), pmb.config.pmb_src,
                tmpdir]
     assert pmb.config.init.ask_for_work_path(args) == tmpdir
+
+    #
+    # BUILD OPTIONS
+    #
+    func = pmb.config.init.ask_for_build_options
+    cfg = {"pmbootstrap": {}}
+
+    # Skip changing anything
+    answers = ["n"]
+    func(args, cfg)
+    assert cfg == {"pmbootstrap": {}}
+
+    # Answer everything
+    answers = ["y", "5", "2G", "n"]
+    func(args, cfg)
+    assert cfg == {"pmbootstrap": {"jobs": "5",
+                                   "ccache_size": "2G",
+                                   "timestamp_based_rebuild": "False"}}

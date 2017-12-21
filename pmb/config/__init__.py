@@ -45,8 +45,9 @@ apk_tools_static_min_version = "2.7.2-r0"
 work_version = "1"
 
 # Only save keys to the config file, which we ask for in 'pmbootstrap init'.
-config_keys = ["device", "extra_packages", "jobs", "timestamp_based_rebuild",
-               "work", "qemu_mesa_driver", "ui", "user", "keymap", "timezone"]
+config_keys = ["ccache_size", "device", "extra_packages", "jobs", "keymap",
+               "qemu_mesa_driver", "timestamp_based_rebuild", "timezone"
+               "ui", "user", "work"]
 
 # Config file/commandline default values
 # $WORK gets replaced with the actual value for args.work (which may be
@@ -54,29 +55,29 @@ config_keys = ["device", "extra_packages", "jobs", "timestamp_based_rebuild",
 defaults = {
     "alpine_version": "edge",  # alternatively: latest-stable
     "aports": os.path.normpath(pmb_src + "/aports"),
-    "config": os.path.expanduser("~") + "/.config/pmbootstrap.cfg",
-    "device": "samsung-i9100",
-    "extra_packages": "none",
-    "jobs": str(multiprocessing.cpu_count() + 1),
-    "timestamp_based_rebuild": True,
-    "log": "$WORK/log.txt",
-    "mirror_alpine": "http://dl-cdn.alpinelinux.org/alpine/",
-    "mirror_postmarketos": "http://postmarketos.brixit.nl",
-    "work": os.path.expanduser("~") + "/.local/var/pmbootstrap",
-    "port_distccd": "33632",
-    "qemu_mesa_driver": "dri-virtio",
-    "ui": "weston",
-    "user": "user",
-    "keymap": "",
-    "timezone": "GMT",
-
+    "ccache_size": "5G",
     # aes-xts-plain64 would be better, but this is not supported on LineageOS
     # kernel configs
     "cipher": "aes-cbc-plain64",
+    "config": os.path.expanduser("~") + "/.config/pmbootstrap.cfg",
+    "device": "samsung-i9100",
+    "extra_packages": "none",
     # A higher value is typically desired, but this can lead to VERY long open
     # times on slower devices due to host systems being MUCH faster than the
     # target device: <https://github.com/postmarketOS/pmbootstrap/issues/429>
-    "iter_time": "200"
+    "iter_time": "200",
+    "jobs": str(multiprocessing.cpu_count() + 1),
+    "keymap": "",
+    "log": "$WORK/log.txt",
+    "mirror_alpine": "http://dl-cdn.alpinelinux.org/alpine/",
+    "mirror_postmarketos": "http://postmarketos.brixit.nl",
+    "port_distccd": "33632",
+    "qemu_mesa_driver": "dri-virtio",
+    "timestamp_based_rebuild": True,
+    "timezone": "GMT",
+    "ui": "weston",
+    "user": "user",
+    "work": os.path.expanduser("~") + "/.local/var/pmbootstrap",
 }
 
 #
@@ -156,7 +157,7 @@ build_packages = ["abuild", "build-base", "ccache"]
 
 # fnmatch for supported pkgnames, that can be directly compiled inside
 # the native chroot and a cross-compiler, without using distcc
-build_cross_native = ["linux-*"]
+build_cross_native = ["linux-*", "arch-bin-masquerade"]
 
 # Necessary kernel config options
 necessary_kconfig_options = {
