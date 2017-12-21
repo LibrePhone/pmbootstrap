@@ -217,7 +217,7 @@ deviceinfo_attributes = [
     "modules_initfs",
     "external_disk",
     "external_disk_install",
-    "flash_methods",
+    "flash_method",
     "arch",
 
     # flash

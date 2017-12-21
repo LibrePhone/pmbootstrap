@@ -68,7 +68,7 @@ def system(args):
                            " please run 'pmbootstrap install' first.")
 
     # Do not flash if using fastboot & image is too large
-    method = args.flash_method or args.deviceinfo["flash_methods"]
+    method = args.flash_method or args.deviceinfo["flash_method"]
     if method == "fastboot" and args.deviceinfo["flash_fastboot_max_size"]:
         img_size = os.path.getsize(args.work + "/chroot_native" + img_path) / 1024**2
         max_size = int(args.deviceinfo["flash_fastboot_max_size"])
@@ -86,7 +86,7 @@ def list_devices(args):
 
 
 def sideload(args):
-    method = args.flash_method or args.deviceinfo["flash_methods"]
+    method = args.flash_method or args.deviceinfo["flash_method"]
     cfg = pmb.config.flashers[method]
 
     # Install depends
@@ -112,7 +112,7 @@ def sideload(args):
 
 def frontend(args):
     action = args.action_flasher
-    method = args.flash_method or args.deviceinfo["flash_methods"]
+    method = args.flash_method or args.deviceinfo["flash_method"]
 
     if method == "none" and action in ["boot", "flash_kernel", "flash_system"]:
         logging.info("This device doesn't support any flash method.")

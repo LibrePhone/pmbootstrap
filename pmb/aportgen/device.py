@@ -144,7 +144,7 @@ def generate_deviceinfo(args, pkgname, name, manufacturer, arch, has_keyboard,
         deviceinfo_dev_keyboard=""
 
         # Bootloader related
-        deviceinfo_flash_methods=\"""" + flash_method + """\"
+        deviceinfo_flash_method=\"""" + flash_method + """\"
         """
 
     content_heimdall_bootimg = """\

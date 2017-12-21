@@ -24,7 +24,7 @@ def run(args, action, flavor=None):
     pmb.flasher.init(args)
 
     # Verify action
-    method = args.flash_method or args.deviceinfo["flash_methods"]
+    method = args.flash_method or args.deviceinfo["flash_method"]
     cfg = pmb.config.flashers[method]
     if action not in cfg["actions"]:
         raise RuntimeError("action " + action + " is not"

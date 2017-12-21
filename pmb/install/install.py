@@ -236,7 +236,7 @@ def install_system_image(args):
     logging.info("  Flashes the kernel + initramfs to your device:")
     logging.info("  " + args.work + "/chroot_rootfs_" + args.device +
                  "/boot")
-    method = args.deviceinfo["flash_methods"]
+    method = args.deviceinfo["flash_method"]
     if (method in pmb.config.flashers and "boot" in
             pmb.config.flashers[method]["actions"]):
         logging.info("  (NOTE: " + method + " also supports booting"

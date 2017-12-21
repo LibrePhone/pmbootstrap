@@ -125,7 +125,7 @@ def test_aportgen_device_wizard(args, monkeypatch):
     assert deviceinfo["arch"] == "armhf"
     assert deviceinfo["keyboard"] == "false"
     assert deviceinfo["external_disk"] == "true"
-    assert deviceinfo["flash_methods"] == "heimdall-isorec"
+    assert deviceinfo["flash_method"] == "heimdall-isorec"
     assert deviceinfo["generate_bootimg"] == ""
     assert deviceinfo["generate_legacy_uboot_initfs"] == ""
 
@@ -147,7 +147,7 @@ def test_aportgen_device_wizard(args, monkeypatch):
     answers["Path"] = ""
     deviceinfo, apkbuild, apkbuild_linux = generate(args, monkeypatch, answers)
     assert apkbuild["depends"] == ["linux-testsuite-testdevice", "mkbootimg"]
-    assert deviceinfo["flash_methods"] == answers["Flash method"]
+    assert deviceinfo["flash_method"] == answers["Flash method"]
     assert deviceinfo["generate_bootimg"] == "true"
 
     # 0xffff (legacy uboot initfs)

@@ -30,7 +30,7 @@ def create_zip(args, suffix):
     zip_root = "/var/lib/postmarketos-android-recovery-installer/"
     rootfs = "/mnt/rootfs_" + args.device
     flavor = pmb.helpers.frontend._parse_flavor(args)
-    method = args.deviceinfo["flash_methods"]
+    method = args.deviceinfo["flash_method"]
     vars = pmb.flasher.variables(args, flavor, method)
 
     # Install recovery installer package in buildroot
