@@ -46,7 +46,7 @@ work_version = "1"
 
 # Only save keys to the config file, which we ask for in 'pmbootstrap init'.
 config_keys = ["ccache_size", "device", "extra_packages", "jobs", "keymap",
-               "qemu_mesa_driver", "timestamp_based_rebuild", "timezone"
+               "qemu_mesa_driver", "timestamp_based_rebuild", "timezone",
                "ui", "user", "work"]
 
 # Config file/commandline default values
