@@ -27,6 +27,7 @@ sh_files="
 	./aports/main/postmarketos-base/firmwareload.sh
 	./aports/main/postmarketos-mkinitfs/init.sh.in
 	./aports/main/postmarketos-mkinitfs/init_functions.sh
+	./aports/main/postmarketos-mkinitfs-hook-debug-shell/20-debug-shell.sh
 	./aports/main/postmarketos-update-kernel/update-kernel.sh
 	./aports/main/postmarketos-android-recovery-installer/build_zip.sh
 	./aports/main/postmarketos-android-recovery-installer/pmos_chroot

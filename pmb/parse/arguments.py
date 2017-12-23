@@ -82,7 +82,7 @@ def arguments_initfs(subparser):
     hook_del = sub.add_parser("hook_del", help="uninstall a hook package")
     for action in [hook_add, hook_del]:
         action.add_argument("hook", help="name of the hook aport, without the"
-                            " '" + pmb.config.initfs_hook_prefix + "' prefix, for example: 'usb-shell'")
+                            " '" + pmb.config.initfs_hook_prefix + "' prefix, for example: 'debug-shell'")
 
     # ls, build, extract
     ls = sub.add_parser("ls", help="list initramfs contents")

@@ -109,7 +109,7 @@ def command_qemu(args, arch, device, img_path, spice_enabled):
     logging.debug("Kernel cmdline: " + cmdline)
 
     port_ssh = str(args.port)
-    port_telnet = str(args.port + 2)
+    port_telnet = str(args.port + 1)
 
     suffix = "rootfs_" + device
     rootfs = args.work + "/chroot_" + suffix
@@ -122,7 +122,7 @@ def command_qemu(args, arch, device, img_path, spice_enabled):
     command += ["-netdev",
                 "user,id=net0,"
                 "hostfwd=tcp::" + port_ssh + "-:22,"
-                "hostfwd=tcp::" + port_telnet + "-:24"
+                "hostfwd=tcp::" + port_telnet + "-:23"
                 ",net=172.16.42.0/24,dhcpstart=" + pmb.config.default_ip
                 ]
     command += ["-show-cursor"]
@@ -249,9 +249,9 @@ def run(args):
 
     # SSH/telnet hints
     logging.info("Connect to the VM (telnet requires 'pmbootstrap initfs"
-                 " hook_add usb-shell'):")
+                 " hook_add debug-shell'):")
     logging.info("* (ssh) ssh -p {port} {user}@localhost".format(**vars(args)))
-    logging.info("* (telnet) telnet localhost " + str(args.port + 2))
+    logging.info("* (telnet) telnet localhost " + str(args.port + 1))
 
     # Run Qemu (or Qemu + SPICE)
     process = None
