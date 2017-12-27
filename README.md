@@ -11,7 +11,7 @@ For in-depth information please refer to the [postmarketOS wiki](https://wiki.po
 * Linux distribution (`x86_64` or `aarch64`)
   * [Windows subsystem for Linux (WSL)](https://en.wikipedia.org/wiki/Windows_Subsystem_for_Linux) does **not** work! Please use [VirtualBox](https://www.virtualbox.org/) instead.
   * Kernels based on the grsec patchset [do **not** work](https://github.com/postmarketOS/pmbootstrap/issues/107) *(Alpine: use linux-vanilla instead of linux-hardened, Arch: linux-hardened [is not based on grsec](https://www.reddit.com/r/archlinux/comments/68b2jn/linuxhardened_in_community_repo_a_grsecurity/))*
-  * On Alpine Linux only: `apk add coretutils`
+  * On Alpine Linux only: `apk add coreutils`
 * Python 3.4+
 * OpenSSL
 
