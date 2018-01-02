@@ -65,7 +65,12 @@ def main():
 
     except Exception as e:
         logging.info("ERROR: " + str(e))
-        logging.info("Run 'pmbootstrap log' for details.")
+        if os.path.exists(args.log):
+            logging.info("Run 'pmbootstrap log' for details.")
+        else:
+            logging.info("Crashed before the log file was created.")
+            logging.info("Running init again like the following gives more details:")
+            logging.info("    pmbootstrap --details-to-stdout init")
         logging.info("See also: <https://postmarketos.org/troubleshooting>")
         logging.debug(traceback.format_exc())
         return 1

@@ -201,6 +201,9 @@ def ask_for_build_options(args, cfg):
 def frontend(args):
     cfg = pmb.config.load(args)
 
+    # Work folder (needs to be first, so boot.img analyze works: #1066)
+    cfg["pmbootstrap"]["work"] = args.work = ask_for_work_path(args)
+
     # Device
     cfg["pmbootstrap"]["device"], device_exists = ask_for_device(args)
 
@@ -217,11 +220,8 @@ def frontend(args):
     cfg["pmbootstrap"]["user"] = pmb.helpers.cli.ask(args, "Username", None,
                                                      args.user, False,
                                                      "[a-z_][a-z0-9_-]*")
-    # UI and work folder
+    # UI and various build options
     cfg["pmbootstrap"]["ui"] = ask_for_ui(args)
-    cfg["pmbootstrap"]["work"] = ask_for_work_path(args)
-
-    # Various build options
     ask_for_build_options(args, cfg)
 
     # Extra packages to be installed to rootfs
