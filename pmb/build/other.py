@@ -246,7 +246,7 @@ def index_repo(args, arch=None):
         paths = glob.glob(args.work + "/packages/*")
 
     for path in paths:
-        if os.path.exists(path):
+        if os.path.isdir(path):
             path_arch = os.path.basename(path)
             path_repo_chroot = "/home/pmos/packages/pmos/" + path_arch
             logging.debug("(native) index " + path_arch + " repository")
@@ -259,8 +259,7 @@ def index_repo(args, arch=None):
             for command in commands:
                 pmb.chroot.user(args, command, working_dir=path_repo_chroot)
         else:
-            logging.debug("NOTE: Can't build index for non-existing path: " +
-                          path)
+            logging.debug("NOTE: Can't build index for: " + path)
         pmb.parse.apkindex.clear_cache(args, path + "/APKINDEX.tar.gz")
 
 
