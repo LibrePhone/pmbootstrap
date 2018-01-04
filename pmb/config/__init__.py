@@ -37,7 +37,7 @@ apk_keys_path = pmb_src + "/keys"
 # Update this frequently to prevent a MITM attack with an outdated version
 # (which may contain a vulnerable apk/libressl, and allows an attacker to
 # exploit the system!)
-apk_tools_static_min_version = "2.7.2-r0"
+apk_tools_static_min_version = "2.9.0-r0"
 
 # Version of the work folder (as asked during 'pmbootstrap init'). Increase
 # this number, whenever migration is required and provide the migration code,
