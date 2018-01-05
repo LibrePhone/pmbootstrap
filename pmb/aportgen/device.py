@@ -179,7 +179,7 @@ def generate_deviceinfo(args, pkgname, name, manufacturer, arch, has_keyboard,
             handle.write(line.lstrip() + "\n")
 
 
-def generate_apkbuild(args, pkgname, name, manufacturer, arch, flash_method):
+def generate_apkbuild(args, pkgname, name, arch, flash_method):
     depends = "linux-" + "-".join(pkgname.split("-")[1:])
     if flash_method in ["fastboot", "heimdall-bootimg"]:
         depends += " mkbootimg"
@@ -188,7 +188,7 @@ def generate_apkbuild(args, pkgname, name, manufacturer, arch, flash_method):
     content = """\
         # Reference: <https://postmarketos.org/devicepkg>
         pkgname=\"""" + pkgname + """\"
-        pkgdesc=\"""" + manufacturer + " " + name + """\"
+        pkgdesc=\"""" + name + """\"
         pkgver=0.1
         pkgrel=0
         url="https://postmarketos.org"
@@ -230,4 +230,4 @@ def generate(args, pkgname):
 
     generate_deviceinfo(args, pkgname, name, manufacturer, arch, has_keyboard,
                         has_external_storage, flash_method, bootimg)
-    generate_apkbuild(args, pkgname, name, manufacturer, arch, flash_method)
+    generate_apkbuild(args, pkgname, name, arch, flash_method)
