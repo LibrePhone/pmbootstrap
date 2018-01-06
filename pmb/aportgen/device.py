@@ -180,11 +180,15 @@ def generate_deviceinfo(args, pkgname, name, manufacturer, arch, has_keyboard,
 
 
 def generate_apkbuild(args, pkgname, name, arch, flash_method):
+    # Dependencies
     depends = "linux-" + "-".join(pkgname.split("-")[1:])
     if flash_method in ["fastboot", "heimdall-bootimg"]:
         depends += " mkbootimg"
     if flash_method == "0xffff":
         depends += " uboot-tools"
+    depends += " mesa-dri-swrast"
+
+    # Whole APKBUILD
     content = """\
         # Reference: <https://postmarketos.org/devicepkg>
         pkgname=\"""" + pkgname + """\"
