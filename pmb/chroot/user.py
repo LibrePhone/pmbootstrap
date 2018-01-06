@@ -22,12 +22,14 @@ import pmb.chroot.root
 def user(args, cmd, suffix="native", working_dir="/", log=True,
          auto_init=True, return_stdout=False, check=True):
     """
-    Run a command inside a chroot as "user"
+    Run a command inside a chroot as "user". We always use the
+    BusyBox implementation of 'su', because other implementations
+    may override the PATH environment variable (#1071).
 
     :param log: When set to true, redirect all output to the logfile
     :param auto_init: Automatically initialize the chroot
     """
-    cmd = ["su", "pmos", "-c", " ".join(cmd)]
+    cmd = ["busybox", "su", "pmos", "-c", " ".join(cmd)]
     return pmb.chroot.root(args, cmd, suffix, working_dir, log,
                            auto_init, return_stdout, check)
 
