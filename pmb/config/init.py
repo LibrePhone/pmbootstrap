@@ -70,11 +70,11 @@ def ask_for_ui(args):
     ui_list = pmb.helpers.ui.list(args)
     logging.info("Available user interfaces (" +
                  str(len(ui_list) - 1) + "): ")
-    for ui, description in ui_list.items():
-        logging.info("* " + ui + ": " + description)
+    for ui in ui_list:
+        logging.info("* " + ui[0] + ": " + ui[1])
     while True:
         ret = pmb.helpers.cli.ask(args, "User interface", None, args.ui, True)
-        if ret in ui_list:
+        if ret in dict(ui_list).keys():
             return ret
         logging.fatal("ERROR: Invalid user interface specified, please type in"
                       " one from the list above.")
