@@ -46,7 +46,7 @@ work_version = "1"
 
 # Only save keys to the config file, which we ask for in 'pmbootstrap init'.
 config_keys = ["ccache_size", "device", "extra_packages", "jobs", "keymap",
-               "qemu_mesa_driver", "timestamp_based_rebuild", "timezone",
+               "qemu_native_mesa_driver", "timestamp_based_rebuild", "timezone",
                "ui", "user", "work"]
 
 # Config file/commandline default values
@@ -72,7 +72,7 @@ defaults = {
     "mirror_alpine": "http://dl-cdn.alpinelinux.org/alpine/",
     "mirror_postmarketos": "http://postmarketos.brixit.nl",
     "port_distccd": "33632",
-    "qemu_mesa_driver": "dri-virtio",
+    "qemu_native_mesa_driver": "dri-virtio",
     "timestamp_based_rebuild": True,
     "timezone": "GMT",
     "ui": "weston",
@@ -383,4 +383,4 @@ aportgen = {
 #
 # QEMU
 #
-qemu_mesa_drivers = ["dri-swrast", "dri-virtio"]
+qemu_native_mesa_drivers = ["dri-swrast", "dri-virtio"]

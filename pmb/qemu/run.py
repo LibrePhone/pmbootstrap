@@ -157,12 +157,12 @@ def command_qemu(args, arch, device, img_path, spice_enabled):
         raise RuntimeError("Architecture {} not supported by this command yet.".format(arch))
 
     # Kernel Virtual Machine (KVM) support
-    enable_kvm = True
+    native = True
     if args.arch:
         arch1 = pmb.parse.arch.uname_to_qemu(args.arch_native)
         arch2 = pmb.parse.arch.uname_to_qemu(args.arch)
-        enable_kvm = (arch1 == arch2)
-    if enable_kvm and os.path.exists("/dev/kvm"):
+        native = (arch1 == arch2)
+    if native and os.path.exists("/dev/kvm"):
         command += ["-enable-kvm"]
     else:
         logging.info("WARNING: Qemu is not using KVM and will run slower!")
@@ -174,7 +174,7 @@ def command_qemu(args, arch, device, img_path, spice_enabled):
                     "port=" + args.spice_port + ",addr=127.0.0.1" +
                     ",disable-ticketing"]
     else:
-        if args.qemu_mesa_driver == "dri-virtio":
+        if native and args.qemu_native_mesa_driver == "dri-virtio":
             command += ["-vga", "virtio"]
         command += ["-display", args.qemu_display]
 

@@ -308,7 +308,7 @@ def install(args):
     if args.add:
         install_packages += args.add.split(",")
     if args.device.startswith("qemu-"):
-        install_packages += ["mesa-" + args.qemu_mesa_driver]
+        install_packages += ["mesa-" + args.qemu_native_mesa_driver]
     for pkgname in install_packages:
         pmb.build.package(args, pkgname, args.deviceinfo["arch"])
 

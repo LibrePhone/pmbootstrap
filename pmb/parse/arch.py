@@ -159,3 +159,16 @@ def qemu_to_pmos_device(arch):
 
     raise ValueError("Can not map QEMU value '" + arch + "'"
                      " to the right postmarketOS device")
+
+
+def qemu_check_device(device, arch):
+    """
+    Check whether a device has a specific architecture.
+
+    Examples:
+        qemu_check_device("qemu-amd64", "x86_64") is True
+        qemu_check_device("qemu-vexpress", "armel") is True
+        qemu_check_device("qemu-vexpress", "aarch64") is False
+    """
+    arch_qemu = uname_to_qemu(arch)
+    return device == qemu_to_pmos_device(arch_qemu)

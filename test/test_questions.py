@@ -140,10 +140,11 @@ def test_questions(args, monkeypatch, tmpdir):
     assert func(args, "nokia-rx51") == "us/rx51_us"
     assert func(args, "lg-mako") == ""
 
-    # Qemu mesa driver
-    func = pmb.config.init.ask_for_qemu_mesa_driver
+    # Qemu native mesa driver
+    func = pmb.config.init.ask_for_qemu_native_mesa_driver
     answers = ["invalid_driver", "dri-swrast"]
-    assert func(args) == "dri-swrast"
+    assert func(args, "qemu-amd64", "x86_64") == "dri-swrast"
+    assert func(args, "qemu-aarch64", "x86_64") is None
 
     # UI
     answers = ["invalid_UI", "weston"]

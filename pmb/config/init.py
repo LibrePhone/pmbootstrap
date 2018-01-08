@@ -81,7 +81,7 @@ def ask_for_ui(args):
 
 
 def ask_for_keymaps(args, device):
-    info = pmb.parse.deviceinfo(args, device=device)
+    info = pmb.parse.deviceinfo(args, device)
     if "keymaps" not in info or info["keymaps"].strip() == "":
         return ""
     options = info["keymaps"].split(' ')
@@ -147,18 +147,23 @@ def ask_for_device(args):
     return (device, device_exists)
 
 
-def ask_for_qemu_mesa_driver(args):
-    drivers = pmb.config.qemu_mesa_drivers
-    logging.info("Which mesa driver do you prefer for your Qemu device? Only"
-                 " select something other than the default if you are having"
-                 " graphical problems (such as glitches).")
+def ask_for_qemu_native_mesa_driver(args, device, arch_native):
+    # Native Qemu device selected? (e.g. qemu-amd64 on x86_64)
+    if not pmb.parse.arch.qemu_check_device(device, arch_native):
+        return None
+
+    drivers = pmb.config.qemu_native_mesa_drivers
+    logging.info("Which mesa driver do you prefer for your native Qemu device?"
+                 " Only select something other than the default if you are"
+                 " having graphical problems (such as glitches).")
     while True:
         ret = pmb.helpers.cli.ask(args, "Mesa driver", drivers,
-                                  args.qemu_mesa_driver)
+                                  args.qemu_native_mesa_driver)
         if ret in drivers:
             return ret
         logging.fatal("ERROR: Please specify a driver from the list. To change"
-                      " it, see qemu_mesa_drivers in pmb/config/__init__.py.")
+                      " it, see qemu_native_mesa_drivers in"
+                      " pmb/config/__init__.py.")
 
 
 def ask_for_build_options(args, cfg):
@@ -205,16 +210,18 @@ def frontend(args):
     cfg["pmbootstrap"]["work"] = args.work = ask_for_work_path(args)
 
     # Device
-    cfg["pmbootstrap"]["device"], device_exists = ask_for_device(args)
+    device, device_exists = ask_for_device(args)
+    cfg["pmbootstrap"]["device"] = device
 
     # Qemu mesa driver
     if cfg["pmbootstrap"]["device"].startswith("qemu-"):
-        cfg["pmbootstrap"]["qemu_mesa_driver"] = ask_for_qemu_mesa_driver(args)
+        driver = ask_for_qemu_native_mesa_driver(args, device, args.arch_native)
+        if driver:
+            cfg["pmbootstrap"]["qemu_native_mesa_driver"] = driver
 
     # Device keymap
     if device_exists:
-        cfg["pmbootstrap"]["keymap"] = ask_for_keymaps(
-            args, device=cfg["pmbootstrap"]["device"])
+        cfg["pmbootstrap"]["keymap"] = ask_for_keymaps(args, device)
 
     # Username
     cfg["pmbootstrap"]["user"] = pmb.helpers.cli.ask(args, "Username", None,
@@ -243,8 +250,8 @@ def frontend(args):
     if (device_exists and
             len(glob.glob(args.work + "/chroot_*")) and
             pmb.helpers.cli.confirm(args, "Zap existing chroots to apply configuration?", default=True)):
-        setattr(args, "deviceinfo", pmb.parse.deviceinfo(
-            args, device=cfg["pmbootstrap"]["device"]))
+        setattr(args, "deviceinfo", pmb.parse.deviceinfo(args, device=device))
+
         # Do not zap any existing packages or cache_http directories
         pmb.chroot.zap(args, confirm=False)
 
