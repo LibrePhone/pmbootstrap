@@ -168,7 +168,7 @@ def init_buildenv(args, apkbuild, arch, strict=False, force=False, cross=None,
                                environment (e.g. qemu aarch64 bug workaround)
     :returns: True when the build is necessary (otherwise False)
     """
-    # Build dependencies
+    # Build dependencies (package arch)
     depends, built = build_depends(args, apkbuild, arch, strict)
 
     # Check if build is necessary
@@ -191,6 +191,12 @@ def init_buildenv(args, apkbuild, arch, strict=False, force=False, cross=None,
         pmb.chroot.apk.install(args, ["distcc", "arch-bin-masquerade"],
                                suffix=suffix)
         pmb.chroot.distccd.start(args, arch)
+
+    # "native" cross-compile: build and install dependencies (#1061)
+    if cross == "native":
+        depends, built = build_depends(args, apkbuild, args.arch_native, strict)
+        if not strict and len(depends):
+            pmb.chroot.apk.install(args, depends)
 
     return True
 
