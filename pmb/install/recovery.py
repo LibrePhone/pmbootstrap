@@ -66,8 +66,8 @@ def create_zip(args, suffix):
         # Move config file from /tmp/ to zip root
         ["mv", "/tmp/install_options", "chroot/install_options"],
         # Create tar archive of the rootfs
-        ["tar", "-pcf", "rootfs.tar", "--exclude",
-         "./home/" + args.user + "/*", "-C", rootfs, "."],
+        ["tar", "-pcf", "rootfs.tar", "--exclude", "./home", "-C", rootfs,
+         "."],
         # Append packages keys
         ["tar", "-prf", "rootfs.tar", "-C", "/", "./etc/apk/keys"],
         # Compress with -1 for speed improvement
