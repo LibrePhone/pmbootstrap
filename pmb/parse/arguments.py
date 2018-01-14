@@ -123,6 +123,23 @@ def arguments_qemu(subparser):
     return ret
 
 
+def arguments_pkgrel_bump(subparser):
+    ret = subparser.add_parser("pkgrel_bump", help="increase the pkgrel to"
+                               " indicate that a package must be rebuilt"
+                               " because of a dependency change")
+    ret.add_argument("--dry", action="store_true", help="instead of modifying"
+                     " APKBUILDs, exit with >0 when a package would have been"
+                     " bumped")
+
+    # Mutually exclusive: "--auto" or package names
+    mode = ret.add_mutually_exclusive_group(required=True)
+    mode.add_argument("--auto", action="store_true", help="all packages which"
+                      " depend on a library which had an incompatible update"
+                      " (libraries with a soname bump)")
+    mode.add_argument("packages", nargs="*", default=[])
+    return ret
+
+
 def arguments():
     parser = argparse.ArgumentParser(prog="pmbootstrap")
     arch_native = pmb.parse.arch.alpine_native()
@@ -179,6 +196,7 @@ def arguments():
     arguments_flasher(sub)
     arguments_initfs(sub)
     arguments_qemu(sub)
+    arguments_pkgrel_bump(sub)
 
     # Action: log
     log = sub.add_parser("log", help="follow the pmbootstrap logfile")

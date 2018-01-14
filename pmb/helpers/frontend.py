@@ -36,6 +36,7 @@ import pmb.chroot.other
 import pmb.flasher
 import pmb.helpers.logging
 import pmb.helpers.other
+import pmb.helpers.pkgrel_bump
 import pmb.helpers.repo
 import pmb.helpers.run
 import pmb.install
@@ -250,6 +251,24 @@ def parse_apkindex(args):
                                args.package)
         result = result[args.package]
     print(json.dumps(result, indent=4))
+
+
+def pkgrel_bump(args):
+    would_bump = True
+    if args.auto:
+        would_bump = pmb.helpers.pkgrel_bump.auto(args, args.dry)
+    else:
+        # Each package must exist
+        for package in args.packages:
+            pmb.build.other.find_aport(args, package)
+
+        # Increase pkgrel
+        for package in args.packages:
+            pmb.helpers.pkgrel_bump.package(args, package, dry=args.dry)
+
+    if args.dry and would_bump:
+        logging.info("Pkgrels of package(s) would have been bumped!")
+        sys.exit(1)
 
 
 def qemu(args):

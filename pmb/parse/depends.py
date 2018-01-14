@@ -30,7 +30,7 @@ def recurse_error_message(pkgname, in_aports, in_apkindexes):
             ret += " and could not find it"
     if in_apkindexes:
         ret += " in any APKINDEX"
-    return ret
+    return ret + "."
 
 
 def recurse(args, pkgnames, arch=None, in_apkindexes=True, in_aports=True,
@@ -64,27 +64,47 @@ def recurse(args, pkgnames, arch=None, in_apkindexes=True, in_aports=True,
         # Get depends and pkgname from aports
         depends = None
         pkgname = None
+        version = None
         if in_aports:
             aport = pmb.build.find_aport(args, pkgname_depend, False)
             if aport:
-                logging.verbose(pkgname_depend + ": found aport: " + aport)
                 apkbuild = pmb.parse.apkbuild(args, aport + "/APKBUILD")
                 depends = apkbuild["depends"]
+                version = apkbuild["pkgver"] + "-r" + apkbuild["pkgrel"]
+                logging.verbose(pkgname_depend + ": " + version +
+                                " found in " + aport)
                 if pkgname_depend in apkbuild["subpackages"]:
                     pkgname = pkgname_depend
                 else:
                     pkgname = apkbuild["pkgname"]
 
         # Get depends and pkgname from APKINDEX
-        if depends is None and in_apkindexes:
+        if in_apkindexes:
             index_data = pmb.parse.apkindex.read_any_index(args, pkgname_depend,
                                                            arch)
             if index_data:
-                depends = index_data["depends"]
-                pkgname = index_data["pkgname"]
+                # The binary package's depends override the aport's depends in
+                # case it has the same or a higher version. Binary packages have
+                # sonames in their dependencies, which we need to detect
+                # breakage (#893).
+                outdated = (version and pmb.parse.version.compare(version,
+                            index_data["version"]) == 1)
+                if not outdated:
+                    if version:
+                        logging.verbose(pkgname_depend + ": binary package is"
+                                        " up to date, using binary dependencies"
+                                        " instead of the ones from the aport")
+                    depends = index_data["depends"]
+                    pkgname = index_data["pkgname"]
 
         # Nothing found
         if pkgname is None and strict:
+            logging.info("NOTE: Run 'pmbootstrap pkgrel_bump --auto' to mark"
+                         " packages with outdated dependencies for rebuild."
+                         " This will most likely fix this issue (soname"
+                         " bump?).")
+            logging.info("NOTE: More dependency calculation logging with"
+                         " 'pmbootstrap -v'.")
             raise RuntimeError(
                 recurse_error_message(
                     pkgname_depend,
