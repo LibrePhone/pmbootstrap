@@ -171,6 +171,10 @@ def arguments():
                         " cause normal 'are you sure?' prompts to be"
                         " disabled!",
                         action="store_true")
+    parser.add_argument("--as-root", help="Allow running as root (not"
+                        " recommended, may screw up your work folders"
+                        " directory permissions!)", dest="as_root",
+                        action="store_true")
 
     # Logging
     parser.add_argument("-l", "--log", dest="log", default=None,

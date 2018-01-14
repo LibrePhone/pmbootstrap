@@ -37,8 +37,10 @@ def main():
 
     # Wrap everything to display nice error messages
     try:
-        # Sanity check
+        # Sanity checks
         other.check_grsec(args)
+        if not args.as_root and os.geteuid() == 0:
+            raise RuntimeError("Do not run pmbootstrap as root!")
 
         # Initialize or require config
         if args.action == "init":
