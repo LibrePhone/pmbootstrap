@@ -42,6 +42,11 @@ def properties(pkgname):
         for prefix in options["prefixes"]:
             if pkgname.startswith(prefix):
                 return (prefix, folder, options)
+    logging.info("NOTE: aportgen is for generating postmarketOS specific"
+                 " aports, such as the cross-compiler related packages"
+                 " or the linux kernel fork packages.")
+    logging.info("NOTE: If you wanted to package new software in general, try"
+                 " 'pmbootstrap newapkbuild' to generate a template.")
     raise ValueError("No generator available for " + pkgname + "!")
 
 

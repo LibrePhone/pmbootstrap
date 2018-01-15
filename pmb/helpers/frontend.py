@@ -218,6 +218,13 @@ def update(args):
     pmb.helpers.repo.update(args, True)
 
 
+def newapkbuild(args):
+    if not len(args.args_passed):
+        logging.info("See 'pmbootstrap newapkbuild -h' for usage information.")
+        raise RuntimeError("No arguments to pass to newapkbuild specified!")
+    pmb.build.newapkbuild(args, args.folder, args.args_passed)
+
+
 def kconfig_check(args):
     # Default to all kernel packages
     packages = args.packages

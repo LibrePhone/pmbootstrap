@@ -140,6 +140,16 @@ def arguments_pkgrel_bump(subparser):
     return ret
 
 
+def arguments_newapkbuild(subparser):
+    ret = subparser.add_parser("newapkbuild", help="get a template to package"
+                               " new software")
+    ret.add_argument("folder", help="aports subfolder, where the new aport will"
+                     " be located (main, cross, device, ...)")
+    ret.add_argument("args_passed", nargs=argparse.REMAINDER,
+                     help="arguments directly passed to Alpine's newapkbuild,"
+                     " more information: 'pmbootstrap newapkbuild main -h'")
+
+
 def arguments():
     parser = argparse.ArgumentParser(prog="pmbootstrap")
     arch_native = pmb.parse.arch.alpine_native()
@@ -201,6 +211,7 @@ def arguments():
     arguments_initfs(sub)
     arguments_qemu(sub)
     arguments_pkgrel_bump(sub)
+    arguments_newapkbuild(sub)
 
     # Action: log
     log = sub.add_parser("log", help="follow the pmbootstrap logfile")
@@ -288,8 +299,8 @@ def arguments():
 
     # Action: build / checksum / aportgen
     checksum = sub.add_parser("checksum", help="update aport checksums")
-    aportgen = sub.add_parser("aportgen", help="generate a package build recipe"
-                              " (aport/APKBUILD) based on an upstream aport from Alpine")
+    aportgen = sub.add_parser("aportgen", help="generate a postmarketOS"
+                              " specific package build recipe (aport/APKBUILD)")
     build = sub.add_parser("build", help="create a package for a"
                            " specific architecture")
     build.add_argument("--arch", choices=arch_choices, default=None,
