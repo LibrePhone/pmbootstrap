@@ -206,36 +206,46 @@ apkbuild_attributes = {
 
 # Variables from deviceinfo. Reference: <https://postmarketos.org/deviceinfo>
 deviceinfo_attributes = [
-    # device
+    # general
     "format_version",
     "name",
     "manufacturer",
     "date",
-    "keyboard",
-    "nonfree",
     "dtb",
     "modules_initfs",
-    "external_disk",
     "external_disk_install",
-    "flash_method",
     "arch",
+    "nonfree",
+
+    # device
+    "keyboard",
+    "external_disk",
+    "screen_width",
+    "screen_height",
+    "dev_touchscreen",
+    "dev_touchscreen_calibration",
+    "dev_keyboard",
+
+    # bootloader
+    "flash_method",
 
     # flash
-    "generate_bootimg",
-    "generate_legacy_uboot_initfs",
     "flash_heimdall_partition_kernel",
     "flash_heimdall_partition_initfs",
     "flash_heimdall_partition_system",
-    "flash_fastboot_max_size",
-    "flash_fastboot_vendor_id",
+    "generate_legacy_uboot_initfs",
+    "kernel_cmdline",
+    "generate_bootimg",
+    "bootimg_qcdt",
     "flash_offset_base",
     "flash_offset_kernel",
     "flash_offset_ramdisk",
     "flash_offset_second",
     "flash_offset_tags",
     "flash_pagesize",
+    "flash_fastboot_max_size",
+    "flash_fastboot_vendor_id",
     "flash_sparse",
-    "kernel_cmdline",
 
     # weston
     "weston_pixman_type",

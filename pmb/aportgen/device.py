@@ -121,6 +121,7 @@ def generate_deviceinfo_fastboot_content(args, bootimg=None):
 
 def generate_deviceinfo(args, pkgname, name, manufacturer, arch, has_keyboard,
                         has_external_storage, flash_method, bootimg=None):
+    # Note: New variables must be added to pmb/config/__init__.py as well
     content = """\
         # Reference: <https://postmarketos.org/deviceinfo>
         # Please use double quotes only. You can source this file in shell scripts.

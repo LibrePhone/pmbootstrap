@@ -22,23 +22,62 @@ import pmb.parse.apkindex
 import pmb.parse.arch
 
 
-def generate_apkbuild(args, pkgname, name, arch):
+def generate_apkbuild(args, pkgname, deviceinfo):
     device = "-".join(pkgname.split("-")[1:])
-    carch = pmb.parse.arch.alpine_to_kernel(arch)
+    carch = pmb.parse.arch.alpine_to_kernel(deviceinfo["arch"])
+
+    makedepends = "perl sed installkernel bash gmp-dev bc linux-headers elfutils-dev"
+
+    package = """
+            # kernel.release
+            install -D "$builddir/include/config/kernel.release" \\
+                "$pkgdir/usr/share/kernel/$_flavor/kernel.release"
+
+            # zImage (find the right one)
+            cd "$builddir/arch/$_carch/boot"
+            _target="$pkgdir/boot/vmlinuz-$_flavor"
+            for _zimg in zImage-dtb Image.gz-dtb *zImage Image; do
+                [ -e "$_zimg" ] || continue
+                msg "zImage found: $_zimg"
+                install -Dm644 "$_zimg" "$_target"
+                break
+            done
+            if ! [ -e "$_target" ]; then
+                error "Could not find zImage in $PWD!"
+                return 1
+            fi"""
+
+    build = """
+            unset LDFLAGS
+            make ARCH="$_carch" CC="${CC:-gcc}" \\
+                KBUILD_BUILD_VERSION="$((pkgrel + 1 ))-postmarketOS\""""
+
+    if deviceinfo["bootimg_qcdt"] == "true":
+        makedepends += " dtbtool"
+
+        build += """\n
+            # Generate master DTB (deviceinfo_bootimg_qcdt)
+            dtbTool -s 2048 -p "scripts/dtc/" -o "arch/""" + carch + "/boot/dt.img\" \"arch/" + carch + "/boot/\""
+
+        package += """\n
+            # Master DTB (deviceinfo_bootimg_qcdt)
+            install -Dm644 "$builddir/arch/""" + carch + """/boot/dt.img" \\
+                "$pkgdir/boot/dt.img\""""
+
     content = """\
         # Kernel config based on: arch/""" + carch + """/configs/(CHANGEME!)
 
         pkgname=\"""" + pkgname + """\"
         pkgver=3.x.x
         pkgrel=0
-        pkgdesc=\"""" + name + """ kernel fork\"
-        arch=\"""" + arch + """\"
+        pkgdesc=\"""" + deviceinfo["name"] + """ kernel fork\"
+        arch=\"""" + deviceinfo["arch"] + """\"
         _carch=\"""" + carch + """\"
         _flavor=\"""" + device + """\"
         url="https://kernel.org"
         license="GPL2"
         options="!strip !check !tracedeps"
-        makedepends="perl sed installkernel bash gmp-dev bc linux-headers elfutils-dev"
+        makedepends=\"""" + makedepends + """\"
         HOSTCC="${CC:-gcc}"
         HOSTCC="${HOSTCC#${CROSS_COMPILE}}"
 
@@ -78,30 +117,10 @@ def generate_apkbuild(args, pkgname, name, arch):
             cp .config "$startdir"/$_config
         }
 
-        build() {
-            unset LDFLAGS
-            make ARCH="$_carch" CC="${CC:-gcc}" \\
-                KBUILD_BUILD_VERSION="$((pkgrel + 1 ))-postmarketOS"
+        build() {""" + build + """
         }
 
-        package() {
-            # kernel.release
-            install -D "$builddir/include/config/kernel.release" \\
-                "$pkgdir/usr/share/kernel/$_flavor/kernel.release"
-
-            # zImage (find the right one)
-            cd "$builddir/arch/$_carch/boot"
-            _target="$pkgdir/boot/vmlinuz-$_flavor"
-            for _zimg in zImage-dtb Image.gz-dtb *zImage Image; do
-                [ -e "$_zimg" ] || continue
-                msg "zImage found: $_zimg"
-                install -Dm644 "$_zimg" "$_target"
-                break
-            done
-            if ! [ -e "$_target" ]; then
-                error "Could not find zImage in $PWD!"
-                return 1
-            fi
+        package() {""" + package + """
         }
 
         sha512sums="(run 'pmbootstrap checksum """ + pkgname + """' to fill)"
@@ -126,4 +145,4 @@ def generate(args, pkgname):
                                     "/device/linux-lg-mako/" + file,
                                     args.work + "/aportgen/"])
 
-    generate_apkbuild(args, pkgname, deviceinfo["name"], deviceinfo["arch"])
+    generate_apkbuild(args, pkgname, deviceinfo)
