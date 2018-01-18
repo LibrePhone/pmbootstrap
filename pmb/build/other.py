@@ -43,6 +43,10 @@ def find_aport(args, package, must_exist=True):
     if package in args.cache["find_aport"]:
         ret = args.cache["find_aport"][package]
     else:
+        # Sanity check
+        if "*" in package:
+            raise RuntimeError("Invalid pkgname: " + package)
+
         # Search in packages
         paths = glob.glob(args.aports + "/*/" + package)
         if len(paths) > 2:

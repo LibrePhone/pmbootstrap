@@ -87,7 +87,8 @@ def generate(args, monkeypatch, answers):
     apkbuild_path_linux = (args.aports + "/device/"
                            "linux-testsuite-testdevice/APKBUILD")
     apkbuild = pmb.parse.apkbuild(args, apkbuild_path)
-    apkbuild_linux = pmb.parse.apkbuild(args, apkbuild_path_linux)
+    apkbuild_linux = pmb.parse.apkbuild(args, apkbuild_path_linux,
+                                        check_pkgver=False)
     deviceinfo = pmb.parse.deviceinfo(args, "testsuite-testdevice")
     return (deviceinfo, apkbuild, apkbuild_linux)
 

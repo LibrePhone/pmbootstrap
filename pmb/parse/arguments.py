@@ -289,15 +289,13 @@ def arguments():
                          help="do not overwrite the existing kernel",
                          action="store_false", dest="recovery_flash_kernel")
 
-    # Action: menuconfig / parse_apkbuild
+    # Action: menuconfig
     menuconfig = sub.add_parser("menuconfig", help="run menuconfig on"
                                 " a kernel aport")
     menuconfig.add_argument("--arch", choices=arch_choices)
-    parse_apkbuild = sub.add_parser("parse_apkbuild")
-    for action in [menuconfig, parse_apkbuild]:
-        action.add_argument("package")
+    menuconfig.add_argument("package")
 
-    # Action: build / checksum / aportgen
+    # Action: checksum / aportgen / build
     checksum = sub.add_parser("checksum", help="update aport checksums")
     aportgen = sub.add_parser("aportgen", help="generate a postmarketOS"
                               " specific package build recipe (aport/APKBUILD)")
@@ -322,11 +320,13 @@ def arguments():
     for action in [checksum, build, aportgen]:
         action.add_argument("packages", nargs="+")
 
-    # Action: kconfig_check
+    # Action: kconfig_check / apkbuild_parse
     kconfig_check = sub.add_parser("kconfig_check", help="check, whether all"
                                    " the necessary options are"
                                    " enabled/disabled in the kernel config")
-    kconfig_check.add_argument("packages", nargs="*")
+    apkbuild_parse = sub.add_parser("apkbuild_parse")
+    for action in [kconfig_check, apkbuild_parse]:
+        action.add_argument("packages", nargs="*")
 
     # Action: challenge
     challenge = sub.add_parser("challenge",
@@ -343,10 +343,10 @@ def arguments():
                                 " .apk, or must be named"
                                 " APKINDEX.tar.gz.")
 
-    # Action: parse_apkindex
-    parse_apkindex = sub.add_parser("parse_apkindex")
-    parse_apkindex.add_argument("apkindex_path")
-    parse_apkindex.add_argument("package", default=None, nargs="?")
+    # Action: apkindex_parse
+    apkindex_parse = sub.add_parser("apkindex_parse")
+    apkindex_parse.add_argument("apkindex_path")
+    apkindex_parse.add_argument("package", default=None, nargs="?")
 
     # Action: config
     config = sub.add_parser("config",

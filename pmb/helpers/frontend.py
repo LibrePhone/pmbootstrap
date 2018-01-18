@@ -244,13 +244,24 @@ def kconfig_check(args):
         raise RuntimeError("kconfig_check failed!")
 
 
-def parse_apkbuild(args):
-    aport = pmb.build.other.find_aport(args, args.package)
-    path = aport + "/APKBUILD"
-    print(json.dumps(pmb.parse.apkbuild(args, path), indent=4))
+def apkbuild_parse(args):
+    # Default to all packages
+    packages = args.packages
+    if not packages:
+        for apkbuild in glob.glob(args.aports + "/*/*/APKBUILD"):
+            packages.append(os.path.basename(os.path.dirname(apkbuild)))
+
+    # Iterate over all packages
+    packages.sort()
+    for package in packages:
+        print(package + ":")
+        aport = pmb.build.other.find_aport(args, package)
+        path = aport + "/APKBUILD"
+        print(json.dumps(pmb.parse.apkbuild(args, path), indent=4,
+                         sort_keys=True))
 
 
-def parse_apkindex(args):
+def apkindex_parse(args):
     result = pmb.parse.apkindex.parse(args, args.apkindex_path)
     if args.package:
         if args.package not in result:
