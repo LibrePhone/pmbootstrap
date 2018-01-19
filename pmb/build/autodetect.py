@@ -43,8 +43,6 @@ def suffix(args, apkbuild, arch):
         return "native"
 
     pkgname = apkbuild["pkgname"]
-    if pkgname.endswith("-repack"):
-        return "native"
     if args.cross:
         for pattern in pmb.config.build_cross_native:
             if fnmatch.fnmatch(pkgname, pattern):
