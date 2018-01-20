@@ -37,6 +37,10 @@ def generate(args, pkgname):
     pkgver = version.split("-r")[0]
     pkgrel = version.split("-r")[1]
 
+    # Architectures to build this package for
+    arches = list(pmb.config.build_device_architectures)
+    arches.remove(arch)
+
     # Copy the apk files to the distfiles cache
     for subpkgname in ["musl", "musl-dev"]:
         pattern = (args.work + "/cache_apk_" + arch + "/" + subpkgname +
@@ -66,9 +70,10 @@ def generate(args, pkgname):
         handle.write("# Automatically generated aport, do not edit!\n"
                      "# Generator: pmbootstrap aportgen " + pkgname + "\n"
                      "\n"
-                     "pkgname=" + pkgname + "\n"
-                     "pkgver=" + pkgver + "\n"
+                     "pkgname=\"" + pkgname + "\"\n"
+                     "pkgver=\"" + pkgver + "\"\n"
                      "pkgrel=" + pkgrel + "\n"
+                     "arch=\"" + " ".join(arches) + "\"\n"
                      "subpackages=\"musl-dev-" + arch + ":package_dev\"\n"
                      "\n"
                      "_arch=\"" + arch + "\"\n"
@@ -78,7 +83,6 @@ def generate(args, pkgname):
         static = """
             url="https://musl-libc.org"
             license="MIT"
-            arch="all"
             options="!check !strip"
             pkgdesc="the musl library (lib c) implementation for $_arch"
 

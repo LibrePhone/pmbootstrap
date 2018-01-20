@@ -29,10 +29,15 @@ def generate(args, pkgname):
     pmb.helpers.git.clone(args, "aports_upstream")
     pmb.helpers.run.user(args, ["cp", "-r", upstream, args.work + "/aportgen"])
 
+    # Architectures to build this package for
+    arches = list(pmb.config.build_device_architectures)
+    arches.remove(arch)
+
     # Rewrite APKBUILD
     fields = {
         "pkgname": pkgname,
         "pkgdesc": "Tools necessary to build programs for " + arch + " targets",
+        "arch": " ".join(arches),
         "makedepends_build": "",
         "makedepends_host": "",
         "makedepends": "gettext libtool autoconf automake bison",
