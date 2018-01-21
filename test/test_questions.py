@@ -137,7 +137,7 @@ def test_questions(args, monkeypatch, tmpdir):
     # Keymaps
     func = pmb.config.init.ask_for_keymaps
     answers = ["invalid_keymap", "us/rx51_us"]
-    assert func(args, "nokia-rx51") == "us/rx51_us"
+    assert func(args, "nokia-n900") == "us/rx51_us"
     assert func(args, "lg-mako") == ""
 
     # Qemu native mesa driver
