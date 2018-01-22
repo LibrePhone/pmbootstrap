@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
 import logging
+import os
 
 import pmb.build
 import pmb.chroot.apk
@@ -46,6 +47,8 @@ def odin(args, flavor, folder):
 
     # Temporary folder
     temp_folder = "/tmp/odin-flashable-tar"
+    if os.path.exists(args.work + "/chroot_native" + temp_folder):
+        pmb.chroot.root(args, ["rm", "-rf", temp_folder])
 
     # Odin flashable tar generation script (because redirecting stdin/stdout is not allowed
     # in pmbootstrap's chroot/shell functions for security reasons)
