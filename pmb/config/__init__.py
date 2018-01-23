@@ -144,14 +144,11 @@ apkindex_retention_time = 4
 #
 # BUILD
 #
-
-# Officially supported target architectures for postmarketOS. Only
-# specify architectures supported by Alpine here. When creating a noarch
-# package, symlinks for all architectures get created - so only specify
-# architectures, where we really have device-* packages for.
-# For cross-compiling we need the "musl-$ARCH", "binutils-$ARCH" and
-# "gcc-$ARCH" packages of each target architecture.
-build_device_architectures = ["armhf", "aarch64", "x86_64"]
+# Officially supported host/target architectures for postmarketOS. Only
+# specify architectures supported by Alpine here. Fro cross-compiling,
+# we need to generate the "musl-$ARCH", "binutils-$ARCH" and "gcc-$ARCH"
+# packages (use "pmbootstrap aportgen musl-armhf" etc.).
+build_device_architectures = ["armhf", "aarch64", "x86_64", "x86"]
 
 # Packages, that will be installed in a chroot before it builds packages
 # for the first time
