@@ -57,8 +57,6 @@ def crosscompile(args, apkbuild, arch, suffix):
     """
     if not args.cross:
         return None
-    if apkbuild["pkgname"].endswith("-repack"):
-        return None
     if not pmb.parse.arch.cpu_emulation_required(args, arch):
         return None
     if suffix == "native":
