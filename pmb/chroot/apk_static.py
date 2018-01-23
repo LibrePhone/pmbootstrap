@@ -107,8 +107,9 @@ def verify_signature(args, files, sigkey_path):
         os.unlink(files["sig"]["temp_path"])
         os.unlink(files["apk"]["temp_path"])
         raise RuntimeError("Failed to validate signature of apk.static."
-                           " There's something wrong with the archive - run 'pmbootstrap"
-                           " zap -a' and try again!")
+                           " Either openssl is not installed, or the"
+                           " download failed. Run 'pmbootstrap zap -hc' to"
+                           " delete the download and try again.")
 
 
 def extract(args, version, apk_path):
