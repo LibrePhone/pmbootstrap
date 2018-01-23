@@ -158,21 +158,28 @@ def init(args):
     """
     Download, verify, extract $WORK/apk.static.
     """
-    apkindex = download(args, "APKINDEX.tar.gz")
+    # Get the APKINDEX
+    pmb.helpers.repo.update(args)
+    url = args.mirror_alpine + args.alpine_version + "/main"
+    apkindex = (args.work + "/cache_apk_" + args.arch_native + "/APKINDEX." +
+                pmb.helpers.repo.hash(url) + ".tar.gz")
+
+    # Extract and verify the apk-tools-static version
     index_data = pmb.parse.apkindex.read(args, "apk-tools-static", apkindex)
     version = index_data["version"]
     version_min = pmb.config.apk_tools_static_min_version
     apk_name = "apk-tools-static-" + version + ".apk"
     if pmb.parse.version.compare(version, version_min) == -1:
-        raise RuntimeError("You have an outdated version of apk-tools-static"
-                           " (your version: " + version +
-                           ", expected at least:"
-                           " " + version_min + "). Delete your http cache and zap"
-                           " all chroots, then try again: 'pmbootstrap zap -hc'")
+        raise RuntimeError("Your APKINDEX has an outdated version of"
+                           " apk-tools-static (your version: " + version +
+                           ", expected at least:" + version_min + "). Please" +
+                           " run 'pmbootstrap update'.")
+
+    # Download, extract, verify apk-tools-static
     apk_static = download(args, apk_name)
     extract(args, version, apk_static)
 
 
-def run(args, parameters, check):
+def run(args, parameters, check=True):
     pmb.helpers.run.root(
         args, [args.work + "/apk.static"] + parameters, check=check)

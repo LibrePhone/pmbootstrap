@@ -45,6 +45,49 @@ def copy_resolv_conf(args, suffix="native"):
         pmb.helpers.run.root(args, ["touch", chroot])
 
 
+def create_device_nodes(args, suffix):
+    error = ("Failed to create nodes in the '" + suffix + "' chroot. Please"
+             " run 'pmbootstrap init' again and put your work folder on a"
+             " normal Linux filesystem. (No ntfs, fat, encfs or encfs"
+             " encrypted home folder, shared folder etc.)")
+
+    # Folder sturcture
+    chroot = args.work + "/chroot_" + suffix
+    pmb.helpers.run.root(args, ["mkdir", "-p", chroot + "/dev"])
+
+    try:
+        # Create all device nodes as specified in the config
+        for dev in pmb.config.chroot_device_nodes:
+            path = chroot + "/dev/" + str(dev[4])
+            if not os.path.exists(path):
+                pmb.helpers.run.root(args, ["mknod",
+                                            "-m", str(dev[0]),  # permissions
+                                            path,  # name
+                                            str(dev[1]),  # type
+                                            str(dev[2]),  # major
+                                            str(dev[3]),  # minor
+                                            ])
+
+        # Verify major and minor numbers of created nodes
+        for dev in pmb.config.chroot_device_nodes:
+            path = chroot + "/dev/" + str(dev[4])
+            stat_result = os.stat(path)
+            rdev = stat_result.st_rdev
+            assert os.major(rdev) == dev[2], "Wrong major in " + path
+            assert os.minor(rdev) == dev[3], "Wrong minor in " + path
+
+        # Verify /dev/zero reading and writing
+        path = chroot + "/dev/zero"
+        with open(path, "r+b", 0) as handle:
+            assert handle.write(bytes([0xff])), "Write failed for " + path
+            assert handle.read(1) == bytes([0x00]), "Read failed for " + path
+
+    # On failure: Show filesystem-related error
+    except Exception as e:
+        logging.info(str(e) + "!")
+        raise RuntimeError(error)
+
+
 def init(args, suffix="native"):
     # When already initialized: just prepare the chroot
     chroot = args.work + "/chroot_" + suffix
@@ -70,48 +113,31 @@ def init(args, suffix="native"):
 
     logging.info("(" + suffix + ") install alpine-base")
 
-    # Initialize cache
+    # Initialize device nodes and cache
+    create_device_nodes(args, suffix)
     apk_cache = args.work + "/cache_apk_" + arch
     pmb.helpers.run.root(args, ["ln", "-s", "-f", "/var/cache/apk", chroot +
                                 "/etc/apk/cache"])
 
     # Initialize /etc/apk/keys/, resolv.conf, repositories
-    logging.debug(pmb.config.apk_keys_path)
     for key in glob.glob(pmb.config.apk_keys_path + "/*.pub"):
         pmb.helpers.run.root(args, ["cp", key, args.work +
                                     "/config_apk_keys/"])
     copy_resolv_conf(args, suffix)
     pmb.chroot.apk.update_repository_list(args, suffix)
 
-    # Install alpine-base (no clean exit for non-native chroot!)
-    pmb.chroot.apk_static.run(args, ["-U", "--root", chroot,
-                                     "--cache-dir", apk_cache, "--initdb", "--arch", arch,
-                                     "add", "alpine-base"], check=(not emulate))
-
-    # Create device nodes
-    for dev in pmb.config.chroot_device_nodes:
-        path = chroot + "/dev/" + str(dev[4])
-        if not os.path.exists(path):
-            pmb.helpers.run.root(args, ["mknod",
-                                        "-m", str(dev[0]),  # permissions
-                                        path,  # name
-                                        str(dev[1]),  # type
-                                        str(dev[2]),  # major
-                                        str(dev[3]),  # minor
-                                        ])
-            if not os.path.exists(path):
-                raise RuntimeError("Failed to create device node in chroot for " +
-                                   dev[4] + "! (This might be caused by setting the work folder" +
-                                   " to an eCryptfs folder.)")
-
-    # Non-native chroot: install qemu-user-binary, run apk fix
+    # Non-native chroot: install qemu-user-binary
     if emulate:
         arch_debian = pmb.parse.arch.alpine_to_debian(arch)
+        pmb.helpers.run.root(args, ["mkdir", "-p", chroot + "/usr/bin"])
         pmb.helpers.run.root(args, ["cp", args.work +
                                     "/chroot_native/usr/bin/qemu-" + arch_debian + "-static",
                                     chroot + "/usr/bin/qemu-" + arch_debian + "-static"])
-        pmb.chroot.root(args, ["apk", "fix"], suffix,
-                        auto_init=False)
+
+    # Install alpine-base (no clean exit for non-native chroot!)
+    pmb.chroot.apk_static.run(args, ["--root", chroot,
+                                     "--cache-dir", apk_cache, "--initdb", "--arch", arch,
+                                     "add", "alpine-base"])
 
     # Building chroots: create "pmos" user, add symlinks to /home/pmos
     if not suffix.startswith("rootfs_"):

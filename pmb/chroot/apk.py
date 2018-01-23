@@ -226,15 +226,14 @@ def install(args, packages, suffix="native", build=True):
                     suffix)
 
 
-def upgrade(args, suffix="native", update_index=True):
+def upgrade(args, suffix="native"):
     """
     Upgrade all packages installed in a chroot
     """
     # Prepare apk and update index
     check_min_version(args, suffix)
     pmb.chroot.init(args, suffix)
-    if update_index:
-        pmb.chroot.root(args, ["apk", "update"], suffix)
+    pmb.helpers.repo.update(args)
 
     # Rebuild and upgrade out-of-date packages
     packages = installed(args, suffix).keys()

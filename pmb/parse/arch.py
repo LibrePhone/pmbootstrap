@@ -42,7 +42,7 @@ def from_chroot_suffix(args, suffix):
     if suffix == "rootfs_" + args.device:
         return args.deviceinfo["arch"]
     if suffix.startswith("buildroot_"):
-        return suffix.split("_", 2)[1]
+        return suffix.split("_", 1)[1]
 
     raise ValueError("Invalid chroot suffix: " + suffix +
                      " (wrong device chosen in 'init' step?)")
