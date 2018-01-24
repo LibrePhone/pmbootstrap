@@ -101,10 +101,13 @@ def generate_apkbuild(args, pkgname, deviceinfo):
             cp -v "$srcdir/compiler-gcc6.h" "$builddir/include/linux/"
 
             # Remove -Werror from all makefiles
-            find . -type f -name Makefile -print0 | \\
-                xargs -0 sed -i 's/-Werror-/-W/g'
-            find . -type f -name Makefile -print0 | \\
-                xargs -0 sed -i 's/-Werror//g'
+            local i
+            local makefiles="$(find . -type f -name Makefile)
+                $(find . -type f -name Kbuild)"
+            for i in $makefiles; do
+                sed -i 's/-Werror-/-W/g' "$i"
+                sed -i 's/-Werror//g' "$i"
+            done
 
             # Prepare kernel config ('yes ""' for kernels lacking olddefconfig)
             cp "$srcdir"/$_config "$builddir"/.config
