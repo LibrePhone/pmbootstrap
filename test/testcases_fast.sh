@@ -10,9 +10,20 @@ disabled="
 	version
 "
 
+# Make sure we have a valid device (#1128)
+cd "$(dirname "$0")/.."
+device="$(./pmbootstrap.py config device)"
+deviceinfo="$PWD/aports/device/device-$device/deviceinfo"
+if ! [ -e "$deviceinfo" ]; then
+	echo "ERROR: Could not find deviceinfo file for selected device '$device'."
+	echo "Expected path: $deviceinfo"
+	echo "Maybe you have switched to a branch where your device does not exist?"
+	echo "Use 'pmbootstrap config device qemu-amd64' to switch to a valid device."
+	exit 1
+fi
+
 # Filter out disabled testcases
 enabled=""
-cd "$(dirname "$0")/.."
 for file in test/test_*.py; do
 	for test in $disabled; do
 		[ "test/test_${test}.py" = "$file" ] && continue 2
