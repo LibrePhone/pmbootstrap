@@ -25,6 +25,7 @@ def alpine_native():
     ret = ""
 
     mapping = {
+        "i686": "x86",
         "x86_64": "x86_64",
         "aarch64": "aarch64",
         "armv7l": "armhf"
@@ -55,7 +56,8 @@ def alpine_to_debian(arch):
     """
 
     mapping = {
-        "x86_64": "amd64",
+        "x86": "i386",
+        "x86_64": "x86_64",
         "armhf": "arm",
         "aarch64": "aarch64",
     }
