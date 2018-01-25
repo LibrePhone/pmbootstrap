@@ -107,15 +107,11 @@ def parse_next_block(args, path, lines, start):
     return None
 
 
-def parse_add_block(path, strict, ret, block, pkgname=None):
+def parse_add_block(path, ret, block, pkgname=None):
     """
     Add one block to the return dictionary of parse().
 
     :param path: to the APKINDEX.tar.gz
-    :param strict: When set to True, only allow one entry per pkgname.
-                   In case there are two, raise an exception.
-                   When set to False, and there are multiple entries
-                   for one pkgname, it uses the latest one.
     :param ret: dictionary of all packages in the APKINDEX, that is
                 getting built right now. This function will extend it.
     :param block: return value from parse_next_block().
@@ -131,9 +127,6 @@ def parse_add_block(path, strict, ret, block, pkgname=None):
 
     # Handle duplicate entries
     if pkgname in ret:
-        if strict:
-            raise RuntimeError("Multiple blocks for " + pkgname +
-                               " in " + path)
         # Ignore the block, if the block we already have has a higher
         # version
         version_old = ret[pkgname]["version"]
@@ -145,14 +138,10 @@ def parse_add_block(path, strict, ret, block, pkgname=None):
     ret[pkgname] = block
 
 
-def parse(args, path, strict=False):
+def parse(args, path):
     """
     Parse an APKINDEX.tar.gz file, and return its content as dictionary.
 
-    :param strict: When set to True, only allow one entry per pkgname.
-                   In case there are two, raise an exception.
-                   When set to False, and there are multiple entries
-                   for one pkgname, it uses the latest one.
     :returns: a dictionary with the following structure:
               { "postmarketos-mkinitfs":
                 {
@@ -189,10 +178,10 @@ def parse(args, path, strict=False):
             break
 
         # Add the next package and all aliases
-        parse_add_block(path, strict, ret, block)
+        parse_add_block(path, ret, block)
         if "provides" in block:
             for alias in block["provides"]:
-                parse_add_block(path, strict, ret, block, alias)
+                parse_add_block(path, ret, block, alias)
 
     # Update the cache
     args.cache["apkindex"][path] = {"lastmod": lastmod, "ret": ret}

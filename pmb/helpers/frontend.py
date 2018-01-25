@@ -29,7 +29,6 @@ import pmb.aportgen
 import pmb.build
 import pmb.build.autodetect
 import pmb.config
-import pmb.challenge
 import pmb.chroot
 import pmb.chroot.initfs
 import pmb.chroot.other
@@ -151,10 +150,6 @@ def build(args):
 def build_init(args):
     suffix = _parse_suffix(args)
     pmb.build.init(args, suffix)
-
-
-def challenge(args):
-    pmb.challenge.frontend(args)
 
 
 def checksum(args):

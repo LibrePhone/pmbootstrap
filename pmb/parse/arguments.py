@@ -328,21 +328,6 @@ def arguments():
     for action in [kconfig_check, apkbuild_parse]:
         action.add_argument("packages", nargs="*")
 
-    # Action: challenge
-    challenge = sub.add_parser("challenge",
-                               help="verify, that all files in an apk can be"
-                                    " reproduced from the same sources /"
-                                    " verify, that an APKINDEX.tar.gz properly"
-                                    " lists all apks in a repository folder")
-    challenge.add_argument("--output-repo-changes", dest="output_repo_changes",
-                           help="pass the path to a file here, to store a list"
-                                " of apk- and APKINDEX-files that have been"
-                                " changed during the build", default=None)
-    challenge.add_argument("challenge_file",
-                           help="the file to be verified. must end in"
-                                " .apk, or must be named"
-                                " APKINDEX.tar.gz.")
-
     # Action: apkindex_parse
     apkindex_parse = sub.add_parser("apkindex_parse")
     apkindex_parse.add_argument("apkindex_path")
