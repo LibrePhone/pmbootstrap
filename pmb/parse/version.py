@@ -113,9 +113,12 @@ def parse_suffix(rest):
     :param rest: what is left of the version string, that we are
                  currently parsing, starts with a "suffix" value
                  (see below for valid suffixes).
-    :returns: (rest, value) rest is the input "rest" string without the
-              suffix, value is a signed integer (negative for pre-,
-              positive for post-suffixes).
+    :returns: (rest, value, invalid_suffix)
+              - rest: is the input "rest" string without the suffix
+              - value: is a signed integer (negative for pre-,
+                positive for post-suffixes).
+              - invalid_suffix: is true, when rest does not start
+                with anything from the suffixes variable.
 
     C equivalent: get_token(), case TOKEN_SUFFIX
     """
@@ -132,8 +135,8 @@ def parse_suffix(rest):
             value = i
             if name == "pre":
                 value = value - len(suffixes)
-            return (rest, value)
-    return (rest, 0)
+            return (rest, value, False)
+    return (rest, 0, True)
 
 
 def get_token(previous, rest):
@@ -154,6 +157,7 @@ def get_token(previous, rest):
     # Set defaults
     value = 0
     next = "invalid"
+    invalid_suffix = False
 
     # Bail out if at the end
     if not len(rest):
@@ -180,7 +184,7 @@ def get_token(previous, rest):
         value = rest[0]
         rest = rest[1:]
     elif previous == "suffix":
-        (rest, value) = parse_suffix(rest)
+        (rest, value, invalid_suffix) = parse_suffix(rest)
 
     # Invalid previous token
     else:
@@ -189,7 +193,7 @@ def get_token(previous, rest):
     # Get the next token (for non-leading zeros)
     if(not len(rest)):
         next = "end"
-    elif(next == "invalid"):
+    elif next == "invalid" and not invalid_suffix:
         (next, rest) = next_token(previous, rest)
 
     return (next, value, rest)
