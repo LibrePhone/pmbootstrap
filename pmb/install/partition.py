@@ -81,6 +81,3 @@ def partition(args, size_boot):
     for command in commands:
         pmb.chroot.root(args, ["parted", "-s", "/dev/install"] +
                         command, check=False)
-
-    # Mount new partitions
-    partitions_mount(args)

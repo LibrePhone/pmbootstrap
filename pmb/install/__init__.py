@@ -19,3 +19,4 @@ along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 from pmb.install.install import install
 from pmb.install.partition import partition
 from pmb.install.format import format
+from pmb.install.partition import partitions_mount

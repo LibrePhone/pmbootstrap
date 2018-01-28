@@ -194,6 +194,12 @@ def initfs(args):
 
 
 def install(args):
+    if args.rsync and args.full_disk_encryption:
+        raise ValueError("Installation using rsync is not compatible with full"
+                         " disk encryption.")
+    if args.rsync and not args.sdcard:
+        raise ValueError("Installation using rsync only works on sdcard.")
+
     pmb.install.install(args)
 
 

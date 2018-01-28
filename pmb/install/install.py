@@ -86,9 +86,18 @@ def copy_files_from_chroot(args):
             continue
         folders += [os.path.basename(path)]
 
-    # Run the copy command
-    pmb.chroot.root(args, ["cp", "-a"] + folders + ["/mnt/install/"],
-                    working_dir=mountpoint)
+    # Update or copy all files
+    if args.rsync:
+        pmb.chroot.apk.install(args, ["rsync"])
+        rsync_flags = "-a"
+        if args.verbose:
+            rsync_flags += "vP"
+        pmb.chroot.root(args, ["rsync", rsync_flags, "--delete"] + folders + ["/mnt/install/"],
+                        working_dir=mountpoint)
+        pmb.chroot.root(args, ["rm", "-rf", "/mnt/install/home"])
+    else:
+        pmb.chroot.root(args, ["cp", "-a"] + folders + ["/mnt/install/"],
+                        working_dir=mountpoint)
 
 
 def copy_files_other(args):
@@ -100,7 +109,7 @@ def copy_files_other(args):
     for key in glob.glob(args.work + "/config_apk_keys/*.pub"):
         pmb.helpers.run.root(args, ["cp", key, rootfs + "/etc/apk/keys/"])
 
-    # Create /home/{user}
+    # Create /home/{user} from /etc/skel
     homedir = rootfs + "/home/" + args.user
     pmb.helpers.run.root(args, ["mkdir", rootfs + "/home"])
     pmb.helpers.run.root(args, ["cp", "-a", rootfs + "/etc/skel", homedir])
@@ -196,8 +205,11 @@ def install_system_image(args):
     logging.info("*** (3/5) PREPARE INSTALL BLOCKDEVICE ***")
     pmb.chroot.shutdown(args, True)
     (size_image, size_boot) = get_subpartitions_size(args)
-    pmb.install.blockdevice.create(args, size_image)
-    pmb.install.partition(args, size_boot)
+    if not args.rsync:
+        pmb.install.blockdevice.create(args, size_image)
+        pmb.install.partition(args, size_boot)
+    pmb.install.partitions_mount(args)
+
     if args.full_disk_encryption:
         logging.info("WARNING: Full disk encryption is enabled!")
         logging.info("Make sure that osk-sdl has been properly configured for your device")

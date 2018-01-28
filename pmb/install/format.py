@@ -49,14 +49,20 @@ def format_and_mount_root(args):
 
 
 def format_and_mount_pm_crypt(args):
+    # Block device
     if args.full_disk_encryption:
         device = "/dev/mapper/pm_crypt"
     else:
         device = "/dev/installp2"
+
+    # Format
+    if not args.rsync:
+        logging.info("(native) format " + device)
+        pmb.chroot.root(args, ["mkfs.ext4", "-F", "-q", "-L", "pmOS_root", device])
+
+    # Mount
     mountpoint = "/mnt/install"
-    logging.info("(native) format " + device + " (ext4), mount to " +
-                 mountpoint)
-    pmb.chroot.root(args, ["mkfs.ext4", "-F", "-q", "-L", "pmOS_root", device])
+    logging.info("(native) mount " + device + " to " + mountpoint)
     pmb.chroot.root(args, ["mkdir", "-p", mountpoint])
     pmb.chroot.root(args, ["mount", device, mountpoint])
 

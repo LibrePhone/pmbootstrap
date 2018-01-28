@@ -266,6 +266,8 @@ def arguments():
                              " chroot and install to sdcard or image file")
     install.add_argument("--sdcard", help="path to the sdcard device,"
                          " eg. /dev/mmcblk0")
+    install.add_argument("--rsync", help="update the sdcard using rsync,"
+                         " only works with --no-fde", action="store_true")
     install.add_argument("--cipher", help="cryptsetup cipher used to"
                          " encrypt the system partition, eg. aes-xts-plain64")
     install.add_argument("--iter-time", help="cryptsetup iteration time (in"
