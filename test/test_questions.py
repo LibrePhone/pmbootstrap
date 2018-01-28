@@ -171,5 +171,4 @@ def test_questions(args, monkeypatch, tmpdir):
     answers = ["y", "5", "2G", "n"]
     func(args, cfg)
     assert cfg == {"pmbootstrap": {"jobs": "5",
-                                   "ccache_size": "2G",
-                                   "timestamp_based_rebuild": "False"}}
+                                   "ccache_size": "2G"}}

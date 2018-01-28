@@ -110,7 +110,6 @@ def setup_work(args, tmpdir):
     # Copy over the pmbootstrap config, disable timestamp based rebuilds
     pmb.helpers.run.user(args, ["cp", args.config, tmpdir +
                                 "/_pmbootstrap.cfg"])
-    pmbootstrap(args, tmpdir, ["config", "timestamp_based_rebuild", "false"])
 
 
 def verify_pkgrels(args, tmpdir, pkgrel_testlib, pkgrel_testapp):

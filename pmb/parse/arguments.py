@@ -366,7 +366,6 @@ def arguments():
                             "apkbuild": {},
                             "apk_min_version_checked": [],
                             "apk_repository_list_updated": [],
-                            "aports_files_out_of_sync_with_git": None,
                             "built": {},
                             "find_aport": {}})
 

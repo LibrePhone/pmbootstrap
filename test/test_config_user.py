@@ -66,13 +66,6 @@ def test_config_user(args, tmpdir, monkeypatch):
     argv = ["pmbootstrap.py", "-c", path_config, "config"]
     args_default = args_patched(monkeypatch, argv)
     assert args_default.work == path_work
-    assert args_default.timestamp_based_rebuild is True
-
-    # Modify timestamp_based_rebuild
-    change_config(monkeypatch, path_config, "timestamp_based_rebuild", "false")
-    assert args_patched(monkeypatch, argv).timestamp_based_rebuild is False
-    change_config(monkeypatch, path_config, "timestamp_based_rebuild", "true")
-    assert args_patched(monkeypatch, argv).timestamp_based_rebuild is True
 
     # Modify jobs count
     change_config(monkeypatch, path_config, "jobs", "9000")

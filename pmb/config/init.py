@@ -168,10 +168,8 @@ def ask_for_qemu_native_mesa_driver(args, device, arch_native):
 
 def ask_for_build_options(args, cfg):
     # Allow to skip build options
-    ts_rebuild = "True" if args.timestamp_based_rebuild else "False"
     logging.info("Build options: Parallel jobs: " + args.jobs +
-                 ", ccache per arch: " + args.ccache_size +
-                 ", timestamp based rebuilds: " + ts_rebuild)
+                 ", ccache per arch: " + args.ccache_size)
 
     if not pmb.helpers.cli.confirm(args, "Change them?",
                                    default=False):
@@ -193,14 +191,6 @@ def ask_for_build_options(args, cfg):
     answer = pmb.helpers.cli.ask(args, "Ccache size", None, args.ccache_size,
                                  lowercase_answer=False, validation_regex=regex)
     cfg["pmbootstrap"]["ccache_size"] = answer
-
-    # Timestamp based rebuilds
-    logging.info("Rebuild packages, when the last modified timestamp changed,"
-                 " even if the version did not change?"
-                 " This makes pmbootstrap behave more like 'make'.")
-    answer = pmb.helpers.cli.confirm(args, "Timestamp based rebuilds",
-                                     default=args.timestamp_based_rebuild)
-    cfg["pmbootstrap"]["timestamp_based_rebuild"] = str(answer)
 
 
 def frontend(args):

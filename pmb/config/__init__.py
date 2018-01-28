@@ -46,8 +46,7 @@ work_version = "1"
 
 # Only save keys to the config file, which we ask for in 'pmbootstrap init'.
 config_keys = ["ccache_size", "device", "extra_packages", "jobs", "keymap",
-               "qemu_native_mesa_driver", "timestamp_based_rebuild", "timezone",
-               "ui", "user", "work"]
+               "qemu_native_mesa_driver", "timezone", "ui", "user", "work"]
 
 # Config file/commandline default values
 # $WORK gets replaced with the actual value for args.work (which may be
@@ -73,7 +72,6 @@ defaults = {
     "mirror_postmarketos": "http://postmarketos.brixit.nl",
     "port_distccd": "33632",
     "qemu_native_mesa_driver": "dri-virtio",
-    "timestamp_based_rebuild": True,
     "timezone": "GMT",
     "ui": "weston",
     "user": "user",
