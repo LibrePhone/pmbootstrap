@@ -94,4 +94,4 @@ def shutdown(args, only_install_related=False):
         for arch in pmb.config.build_device_architectures:
             if pmb.parse.arch.cpu_emulation_required(args, arch):
                 pmb.chroot.binfmt.unregister(args, arch)
-        logging.info("Shutdown complete")
+        logging.debug("Shutdown complete")

@@ -226,6 +226,9 @@ def arguments():
 
     # Action: zap
     zap = sub.add_parser("zap", help="safely delete chroot folders")
+    zap.add_argument("--dry", action="store_true", help="instead of actually"
+                     " deleting anything, print out what would have been"
+                     " deleted")
     zap.add_argument("-p", "--packages", action="store_true", help="also delete"
                      " the precious, self-compiled packages")
     zap.add_argument("-hc", "--http", action="store_true", help="also delete http"

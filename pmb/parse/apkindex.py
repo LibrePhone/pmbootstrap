@@ -47,11 +47,12 @@ def parse_next_block(args, path, lines, start):
     ret = {}
     mapping = {
         "A": "arch",
-        "P": "pkgname",
-        "V": "version",
         "D": "depends",
+        "o": "origin",
+        "P": "pkgname",
         "p": "provides",
-        "t": "timestamp"
+        "t": "timestamp",
+        "V": "version",
     }
     end_of_block_found = False
     for i in range(start[0], len(lines)):
