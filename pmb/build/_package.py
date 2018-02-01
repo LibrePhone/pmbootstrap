@@ -21,7 +21,6 @@ import logging
 
 import pmb.build
 import pmb.build.autodetect
-import pmb.build.buildinfo
 import pmb.chroot
 import pmb.chroot.apk
 import pmb.chroot.distccd
@@ -272,8 +271,7 @@ def run_abuild(args, apkbuild, arch, strict=False, force=False, cross=None,
     return (output, cmd, env)
 
 
-def finish(args, apkbuild, arch, output, strict=False, suffix="native",
-           buildinfo=False):
+def finish(args, apkbuild, arch, output, strict=False, suffix="native"):
     """
     Various finishing tasks that need to be done after a build.
     """
@@ -281,13 +279,6 @@ def finish(args, apkbuild, arch, output, strict=False, suffix="native",
     path = args.work + "/packages/" + output
     if not os.path.exists(path):
         raise RuntimeError("Package not found after build: " + path)
-
-    # Create .buildinfo.json file (captures the build environment, from the
-    # reproducible builds approach in #64 that we aren't using anymore, but it
-    # might still be useful)
-    if buildinfo:
-        logging.info("(" + suffix + ") generate " + output + ".buildinfo.json")
-        pmb.build.buildinfo.write(args, output, arch, suffix, apkbuild)
 
     # Clear APKINDEX cache (we only parse APKINDEX files once per session and
     # cache the result for faster dependency resolving, but after we built a
@@ -301,15 +292,14 @@ def finish(args, apkbuild, arch, output, strict=False, suffix="native",
         pmb.chroot.user(args, ["abuild", "undeps"], suffix, "/home/pmos/build")
 
 
-def package(args, pkgname, arch=None, force=False, buildinfo=False,
-            strict=False, skip_init_buildenv=False):
+def package(args, pkgname, arch=None, force=False, strict=False,
+            skip_init_buildenv=False):
     """
     Build a package and its dependencies with Alpine Linux' abuild.
 
     :param pkgname: package name to be built, as specified in the APKBUILD
     :param arch: architecture we're building for (default: native)
     :param force: even build, if not necessary
-    :param buildinfo: record the build environment in a .buildinfo.json file
     :param strict: avoid building with irrelevant dependencies installed by
                    letting abuild install and uninstall all dependencies.
     :param skip_init_buildenv: can be set to False to avoid initializing the
@@ -340,5 +330,5 @@ def package(args, pkgname, arch=None, force=False, buildinfo=False,
     # Build and finish up
     (output, cmd, env) = run_abuild(args, apkbuild, arch, strict, force, cross,
                                     suffix)
-    finish(args, apkbuild, arch, output, strict, suffix, buildinfo)
+    finish(args, apkbuild, arch, output, strict, suffix)
     return output

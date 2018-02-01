@@ -243,7 +243,6 @@ def test_finish(args, monkeypatch):
     output = pmb.build.package(args, "hello-world", force=True)
 
     # Disable effects of functions we don't want to test below
-    monkeypatch.setattr(pmb.build.buildinfo, "write", return_none)
     monkeypatch.setattr(pmb.chroot, "user", return_none)
 
     # Shortcut and fake apkbuild

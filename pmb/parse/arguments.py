@@ -312,7 +312,6 @@ def arguments():
                        " APKBUILD)")
     build.add_argument("--force", action="store_true", help="even build if not"
                        " necessary")
-    build.add_argument("--buildinfo", action="store_true")
     build.add_argument("--strict", action="store_true", help="(slower) zap and install only"
                        " required depends when building, to detect dependency errors")
     build.add_argument("-i", "--ignore-depends", action="store_true",

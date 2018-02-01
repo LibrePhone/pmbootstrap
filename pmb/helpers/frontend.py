@@ -144,7 +144,7 @@ def build(args):
     for package in args.packages:
         arch_package = args.arch or pmb.build.autodetect.arch(args, package)
         if not pmb.build.package(args, package, arch_package, args.force,
-                                 args.buildinfo, args.strict):
+                                 args.strict):
             logging.info("NOTE: Package '" + package + "' is up to date. Use"
                          " 'pmbootstrap build " + package + " --force'"
                          " if needed.")
