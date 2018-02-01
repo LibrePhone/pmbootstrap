@@ -100,20 +100,31 @@ def copy_files_from_chroot(args):
                         working_dir=mountpoint)
 
 
-def copy_files_other(args):
+def create_home_from_skel(args):
     """
-    Copy over keys, create /home/{user}.
+    Create /home/{user} from /etc/skel
+    """
+    rootfs = args.work + "/chroot_native/mnt/install"
+    homedir = rootfs + "/home/" + args.user
+    pmb.helpers.run.root(args, ["mkdir", rootfs + "/home"])
+    pmb.helpers.run.root(args, ["cp", "-a", rootfs + "/etc/skel", homedir])
+    pmb.helpers.run.root(args, ["chown", "-R", "1000", homedir])
+
+
+def configure_apk(args):
+    """
+    Copies over all keys used locally to compile packages, and disables the
+    /mnt/pmbootstrap-packages repository.
     """
     # Copy over keys
     rootfs = args.work + "/chroot_native/mnt/install"
     for key in glob.glob(args.work + "/config_apk_keys/*.pub"):
         pmb.helpers.run.root(args, ["cp", key, rootfs + "/etc/apk/keys/"])
 
-    # Create /home/{user} from /etc/skel
-    homedir = rootfs + "/home/" + args.user
-    pmb.helpers.run.root(args, ["mkdir", rootfs + "/home"])
-    pmb.helpers.run.root(args, ["cp", "-a", rootfs + "/etc/skel", homedir])
-    pmb.helpers.run.root(args, ["chown", "-R", "1000", homedir])
+    # Disable pmbootstrap repository
+    pmb.helpers.run.root(args, ["sed", "-i", "/\/mnt\/pmbootstrap-packages/d",
+                         rootfs + "/etc/apk/repositories"])
+    pmb.helpers.run.user(args, ["cat", rootfs + "/etc/apk/repositories"])
 
 
 def set_user(args):
@@ -223,7 +234,8 @@ def install_system_image(args):
     # Just copy all the files
     logging.info("*** (4/5) FILL INSTALL BLOCKDEVICE ***")
     copy_files_from_chroot(args)
-    copy_files_other(args)
+    create_home_from_skel(args)
+    configure_apk(args)
 
     # If user has a ssh pubkey, offer to copy it to device
     copy_ssh_key(args)
