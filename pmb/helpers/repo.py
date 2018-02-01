@@ -159,7 +159,7 @@ def update(args, force=False):
     :arg force: even update when the APKINDEX file is fairly recent
     """
 
-    architectures = [args.arch_native] + pmb.config.build_device_architectures
+    architectures = pmb.config.build_device_architectures
     retention_hours = pmb.config.apkindex_retention_time
     retention_seconds = retention_hours * 3600
 
