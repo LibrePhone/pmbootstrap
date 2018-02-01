@@ -81,7 +81,7 @@ def check_arch(args, apkbuild, arch):
     logging.info("NOTE: You can edit the 'arch=' line inside the APKBUILD")
     if args.action == "build":
         logging.info("NOTE: Alternatively, use --arch to build for another"
-                     "architecture ('pmbootstrap build --arch=armhf " +
+                     " architecture ('pmbootstrap build --arch=armhf " +
                      pkgname + "')")
     raise RuntimeError("Can't build '" + pkgname + "' for architecture " +
                        arch)
