@@ -18,8 +18,9 @@ along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
 import logging
 import os
-import shutil
 import re
+import signal
+import shutil
 
 import pmb.build
 import pmb.chroot
@@ -218,6 +219,11 @@ def resize_image(args, img_size_new, img_path):
         raise RuntimeError("The system image size must be " + img_size_str + " or greater")
 
 
+def sigterm_handler(number, frame):
+    raise RuntimeError("pmbootstrap was terminated by another process,"
+                       " and killed the Qemu VM it was running.")
+
+
 def run(args):
     """
     Run a postmarketOS image in qemu
@@ -253,13 +259,15 @@ def run(args):
     logging.info("* (ssh) ssh -p {port} {user}@localhost".format(**vars(args)))
     logging.info("* (telnet) telnet localhost " + str(args.port + 1))
 
-    # Run Qemu (or Qemu + SPICE)
+    # Run Qemu (or Qemu + SPICE) and kill it together with pmbootstrap
     process = None
     try:
+        signal.signal(signal.SIGTERM, sigterm_handler)
         process = pmb.helpers.run.user(args, qemu, background=spice_enabled)
         if spice:
             pmb.helpers.run.user(args, spice)
     except KeyboardInterrupt:
+        # Don't show a trace when pressing ^C
         pass
     finally:
         if process:

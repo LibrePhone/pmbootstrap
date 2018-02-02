@@ -17,9 +17,35 @@ You should have received a copy of the GNU General Public License
 along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
 import fnmatch
+import logging
+import os
+
 import pmb.config
 import pmb.chroot.apk
 import pmb.parse.arch
+
+
+def arch_from_deviceinfo(args, pkgname, aport):
+    """
+    The device- packages are noarch packages. But it only makes sense to build
+    them for the device's architecture, which is specified in the deviceinfo
+    file.
+
+    :returns: None (no deviceinfo file)
+              arch from the deviceinfo (e.g. "armhf")
+    """
+    # Require a deviceinfo file in the aport
+    if not pkgname.startswith("device-"):
+        return
+    deviceinfo = aport + "/deviceinfo"
+    if not os.path.exists(deviceinfo):
+        return
+
+    # Return its arch
+    device = pkgname.split("-", 1)[1]
+    arch = pmb.parse.deviceinfo(args, device)["arch"]
+    logging.verbose(pkgname + ": arch from deviceinfo: " + arch)
+    return arch
 
 
 def arch(args, pkgname):
@@ -32,6 +58,10 @@ def arch(args, pkgname):
               APKBUILD.
     """
     aport = pmb.build.find_aport(args, pkgname)
+    ret = arch_from_deviceinfo(args, pkgname, aport)
+    if ret:
+        return ret
+
     apkbuild = pmb.parse.apkbuild(args, aport + "/APKBUILD")
     if "noarch" in apkbuild["arch"] or "all" in apkbuild["arch"]:
         return args.arch_native

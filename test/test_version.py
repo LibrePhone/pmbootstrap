@@ -21,8 +21,8 @@ import sys
 import pytest
 
 # Import from parent directory
-sys.path.append(os.path.realpath(
-    os.path.join(os.path.dirname(__file__) + "/..")))
+pmb_src = os.path.realpath(os.path.join(os.path.dirname(__file__) + "/.."))
+sys.path.append(pmb_src)
 import pmb.helpers.git
 import pmb.helpers.logging
 import pmb.parse.version
@@ -43,11 +43,8 @@ def test_version(args):
     # Fail after the first error or print a grand total of failures
     keep_going = False
 
-    # Clone official test file from apk-tools
-    pmb.helpers.git.clone(args, "apk-tools")
-    path = args.work + "/cache_git/apk-tools/test/version.data"
-
-    # Iterate over the cases from the list
+    # Iterate over the version tests from apk-tools
+    path = pmb_src + "/test/testdata/version/version.data"
     mapping = {-1: "<", 0: "=", 1: ">"}
     count = 0
     errors = []
@@ -64,8 +61,7 @@ def test_version(args):
             count += 1
             if real != expected:
                 if keep_going:
-                    errors.append(line.rstrip() + " (got: '" + real +
-                                  "')")
+                    errors.append(line.rstrip() + " (got: '" + real + "')")
                 else:
                     assert real == expected
 

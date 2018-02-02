@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import os
 import subprocess
+import sys
 
 
 def get_changed_files():
@@ -62,7 +63,27 @@ def check_checksums(package):
         exit(1)
 
 
+def check_build(packages):
+    command = (["./pmbootstrap.py", "--details-to-stdout", "build",
+                "--strict"] + list(packages))
+    try:
+        process = subprocess.Popen(command)
+        process.communicate()
+    except subprocess.CalledProcessError as e:
+        print("** Building failed")
+        exit(1)
+
+
 if __name__ == "__main__":
+    # Allow to specify "--build" to build instead of only verifying checksums
+    build = False
+    if len(sys.argv) > 1:
+        if sys.argv[1] == "--build":
+            build = True
+        else:
+            print("usage: {} [--build]".format(sys.argv[0]))
+            exit(1)
+
     if 'TRAVIS_COMMIT_RANGE' in os.environ:
         print('Checking commit range: {}'.format(os.environ['TRAVIS_COMMIT_RANGE']))
     if 'TRAVIS_PULL_REQUEST_BRANCH' in os.environ:
@@ -74,6 +95,10 @@ if __name__ == "__main__":
         print("No aports packages changed in this commit")
         exit(0)
 
-    for package in packages:
-        print("Checking {} for correct checksums".format(package))
-        check_checksums(package)
+    if build:
+        print("Building in strict mode: " + ", ".join(packages))
+        check_build(packages)
+    else:
+        for package in packages:
+            print("Checking {} for correct checksums".format(package))
+            check_checksums(package)

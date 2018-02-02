@@ -5,15 +5,15 @@ addons:
   apt:
     sources:
     - debian-sid
-    packages:
-    - shellcheck
-install: "pip install flake8 pytest-cov python-coveralls"
+install:
+  - sudo apt install shellcheck qemu-system-x86
+  - pip install flake8 pytest-cov python-coveralls
 script:
   - test/static_code_analysis.sh
   - yes "" | ./pmbootstrap.py init
   - ./pmbootstrap.py kconfig_check
+  - test/check_checksums.py --build
   - test/testcases_fast.sh
-  - test/check_checksums.py
 after_success:
   - coveralls
 after_failure:

@@ -43,48 +43,28 @@ import pmb.parse
 import pmb.qemu
 
 
-def _build_verify_usage_device_package(args, pkgname):
+def _build_device_depends_note(args, pkgname):
     """
-    Detect if the user is about to build a device- package for the wrong
-    architecture. The package is noarch, but the dependencies (kernel!) will get
-    pulled in with the same arch as dependency.
+    Previously 'pmbootstrap build device-...' built the device package in the
+    native chroot without installing its dependencies (e.g. armhf kernel!) and
+    created a symlink to all supported architectures.
+
+    Not installing depends while building is incompatible with how Alpine's
+    abuild does it, so we changed the behavior. Now pmbootstrap reads the
+    device's architecture from the deviceinfo file and automatically builds
+    for that architecture, if you did not specify any architecture. And the
+    dependencies get installed correctly before the build.
+
+    To make migration easier for the users, we show a hint if building a device
+    package was requested.
     """
-    # Skip non-device-packages
-    if not pkgname.startswith("device-"):
+    # Only relevant for device packages when -i is not set
+    if not pkgname.startswith("device-") or getattr(args, "ignore_depends"):
         return
 
-    # Only continue when the --arch parameter is *not* the device architecture
-    deviceinfo = args.aports + "/device/" + pkgname + "/deviceinfo"
-    if not os.path.exists(deviceinfo):
-        return
     device = pkgname.split("-", 1)[1]
-    arch = pmb.parse.deviceinfo(args, device)["arch"]
-    if args.arch == arch:
-        return
-
-    # Abort with a big note
-    logging.info("Dependency handling in 'pmbootstrap build' has been"
-                 " changed.")
-    logging.info("Previously we only built and installed the 'makedepends'"
-                 " from the APKBUILDs, now we use the 'depends', too.")
-    logging.info("")
-    logging.info("Your options:")
-    logging.info("* Ignore depends (fast, old behavior, may cause problems"
-                 " with some packages):")
-    logging.info("  pmbootstrap build " + pkgname + " -i")
-    logging.info("* Build with depends (kernel!) and specify the right"
-                 " architecture:")
-    logging.info("  pmbootstrap build " + pkgname + " --arch=" + arch)
-    logging.info("")
-    logging.info("This change was necessary to be more compatible with Alpine's"
-                 " abuild.")
-    logging.info("The default architecture is the native one (" +
-                 args.arch_native + " in your case), so you need to overwrite")
-    logging.info("it now to get the kernel dependency of your device package"
-                 " for the right architecture.")
-    logging.info("Sorry for the inconvenience.")
-    logging.info("")
-    raise RuntimeError("Missing -i or --arch parameter")
+    logging.info("NOTE: " + device + "'s kernel will be installed as dependency"
+                 " before building (old behavior: 'pmbootstrap build -i')")
 
 
 def _parse_flavor(args):
@@ -135,10 +115,10 @@ def build(args):
     if args.strict:
         pmb.chroot.zap(args, False)
 
-    # Detect wrong usage for device- packages
+    # Detect old usage for device- packages
     if not args.ignore_depends:
         for package in args.packages:
-            _build_verify_usage_device_package(args, package)
+            _build_device_depends_note(args, package)
 
     # Build all packages
     for package in args.packages:

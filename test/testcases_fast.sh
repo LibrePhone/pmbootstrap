@@ -3,11 +3,9 @@
 # Disable slow testcases
 # aport_in_sync_with_git: clones Alpine's aports repo
 # aportgen: clones Alpine's aports repo
-# version: clones Alpine's apk repo
 disabled="
 	aport_in_sync_with_git
 	aportgen
-	version
 "
 
 # Make sure we have a valid device (#1128)
