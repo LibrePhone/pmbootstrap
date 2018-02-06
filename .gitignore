@@ -107,3 +107,6 @@ ENV/
 
 # Visual Studio Code
 .vscode/
+
+# Pytest
+.pytest_cache
