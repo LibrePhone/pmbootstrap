@@ -16,8 +16,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
-import os
 import logging
+import os
+import shlex
 
 import pmb.build
 import pmb.build.autodetect
@@ -242,7 +243,8 @@ def run_abuild(args, apkbuild, arch, strict=False, force=False, cross=None,
     logging.info("(" + suffix + ") build " + output)
 
     # Environment variables
-    env = {"CARCH": arch}
+    env = {"CARCH": arch,
+           "SUDO_APK": "abuild-apk --no-progress"}
     if cross == "native":
         hostspec = pmb.parse.arch.alpine_to_hostspec(arch)
         env["CROSS_COMPILE"] = hostspec + "-"
@@ -256,7 +258,7 @@ def run_abuild(args, apkbuild, arch, strict=False, force=False, cross=None,
     # Build the abuild command
     cmd = []
     for key, value in env.items():
-        cmd += [key + "=" + value]
+        cmd += [key + "=" + shlex.quote(value)]
     cmd += ["abuild"]
     if strict:
         cmd += ["-r"]  # install depends with abuild
@@ -289,7 +291,8 @@ def finish(args, apkbuild, arch, output, strict=False, suffix="native"):
     # Uninstall build dependencies (strict mode)
     if strict:
         logging.info("(" + suffix + ") uninstall build dependencies")
-        pmb.chroot.user(args, ["abuild", "undeps"], suffix, "/home/pmos/build")
+        cmd = ["SUDO_APK='abuild-apk --no-progress'", "abuild", "undeps"]
+        pmb.chroot.user(args, cmd, suffix, "/home/pmos/build")
 
 
 def package(args, pkgname, arch=None, force=False, strict=False,

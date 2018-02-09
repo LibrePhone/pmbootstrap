@@ -212,19 +212,21 @@ def test_run_abuild(args, monkeypatch):
 
     # Normal run
     output = "armhf/test-1-r2.apk"
-    env = {"CARCH": "armhf"}
-    cmd = ["CARCH=armhf", "abuild", "-d"]
+    env = {"CARCH": "armhf", "SUDO_APK": "abuild-apk --no-progress"}
+    sudo_apk = "SUDO_APK='abuild-apk --no-progress'"
+    cmd = ["CARCH=armhf", sudo_apk, "abuild", "-d"]
     assert func(args, apkbuild, "armhf") == (output, cmd, env)
 
     # Force and strict
-    cmd = ["CARCH=armhf", "abuild", "-r", "-f"]
+    cmd = ["CARCH=armhf", sudo_apk, "abuild", "-r", "-f"]
     assert func(args, apkbuild, "armhf", True, True) == (output, cmd, env)
 
     # cross=native
     env = {"CARCH": "armhf",
+           "SUDO_APK": "abuild-apk --no-progress",
            "CROSS_COMPILE": "armv6-alpine-linux-muslgnueabihf-",
            "CC": "armv6-alpine-linux-muslgnueabihf-gcc"}
-    cmd = ["CARCH=armhf", "CROSS_COMPILE=armv6-alpine-linux-muslgnueabihf-",
+    cmd = ["CARCH=armhf", sudo_apk, "CROSS_COMPILE=armv6-alpine-linux-muslgnueabihf-",
            "CC=armv6-alpine-linux-muslgnueabihf-gcc", "abuild", "-d"]
     assert func(args, apkbuild, "armhf", cross="native") == (output, cmd, env)
 

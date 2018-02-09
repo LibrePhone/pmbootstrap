@@ -64,14 +64,16 @@ def check_checksums(package):
 
 
 def check_build(packages):
-    command = (["./pmbootstrap.py", "--details-to-stdout", "build",
-                "--strict"] + list(packages))
-    try:
-        process = subprocess.Popen(command)
-        process.communicate()
-    except subprocess.CalledProcessError as e:
-        print("** Building failed")
-        exit(1)
+    # Initialize build environment with less logging
+    commands = [["build_init"],
+                ["--details-to-stdout", "build", "--strict"] + list(packages)]
+    for command in commands:
+        try:
+            process = subprocess.Popen(["./pmbootstrap.py"] + command)
+            process.communicate()
+        except subprocess.CalledProcessError as e:
+            print("** Building failed")
+            exit(1)
 
 
 if __name__ == "__main__":
