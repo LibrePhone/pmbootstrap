@@ -68,10 +68,9 @@ def check_build(packages):
     commands = [["build_init"],
                 ["--details-to-stdout", "build", "--strict"] + list(packages)]
     for command in commands:
-        try:
-            process = subprocess.Popen(["./pmbootstrap.py"] + command)
-            process.communicate()
-        except subprocess.CalledProcessError as e:
+        process = subprocess.Popen(["./pmbootstrap.py"] + command)
+        process.communicate()
+        if process.returncode != 0:
             print("** Building failed")
             exit(1)
 
