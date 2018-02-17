@@ -20,6 +20,7 @@ import os
 import logging
 
 import pmb.helpers.run
+import pmb.helpers.other
 import pmb.parse
 import pmb.parse.arch
 
@@ -35,6 +36,7 @@ def register(args, arch):
     arch_debian = pmb.parse.arch.alpine_to_debian(arch)
     if is_registered(arch_debian):
         return
+    pmb.helpers.other.check_binfmt_misc(args)
     pmb.chroot.apk.install(args, ["qemu-user-static-repack",
                                   "qemu-user-static-repack-binfmt"])
     info = pmb.parse.binfmt_info(args, arch_debian)
