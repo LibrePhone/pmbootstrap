@@ -158,16 +158,20 @@ build_cross_native = ["linux-*", "arch-bin-masquerade"]
 
 # Necessary kernel config options
 necessary_kconfig_options = {
-    "ANDROID_PARANOID_NETWORK": False,
-    "DEVTMPFS": True,
-    "DEVTMPFS_MOUNT": False,
-    "DM_CRYPT": True,
-    "EXT4_FS": True,
-    "PFT": False,
-    "SYSVIPC": True,
-    "VT": True
+    "all": {
+        "ANDROID_PARANOID_NETWORK": False,
+        "DEVTMPFS": True,
+        "DEVTMPFS_MOUNT": False,
+        "DM_CRYPT": True,
+        "EXT4_FS": True,
+        "PFT": False,
+        "SYSVIPC": True,
+        "VT": True
+    },
+    "armhf x86": {
+        "LBDAF": True
+    }
 }
-
 
 #
 # PARSE
