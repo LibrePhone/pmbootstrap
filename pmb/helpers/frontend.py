@@ -120,11 +120,17 @@ def build(args):
         for package in args.packages:
             _build_device_depends_note(args, package)
 
+    # Set src and force
+    src = os.path.realpath(os.path.expanduser(args.src[0])) if args.src else None
+    force = True if src else args.force
+    if src and not os.path.exists(src):
+        raise RuntimeError("Invalid path specified for --src: " + src)
+
     # Build all packages
     for package in args.packages:
         arch_package = args.arch or pmb.build.autodetect.arch(args, package)
-        if not pmb.build.package(args, package, arch_package, args.force,
-                                 args.strict):
+        if not pmb.build.package(args, package, arch_package, force,
+                                 args.strict, src=src):
             logging.info("NOTE: Package '" + package + "' is up to date. Use"
                          " 'pmbootstrap build " + package + " --force'"
                          " if needed.")

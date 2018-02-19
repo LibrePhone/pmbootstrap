@@ -16,6 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
+import datetime
 import logging
 import os
 import shlex
@@ -155,7 +156,7 @@ def is_necessary_warn_depends(args, apkbuild, arch, force, depends_built):
 
 
 def init_buildenv(args, apkbuild, arch, strict=False, force=False, cross=None,
-                  suffix="native", skip_init_buildenv=False):
+                  suffix="native", skip_init_buildenv=False, src=None):
     """
     Build all dependencies, check if we need to build at all (otherwise we've
     just initialized the build environment for nothing) and then setup the
@@ -166,6 +167,7 @@ def init_buildenv(args, apkbuild, arch, strict=False, force=False, cross=None,
                                build environment. Use this when building
                                something during initialization of the build
                                environment (e.g. qemu aarch64 bug workaround)
+    :param src: override source used to build the package with a local folder
     :returns: True when the build is necessary (otherwise False)
     """
     # Build dependencies (package arch)
@@ -182,6 +184,8 @@ def init_buildenv(args, apkbuild, arch, strict=False, force=False, cross=None,
         pmb.build.other.configure_ccache(args, suffix)
     if not strict and len(depends):
         pmb.chroot.apk.install(args, depends, suffix)
+    if src:
+        pmb.chroot.apk.install(args, ["rsync"], suffix)
 
     # Cross-compiler init
     if cross:
@@ -218,14 +222,106 @@ def get_gcc_version(args, arch):
     return apkindex["version"]
 
 
+def get_pkgver(original_pkgver, original_source=False, now=None):
+    """
+    Get the original pkgver when using the original source. Otherwise, get the
+    pkgver with an appended suffix of current date and time. For example:
+        _p20180218550502
+    When appending the suffix, an existing suffix (e.g. _git20171231) gets
+    replaced.
+
+    :param original_pkgver: unmodified pkgver from the package's APKBUILD.
+    :param original_source: the original source is used instead of overriding
+                            it with --src.
+    :param now: use a specific date instead of current date (for test cases)
+    """
+    if original_source:
+        return original_pkgver
+
+    # Append current date
+    no_suffix = original_pkgver.split("_", 1)[0]
+    now = now if now else datetime.datetime.now()
+    new_suffix = "_p" + now.strftime("%Y%m%d%H%M%S")
+    return no_suffix + new_suffix
+
+
+def override_source(args, apkbuild, pkgver, src, suffix="native"):
+    """
+    Mount local source inside chroot and append new functions (prepare() etc.)
+    to the APKBUILD to make it use the local source.
+    """
+    if not src:
+        return
+
+    # Mount source in chroot
+    mount_path = "/mnt/pmbootstrap-source-override/"
+    mount_path_outside = args.work + "/chroot_" + suffix + mount_path
+    pmb.helpers.mount.bind(args, src, mount_path_outside, umount=True)
+
+    # Delete existing append file
+    append_path = "/tmp/APKBUILD.append"
+    append_path_outside = args.work + "/chroot_" + suffix + append_path
+    if os.path.exists(append_path_outside):
+        pmb.chroot.root(args, ["rm", append_path])
+
+    # Add src path to pkgdesc, cut it off after max length
+    pkgdesc = ("[" + src + "] " + apkbuild["pkgdesc"])[:127]
+
+    # Appended content
+    append = """
+             # ** Overrides below appended by pmbootstrap for --src **
+
+             pkgver=\"""" + pkgver + """\"
+             pkgdesc=\"""" + pkgdesc + """\"
+             _pmb_src_copy="/tmp/pmbootstrap-local-source-copy"
+
+             # Empty $source avoids patching in prepare()
+             _pmb_source_original="$source"
+             source=""
+             sha512sums=""
+
+             fetch() {
+                 # Update source copy
+                 msg "Copying source from host system: """ + src + """\"
+                 rsync -a --exclude=".git/" --delete --ignore-errors --force \\
+                     \"""" + mount_path + """\" "$_pmb_src_copy" || true
+
+                 # Link local source files (e.g. kernel config)
+                 mkdir "$srcdir"
+                 local s
+                 for s in $_pmb_source_original; do
+                     is_remote "$s" || ln -sf "$startdir/$s" "$srcdir/"
+                 done
+             }
+
+             unpack() {
+                 ln -sv "$_pmb_src_copy" "$builddir"
+             }
+             """
+
+    # Write and log append file
+    with open(append_path_outside, "w", encoding="utf-8") as handle:
+        for line in append.split("\n"):
+            handle.write(line[13:].replace(" " * 4, "\t") + "\n")
+    pmb.chroot.user(args, ["cat", append_path])
+
+    # Append it to the APKBUILD
+    apkbuild_path = "/home/pmos/build/APKBUILD"
+    shell_cmd = ("cat " + apkbuild_path + " " + append_path + " > " +
+                 append_path + "_")
+    pmb.chroot.user(args, ["sh", "-c", shlex.quote(shell_cmd)])
+    pmb.chroot.user(args, ["mv", append_path + "_", apkbuild_path])
+
+
 def run_abuild(args, apkbuild, arch, strict=False, force=False, cross=None,
-               suffix="native"):
+               suffix="native", src=None):
     """
     Set up all environment variables and construct the abuild command (all
     depending on the cross-compiler method and target architecture), copy
     the aport to the chroot and execute abuild.
 
     :param cross: None, "native" or "distcc"
+    :param src: override source used to build the package with a local folder
     :returns: (output, cmd, env), output is the destination apk path relative
               to the package folder ("x86_64/hello-1-r2.apk"). cmd and env are
               used by the test case, and they are the full abuild command and
@@ -238,9 +334,13 @@ def run_abuild(args, apkbuild, arch, strict=False, force=False, cross=None,
                      " probably fail!")
 
     # Pretty log message
-    output = (arch + "/" + apkbuild["pkgname"] + "-" + apkbuild["pkgver"] +
+    pkgver = get_pkgver(apkbuild["pkgver"], src is None)
+    output = (arch + "/" + apkbuild["pkgname"] + "-" + pkgver +
               "-r" + apkbuild["pkgrel"] + ".apk")
-    logging.info("(" + suffix + ") build " + output)
+    message = "(" + suffix + ") build " + output
+    if src:
+        message += " (source: " + src + ")"
+    logging.info(message)
 
     # Environment variables
     env = {"CARCH": arch,
@@ -269,6 +369,7 @@ def run_abuild(args, apkbuild, arch, strict=False, force=False, cross=None,
 
     # Copy the aport to the chroot and build it
     pmb.build.copy_to_buildpath(args, apkbuild["pkgname"], suffix)
+    override_source(args, apkbuild, pkgver, src, suffix)
     pmb.chroot.user(args, cmd, suffix, "/home/pmos/build")
     return (output, cmd, env)
 
@@ -296,7 +397,7 @@ def finish(args, apkbuild, arch, output, strict=False, suffix="native"):
 
 
 def package(args, pkgname, arch=None, force=False, strict=False,
-            skip_init_buildenv=False):
+            skip_init_buildenv=False, src=None):
     """
     Build a package and its dependencies with Alpine Linux' abuild.
 
@@ -309,6 +410,7 @@ def package(args, pkgname, arch=None, force=False, strict=False,
                                build environment. Use this when building
                                something during initialization of the build
                                environment (e.g. qemu aarch64 bug workaround)
+    :param src: override source used to build the package with a local folder
     :returns: None if the build was not necessary
               output path relative to the packages folder ("armhf/ab-1-r2.apk")
     """
@@ -327,11 +429,11 @@ def package(args, pkgname, arch=None, force=False, strict=False,
     suffix = pmb.build.autodetect.suffix(args, apkbuild, arch)
     cross = pmb.build.autodetect.crosscompile(args, apkbuild, arch, suffix)
     if not init_buildenv(args, apkbuild, arch, strict, force, cross, suffix,
-                         skip_init_buildenv):
+                         skip_init_buildenv, src):
         return
 
     # Build and finish up
     (output, cmd, env) = run_abuild(args, apkbuild, arch, strict, force, cross,
-                                    suffix)
+                                    suffix, src)
     finish(args, apkbuild, arch, output, strict, suffix)
     return output

@@ -21,8 +21,11 @@ along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 This file tests all functions from pmb.build._package.
 """
 
+import datetime
+import glob
 import os
 import pytest
+import shutil
 import sys
 
 # Import from parent directory
@@ -201,6 +204,17 @@ def test_init_buildenv(args, monkeypatch):
     assert func(args, apkbuild, "armhf") is False
 
 
+def test_get_pkgver(monkeypatch):
+    # With original source
+    func = pmb.build._package.get_pkgver
+    assert func("1.0", True) == "1.0"
+
+    # Without original source
+    now = datetime.date(2018, 1, 1)
+    assert func("1.0", False, now) == "1.0_p20180101000000"
+    assert func("1.0_git20170101", False, now) == "1.0_p20180101000000"
+
+
 def test_run_abuild(args, monkeypatch):
     # Disable effects of functions we don't want to test here
     monkeypatch.setattr(pmb.build, "copy_to_buildpath", return_none)
@@ -311,3 +325,61 @@ def test_build_depends_high_level(args, monkeypatch):
     # instead.
     assert pmb.build.package(args, "hello-world-wrapper") is None
     assert os.path.exists(output_hello_outside)
+
+
+def test_build_local_source_high_level(args, tmpdir):
+    """
+    Test building a package with overriding the source code:
+        pmbootstrap build --src=/some/path hello-world
+
+    We use a copy of the hello-world APKBUILD here, that doesn't have the
+    source files it needs to build included. And we use the original aport
+    folder as local source folder, so pmbootstrap should take the source files
+    from there and the build should succeed.
+    """
+    # aports: Add deviceinfo (required by pmbootstrap to start)
+    tmpdir = str(tmpdir)
+    aports = tmpdir + "/aports"
+    aport = aports + "/device/device-" + args.device
+    os.makedirs(aport)
+    shutil.copy(args.aports + "/device/device-" + args.device + "/deviceinfo",
+                aport)
+
+    # aports: Add modified hello-world aport (source="", uses $builddir)
+    aport = aports + "/main/hello-world"
+    os.makedirs(aport)
+    shutil.copy(pmb.config.pmb_src + "/test/testdata/build_local_src/APKBUILD",
+                aport)
+
+    # src: Copy hello-world source files
+    src = tmpdir + "/src"
+    os.makedirs(src)
+    shutil.copy(args.aports + "/main/hello-world/Makefile", src)
+    shutil.copy(args.aports + "/main/hello-world/main.c", src)
+
+    # src: Create unreadable file (rsync should skip it)
+    unreadable = src + "/_unreadable_file"
+    shutil.copy(args.aports + "/main/hello-world/main.c", unreadable)
+    pmb.helpers.run.root(args, ["chown", "root:root", unreadable])
+    pmb.helpers.run.root(args, ["chmod", "500", unreadable])
+
+    # Delete all hello-world --src packages
+    pattern = (args.work + "/packages/" + args.arch_native +
+               "/hello-world-*_p*.apk")
+    for path in glob.glob(pattern):
+        pmb.helpers.run.root(args, ["rm", path])
+    assert len(glob.glob(pattern)) == 0
+
+    # Build hello-world --src package
+    pmb.helpers.run.user(args, [pmb.config.pmb_src + "/pmbootstrap.py",
+                                "--aports", aports, "build", "--src", src,
+                                "hello-world"])
+
+    # Verify that the package has been built
+    paths = glob.glob(pattern)
+    assert len(paths) == 1
+
+    # Clean up: delete package and tempfolder, update index
+    pmb.helpers.run.root(args, ["rm", paths[0]])
+    pmb.build.index_repo(args, args.arch_native)
+    pmb.helpers.run.root(args, ["rm", "-r", tmpdir])

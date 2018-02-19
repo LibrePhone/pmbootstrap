@@ -36,12 +36,17 @@ def ismount(folder):
     return False
 
 
-def bind(args, source, destination, create_folders=True):
+def bind(args, source, destination, create_folders=True, umount=False):
     """
     Mount --bind a folder and create necessary directory structure.
+    :param umount: when destination is already a mount point, umount it first.
     """
+    # Check/umount destination
     if ismount(destination):
-        return
+        if umount:
+            umount_all(args, destination)
+        else:
+            return
 
     # Check/create folders
     for path in [source, destination]:
