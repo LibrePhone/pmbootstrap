@@ -166,7 +166,8 @@ def init(args):
                 pmb.helpers.repo.hash(url) + ".tar.gz")
 
     # Extract and verify the apk-tools-static version
-    index_data = pmb.parse.apkindex.read(args, "apk-tools-static", apkindex)
+    index_data = pmb.parse.apkindex.package(args, "apk-tools-static",
+                                            indexes=[apkindex])
     version = index_data["version"]
     version_min = pmb.config.apk_tools_static_min_version
     apk_name = "apk-tools-static-" + version + ".apk"

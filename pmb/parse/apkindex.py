@@ -16,6 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
+import collections
 import logging
 import os
 import tarfile
@@ -38,8 +39,7 @@ def parse_next_block(args, path, lines, start):
                 "depends": ["busybox-extras", "lddtree", ... ],
                 "pkgname": "postmarketos-mkinitfs",
                 "provides": ["mkinitfs=0.0.1"],
-                "version": "0.0.4-r10",
-              }
+                "version": "0.0.4-r10" }
     :returns: None, when there are no more blocks
     """
 
@@ -108,58 +108,87 @@ def parse_next_block(args, path, lines, start):
     return None
 
 
-def parse_add_block(path, ret, block, pkgname=None):
+def parse_add_block(ret, block, alias=None, multiple_providers=True):
     """
     Add one block to the return dictionary of parse().
 
-    :param path: to the APKINDEX.tar.gz
     :param ret: dictionary of all packages in the APKINDEX, that is
                 getting built right now. This function will extend it.
     :param block: return value from parse_next_block().
-    :param pkgname: defaults to the real pkgname, could be an alias
-                    from the "provides" list.
-    :param version: defaults to the real version, could be a value
-                    from the "provides" list.
+    :param alias: defaults to the pkgname, could be an alias from the
+                  "provides" list.
+    :param multiple_providers: assume that there are more than one provider for
+                               the alias. This makes sense when parsing the
+                               APKINDEX files from a repository (#1122), but
+                               not when parsing apk's installed packages DB.
     """
 
     # Defaults
-    if not pkgname:
-        pkgname = block["pkgname"]
+    pkgname = block["pkgname"]
+    alias = alias or pkgname
 
-    # Handle duplicate entries
-    if pkgname in ret:
-        # Ignore the block, if the block we already have has a higher
-        # version
-        version_old = ret[pkgname]["version"]
+    # Get an existing block with the same alias
+    block_old = None
+    if multiple_providers and alias in ret and pkgname in ret[alias]:
+        block_old = ret[alias][pkgname]
+    elif not multiple_providers and alias in ret:
+        block_old = ret[alias]
+
+    # Ignore the block, if the block we already have has a higher version
+    if block_old:
+        version_old = block_old["version"]
         version_new = block["version"]
         if pmb.parse.version.compare(version_old, version_new) == 1:
             return
 
     # Add it to the result set
-    ret[pkgname] = block
+    if multiple_providers:
+        if alias not in ret:
+            ret[alias] = {}
+        ret[alias][pkgname] = block
+    else:
+        ret[alias] = block
 
 
-def parse(args, path):
+def parse(args, path, multiple_providers=True):
     """
     Parse an APKINDEX.tar.gz file, and return its content as dictionary.
 
-    :returns: a dictionary with the following structure:
-              { "postmarketos-mkinitfs":
-                {
-                  "pkgname": "postmarketos-mkinitfs"
-                  "version": "0.0.4-r10",
-                  "depends": ["busybox-extras", "lddtree", ...],
-                  "provides": ["mkinitfs=0.0.1"]
-                }, ...
-              }
+    :param multiple_providers: assume that there are more than one provider for
+                               the alias. This makes sense when parsing the
+                               APKINDEX files from a repository (#1122), but
+                               not when parsing apk's installed packages DB.
+    :returns: (without multiple_providers)
+              generic format:
+              { pkgname: block, ... }
+
+              example:
+              { "postmarketos-mkinitfs": block,
+                "so:libGL.so.1": block, ...}
+
+    :returns: (with multiple_providers)
+              generic format:
+              { provide: { pkgname: block, ... }, ... }
+
+              example:
+              { "postmarketos-mkinitfs": {"postmarketos-mkinitfs": block},
+                "so:libGL.so.1": {"mesa-egl": block, "libhybris": block}, ...}
+
+    NOTE: "block" is the return value from parse_next_block() above.
     """
+    # Require the file to exist
+    if not os.path.isfile(path):
+        logging.debug("NOTE: APKINDEX not found, assuming no binary packages"
+                      " exist for that architecture: " + path)
+        return {}
 
     # Try to get a cached result first
     lastmod = os.path.getmtime(path)
+    cache_key = "multiple" if multiple_providers else "single"
     if path in args.cache["apkindex"]:
         cache = args.cache["apkindex"][path]
-        if cache["lastmod"] == lastmod:
-            return cache["ret"]
+        if cache["lastmod"] == lastmod and cache_key in cache:
+            return cache[cache_key]
 
     # Read all lines
     if tarfile.is_tarfile(path):
@@ -171,7 +200,7 @@ def parse(args, path):
             lines = handle.readlines()
 
     # Parse the whole APKINDEX file
-    ret = {}
+    ret = collections.OrderedDict()
     start = [0]
     while True:
         block = parse_next_block(args, path, lines, start)
@@ -179,97 +208,119 @@ def parse(args, path):
             break
 
         # Add the next package and all aliases
-        parse_add_block(path, ret, block)
+        parse_add_block(ret, block, None, multiple_providers)
         if "provides" in block:
             for alias in block["provides"]:
-                parse_add_block(path, ret, block, alias)
+                parse_add_block(ret, block, alias, multiple_providers)
 
     # Update the cache
-    args.cache["apkindex"][path] = {"lastmod": lastmod, "ret": ret}
-
+    if path not in args.cache["apkindex"]:
+        args.cache["apkindex"][path] = {"lastmod": lastmod}
+    args.cache["apkindex"][path][cache_key] = ret
     return ret
 
 
 def clear_cache(args, path):
+    """
+    Clear the APKINDEX parsing cache.
+
+    :returns: True on successful deletion, False otherwise
+    """
     logging.verbose("Clear APKINDEX cache for: " + path)
     if path in args.cache["apkindex"]:
         del args.cache["apkindex"][path]
+        return True
     else:
         logging.verbose("Nothing to do, path was not in cache:" +
                         str(args.cache["apkindex"].keys()))
+        return False
 
 
-def read(args, package, path, must_exist=True):
+def providers(args, package, arch=None, must_exist=True, indexes=None):
     """
-    Get information about a single package from an APKINDEX.tar.gz file.
+    Get all packages, which provide one package.
 
-    :param path: Path to APKINDEX.tar.gz, defaults to $WORK/APKINDEX.tar.gz
-    :param package: The package of which you want to read the properties.
+    :param package: of which you want to have the providers
+    :param arch: defaults to native arch, only relevant for indexes=None
     :param must_exist: When set to true, raise an exception when the package is
-        missing in the index, or the index file was not found.
-    :returns: {"pkgname": ..., "version": ..., "depends": [...]}
-        When the package appears multiple times in the APKINDEX, this
-        function returns the attributes of the latest version.
+                       not provided at all.
+    :param indexes: list of APKINDEX.tar.gz paths, defaults to all index files
+                    (depending on arch)
+    :returns: list of parsed packages. Example for package="so:libGL.so.1":
+                  {"mesa-egl": block, "libhybris": block}
+              block is the return value from parse_next_block() above.
     """
-    # Verify APKINDEX path
-    if not os.path.exists(path):
-        if not must_exist:
-            return None
-        raise RuntimeError("File not found: " + path)
 
-    # Parse the APKINDEX
-    apkindex = parse(args, path)
-    if package not in apkindex:
-        if must_exist:
-            raise RuntimeError("Package '" + package +
-                               "' not found in " + path)
-        else:
-            return None
-    return apkindex[package]
+    if not indexes:
+        arch = arch or args.arch_native
+        indexes = pmb.helpers.repo.apkindex_files(args, arch)
 
-
-def read_any_index(args, package, arch=None):
-    """
-    Get information about a single package from any APKINDEX.tar.gz.
-
-    We iterate through the index files in the order they are listed in
-    /etc/apk/repositories (we write that file in pmbootstrap, so we know the
-    order). That way it is possible to override a package from an upstream
-    binary repository (pmOS or Alpine) with a package built locally with
-    pmbootstrap.
-
-    If a package is in multiple APKINDEX files in multiple versions, then the
-    highest one gets returned (even if it is not in the first APKINDEX we look
-    at).
-
-    :param arch: defaults to native architecture
-    :returns: the same format as read()
-    """
-    if not arch:
-        arch = args.arch_native
-
-    # Iterate over indexes
-    ret = None
-    version_last = None
-    for index in pmb.helpers.repo.apkindex_files(args, arch):
-        # Skip indexes without the package
-        index_data = read(args, package, index, False)
-        if not index_data:
+    ret = {}
+    for path in indexes:
+        # Skip indexes not providing the package
+        index_packages = parse(args, path)
+        if package not in index_packages:
             continue
 
-        # Skip lower versions
-        version = index_data["version"]
-        if ret and pmb.parse.version.compare(version, version_last) == -1:
-            logging.verbose(package + ": " + version + " found in " + index +
-                            " (but " + version_last + " is bigger)")
-            continue
+        # Iterate over found providers
+        for provider_pkgname, provider in index_packages[package].items():
+            # Skip lower versions of providers we already found
+            version = provider["version"]
+            if provider_pkgname in ret:
+                version_last = ret[provider_pkgname]["version"]
+                if pmb.parse.version.compare(version, version_last) == -1:
+                    logging.verbose(package + ": provided by: " +
+                                    provider_pkgname + "-" + version + " in " +
+                                    path + " (but " + version_last + " is"
+                                    " higher)")
+                    continue
 
-        # Save as result
-        logging.verbose(package + ": " + version + " found in " + index)
-        ret = index_data
-        version_last = version
+            # Add the provier to ret
+            logging.verbose(package + ": provided by: " + provider_pkgname +
+                            "-" + version + " in " + path)
+            ret[provider_pkgname] = provider
 
-    # No result log entry
-    if not ret:
-        logging.verbose(package + ": no match found in any APKINDEX.tar.gz!")
+    if ret == {} and must_exist:
+        logging.debug("Searched in APKINDEX files: " + ", ".join(indexes))
+        raise RuntimeError("Could not find package '" + package + "'!")
+
     return ret
+
+
+def package(args, package, arch=None, must_exist=True, indexes=None):
+    """
+    Get a specific package's data from an apkindex.
+
+    :param package: of which you want to have the apkindex data
+    :param arch: defaults to native arch, only relevant for indexes=None
+    :param must_exist: When set to true, raise an exception when the package is
+                       not provided at all.
+    :param indexes: list of APKINDEX.tar.gz paths, defaults to all index files
+                    (depending on arch)
+    :returns: a dictionary with the following structure:
+              { "arch": "noarch",
+                "depends": ["busybox-extras", "lddtree", ... ],
+                "pkgname": "postmarketos-mkinitfs",
+                "provides": ["mkinitfs=0.0.1"],
+                "version": "0.0.4-r10" }
+              or None when the package was not found.
+    """
+    # Provider with the same package
+    package_providers = providers(args, package, arch, must_exist, indexes)
+    if package in package_providers:
+        return package_providers[package]
+
+    # Any provider
+    if package_providers:
+        provider_pkgname = list(package_providers.keys())[0]
+        if len(package_providers) != 1:
+            logging.debug(package + ": provided by multiple packages (" +
+                          ", ".join(package_providers) + "), picked " +
+                          provider_pkgname)
+        return package_providers[provider_pkgname]
+
+    # No provider
+    if must_exist:
+        raise RuntimeError("Package '" + package + "' not found in any"
+                           " APKINDEX.")
+    return None

@@ -63,7 +63,7 @@ def get_apkbuild(args, pkgname, arch):
     aport = pmb.build.find_aport(args, pkgname, False)
     if aport:
         return pmb.parse.apkbuild(args, aport + "/APKBUILD")
-    if pmb.parse.apkindex.read_any_index(args, pkgname, arch):
+    if pmb.parse.apkindex.providers(args, pkgname, arch, False):
         return None
     raise RuntimeError("Package '" + pkgname + "': Could not find aport, and"
                        " could not find this package in any APKINDEX!")
@@ -214,12 +214,7 @@ def get_gcc_version(args, arch):
     <https://linux.die.net/man/1/ccache>
     :returns: a string like "6.4.0-r5"
     """
-    repository = args.mirror_alpine + args.alpine_version + "/main"
-    hash = pmb.helpers.repo.hash(repository)
-    index_path = (args.work + "/cache_apk_" + arch + "/APKINDEX." +
-                  hash + ".tar.gz")
-    apkindex = pmb.parse.apkindex.read(args, "gcc", index_path, True)
-    return apkindex["version"]
+    return pmb.parse.apkindex.package(args, "gcc", arch)["version"]
 
 
 def get_pkgver(original_pkgver, original_source=False, now=None):

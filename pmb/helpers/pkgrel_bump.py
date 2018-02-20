@@ -98,8 +98,8 @@ def auto_apkindex_package(args, pkgname, aport_version, apkindex, arch,
     :returns: True when there was an APKBUILD that needed to be changed.
     """
     # Binary package
-    binary = pmb.parse.apkindex.read(args, pkgname, apkindex,
-                                     False)
+    binary = pmb.parse.apkindex.package(args, pkgname, must_exist=False,
+                                        indexes=[apkindex])
     if not binary:
         return
 
@@ -124,8 +124,9 @@ def auto_apkindex_package(args, pkgname, aport_version, apkindex, arch,
                     ",".join(binary["depends"]))
     missing = []
     for depend in binary["depends"]:
-        if not pmb.parse.apkindex.read_any_index(args, depend,
-                                                 arch):
+        providers = pmb.parse.apkindex.providers(args, depend, arch,
+                                                 must_exist=False)
+        if providers == {}:
             # We're only interested in missing depends starting with "so:"
             # (which means dynamic libraries that the package was linked
             # against) and packages for which no aport exists.

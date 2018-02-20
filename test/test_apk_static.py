@@ -100,9 +100,7 @@ def test_signature_verification(args, tmpdir):
     if os.path.exists(args.work + "/apk.static"):
         os.remove(args.work + "/apk.static")
 
-    apk_index = pmb.chroot.apk_static.download(args, "APKINDEX.tar.gz")
-    version = pmb.parse.apkindex.read(args, "apk-tools-static",
-                                      apk_index)["version"]
+    version = pmb.parse.apkindex.package(args, "apk-tools-static")["version"]
     apk_path = pmb.chroot.apk_static.download(args,
                                               "apk-tools-static-" + version + ".apk")
 

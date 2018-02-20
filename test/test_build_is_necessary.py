@@ -41,7 +41,7 @@ def args(request, tmpdir):
     apkindex_path = str(tmpdir) + "/APKINDEX.tar.gz"
     open(apkindex_path, "a").close()
     lastmod = os.path.getmtime(apkindex_path)
-    args.cache["apkindex"][apkindex_path] = {"lastmod": lastmod, "ret": {}}
+    args.cache["apkindex"][apkindex_path] = {"lastmod": lastmod, "multiple": {}}
     return args
 
 
@@ -53,7 +53,8 @@ def cache_apkindex(args, version):
     """
     apkindex_path = list(args.cache["apkindex"].keys())[0]
 
-    args.cache["apkindex"][apkindex_path]["ret"]["hello-world"]["version"] = version
+    providers = args.cache["apkindex"][apkindex_path]["multiple"]["hello-world"]
+    providers["hello-world"]["version"] = version
 
 
 def test_build_is_necessary(args):
@@ -62,22 +63,23 @@ def test_build_is_necessary(args):
     apkbuild = pmb.parse.apkbuild(args, aport + "/APKBUILD")
     apkbuild["pkgver"] = "1"
     apkbuild["pkgrel"] = "2"
-    apkindex_path = list(args.cache["apkindex"].keys())[0]
-    args.cache["apkindex"][apkindex_path]["ret"] = {
-        "hello-world": {"pkgname": "hello-world", "version": "1-r2"}
-    }
+    indexes = list(args.cache["apkindex"].keys())
+    apkindex_path = indexes[0]
+    cache = {"hello-world": {"hello-world": {"pkgname": "hello-world",
+                                             "version": "1-r2"}}}
+    args.cache["apkindex"][apkindex_path]["multiple"] = cache
 
     # Binary repo has a newer version
     cache_apkindex(args, "999-r1")
-    assert pmb.build.is_necessary(args, None, apkbuild, apkindex_path) is False
+    assert pmb.build.is_necessary(args, None, apkbuild, indexes) is False
 
     # Aports folder has a newer version
     cache_apkindex(args, "0-r0")
-    assert pmb.build.is_necessary(args, None, apkbuild, apkindex_path) is True
+    assert pmb.build.is_necessary(args, None, apkbuild, indexes) is True
 
     # Same version
     cache_apkindex(args, "1-r2")
-    assert pmb.build.is_necessary(args, None, apkbuild, apkindex_path) is False
+    assert pmb.build.is_necessary(args, None, apkbuild, indexes) is False
 
 
 def test_build_is_necessary_no_binary_available(args):
@@ -85,7 +87,7 @@ def test_build_is_necessary_no_binary_available(args):
     APKINDEX cache is set up to fake an empty APKINDEX, which means, that the
     hello-world package has not been built yet.
     """
-    apkindex_path = list(args.cache["apkindex"].keys())[0]
+    indexes = list(args.cache["apkindex"].keys())
     aport = pmb.build.other.find_aport(args, "hello-world")
     apkbuild = pmb.parse.apkbuild(args, aport + "/APKBUILD")
-    assert pmb.build.is_necessary(args, None, apkbuild, apkindex_path) is True
+    assert pmb.build.is_necessary(args, None, apkbuild, indexes) is True

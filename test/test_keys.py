@@ -43,8 +43,7 @@ def args(request):
 def test_keys(args):
     # Get the alpine-keys apk filename
     pmb.chroot.init(args)
-    info = pmb.parse.apkindex.read_any_index(args, "alpine-keys")
-    version = info["version"]
+    version = pmb.parse.apkindex.package(args, "alpine-keys")["version"]
     pattern = (args.work + "/cache_apk_" + args.arch_native + "/alpine-keys-" +
                version + ".*.apk")
     filename = os.path.basename(glob.glob(pattern)[0])

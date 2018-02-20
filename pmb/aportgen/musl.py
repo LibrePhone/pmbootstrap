@@ -26,13 +26,12 @@ import pmb.chroot.apk_static
 
 
 def generate(args, pkgname):
-    # Install musl in chroot (so we have the APKINDEX and verified musl apks)
+    # Install musl in chroot to get verified apks
     arch = pkgname.split("-")[1]
-    apkindex = pmb.chroot.apk_static.download(args, "APKINDEX.tar.gz")
     pmb.chroot.apk.install(args, ["musl-dev"], "buildroot_" + arch)
 
     # Parse musl version from APKINDEX
-    package_data = pmb.parse.apkindex.read(args, "musl", apkindex)
+    package_data = pmb.parse.apkindex.package(args, "musl")
     version = package_data["version"]
     pkgver = version.split("-r")[0]
     pkgrel = version.split("-r")[1]

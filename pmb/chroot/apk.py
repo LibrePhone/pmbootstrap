@@ -94,8 +94,7 @@ def check_min_version(args, suffix="native"):
     # Compare
     version_installed = installed(args, suffix)["apk-tools"]["version"]
     version_min = pmb.config.apk_tools_static_min_version
-    if pmb.parse.version.compare(version_installed,
-                                 version_min) == -1:
+    if pmb.parse.version.compare(version_installed, version_min) == -1:
         raise RuntimeError("You have an outdated version of the 'apk' package"
                            " manager installed (your version: " + version_installed +
                            ", expected at least: " + version_min + "). Delete"
@@ -124,7 +123,7 @@ def install_is_necessary(args, build, arch, package, packages_installed):
         return True
 
     # Make sure, that we really have a binary package
-    data_repo = pmb.parse.apkindex.read_any_index(args, package, arch)
+    data_repo = pmb.parse.apkindex.package(args, package, arch, False)
     if not data_repo:
         logging.warning("WARNING: Internal error in pmbootstrap," +
                         " package '" + package + "' for " + arch +
@@ -193,8 +192,7 @@ def install(args, packages, suffix="native", build=True):
 
     # Add depends to packages
     arch = pmb.parse.arch.from_chroot_suffix(args, suffix)
-    packages_with_depends = pmb.parse.depends.recurse(args, packages, arch,
-                                                      strict=True)
+    packages_with_depends = pmb.parse.depends.recurse(args, packages, suffix)
 
     # Filter outdated packages (build them if required)
     packages_installed = installed(args, suffix)
@@ -256,6 +254,4 @@ def installed(args, suffix="native"):
               }
     """
     path = args.work + "/chroot_" + suffix + "/lib/apk/db/installed"
-    if not os.path.exists(path):
-        return {}
-    return pmb.parse.apkindex.parse(args, path)
+    return pmb.parse.apkindex.parse(args, path, False)

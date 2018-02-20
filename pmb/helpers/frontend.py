@@ -149,6 +149,8 @@ def checksum(args):
 def chroot(args):
     suffix = _parse_suffix(args)
     pmb.chroot.apk.check_min_version(args, suffix)
+    if args.add:
+        pmb.chroot.apk.install(args, args.add.split(","), suffix)
     logging.info("(" + suffix + ") % " + " ".join(args.command))
     pmb.chroot.root(args, args.command, suffix, log=False)
 

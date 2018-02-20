@@ -91,7 +91,7 @@ def copy_to_buildpath(args, package, suffix="native"):
                            "/home/pmos/build"], suffix=suffix)
 
 
-def is_necessary(args, arch, apkbuild, apkindex_path=None):
+def is_necessary(args, arch, apkbuild, indexes=None):
     """
     Check if the package has already been built. Compared to abuild's check,
     this check also works for different architectures, and it recognizes
@@ -100,7 +100,7 @@ def is_necessary(args, arch, apkbuild, apkindex_path=None):
 
     :param arch: package target architecture
     :param apkbuild: from pmb.parse.apkbuild()
-    :param apkindex_path: override the APKINDEX.tar.gz path
+    :param indexes: list of APKINDEX.tar.gz paths
     :returns: boolean
     """
     # Get package name, version, define start of debug message
@@ -109,11 +109,8 @@ def is_necessary(args, arch, apkbuild, apkindex_path=None):
     msg = "Build is necessary for package '" + package + "': "
 
     # Get old version from APKINDEX
-    if apkindex_path:
-        index_data = pmb.parse.apkindex.read(
-            args, package, apkindex_path, False)
-    else:
-        index_data = pmb.parse.apkindex.read_any_index(args, package, arch)
+    index_data = pmb.parse.apkindex.package(args, package, arch, False,
+                                            indexes)
     if not index_data:
         logging.debug(msg + "No binary package available")
         return True

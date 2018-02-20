@@ -249,6 +249,8 @@ def arguments():
     build_init = sub.add_parser("build_init", help="initialize build"
                                 " environment (usually you do not need to call this)")
     chroot = sub.add_parser("chroot", help="start shell in chroot")
+    chroot.add_argument("--add", help="build/install comma separated list of"
+                        " packages in the chroot before entering it")
     chroot.add_argument("command", default=["sh"], help="command"
                         " to execute inside the chroot. default: sh", nargs='*')
     for action in [build_init, chroot]:
