@@ -103,7 +103,7 @@ def zap_mismatch_bins(args, confirm=True, dry=False):
 
     reindex = False
     for apkindex_path in glob.glob(args.work + "/packages/*/APKINDEX.tar.gz"):
-        apkindex = pmb.parse.apkindex.parse(args, apkindex_path)
+        apkindex = pmb.parse.apkindex.parse(args, apkindex_path, False)
         for pkgname, bin_data in apkindex.items():
             # Only real packages have apks, provided packages do not exist
             # (e.g. "so:libtest.so.1.2")
