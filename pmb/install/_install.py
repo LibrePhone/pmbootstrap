@@ -67,6 +67,29 @@ def get_subpartitions_size(args):
     return (full, boot)
 
 
+def get_nonfree_packages(args, device):
+    """
+    Get the non-free packages based on user's choice in "pmbootstrap init" and
+    based on whether there are non-free packages in the APKBUILD or not.
+
+    :returns: list of non-free packages to be installed. Example:
+              ["device-nokia-n900-nonfree-firmware"]
+    """
+    # Read subpackages
+    apkbuild_path = args.aports + "/device/device-" + device + "/APKBUILD"
+    apkbuild = pmb.parse.apkbuild(args, apkbuild_path)
+    subpackages = apkbuild["subpackages"]
+
+    # Check for firmware and userland
+    ret = []
+    prefix = "device-" + device + "-nonfree-"
+    if args.nonfree_firmware and prefix + "firmware" in subpackages:
+        ret += [prefix + "firmware"]
+    if args.nonfree_userland and prefix + "userland" in subpackages:
+        ret += [prefix + "userland"]
+    return ret
+
+
 def copy_files_from_chroot(args):
     """
     Copy all files from the rootfs chroot to /mnt/install, except
@@ -316,7 +339,8 @@ def install(args):
     logging.info('*** (2/{0}) CREATE DEVICE ROOTFS ("{1}") ***'.format(steps,
                  args.device))
     install_packages = (pmb.config.install_device_packages +
-                        ["device-" + args.device])
+                        ["device-" + args.device] +
+                        get_nonfree_packages(args, args.device))
     if args.ui.lower() != "none":
         install_packages += ["postmarketos-ui-" + args.ui]
     suffix = "rootfs_" + args.device

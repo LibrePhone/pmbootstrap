@@ -17,22 +17,23 @@ You should have received a copy of the GNU General Public License
 along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
 import os
-import sys
-import glob
 import pytest
+import sys
 
 # Import from parent directory
 pmb_src = os.path.realpath(os.path.join(os.path.dirname(__file__) + "/.."))
 sys.path.append(pmb_src)
-import pmb.parse.apkindex
-import pmb.parse
+import pmb.aportgen.device
+import pmb.config
+import pmb.config.init
 import pmb.helpers.logging
+import pmb.install._install
 
 
 @pytest.fixture
-def args(request):
+def args(tmpdir, request):
     import pmb.parse
-    sys.argv = ["pmbootstrap.py", "chroot"]
+    sys.argv = ["pmbootstrap.py", "init"]
     args = pmb.parse.arguments()
     args.log = args.work + "/log_testsuite.txt"
     pmb.helpers.logging.init(args)
@@ -40,11 +41,24 @@ def args(request):
     return args
 
 
-def test_deviceinfo(args):
-    """
-    Parse all deviceinfo files. When no exception gets raised, we're good.
-    """
-    for folder in glob.glob(args.aports + "/device/device-*"):
-        device = folder.split("-", 1)[1]
-        print(device)
-        pmb.parse.deviceinfo(args, device)
+def test_get_nonfree_packages(args):
+    args.aports = pmb_src + "/test/testdata/init_questions_device/aports"
+    func = pmb.install._install.get_nonfree_packages
+
+    # Device without any non-free subpackages
+    args.nonfree_firmware = True
+    args.nonfree_userland = True
+    assert func(args, "lg-mako") == []
+
+    # Device with non-free firmware and userland
+    device = "nonfree-firmware-and-userland"
+    assert func(args, device) == ["device-" + device + "-nonfree-firmware",
+                                  "device-" + device + "-nonfree-userland"]
+
+    # Device with non-free userland
+    device = "nonfree-userland"
+    assert func(args, device) == ["device-" + device + "-nonfree-userland"]
+
+    # Device with non-free userland (but user disabled it init)
+    args.nonfree_userland = False
+    assert func(args, device) == []

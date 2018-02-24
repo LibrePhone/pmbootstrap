@@ -25,7 +25,7 @@ import pytest
 pmb_src = os.path.realpath(os.path.join(os.path.dirname(__file__) + "/.."))
 sys.path.append(pmb_src)
 import pmb.parse.apkindex
-import pmb.parse.apkbuild
+import pmb.parse
 import pmb.helpers.logging
 
 

@@ -27,6 +27,7 @@ import pmb.helpers.run
 import pmb.helpers.ui
 import pmb.chroot.zap
 import pmb.parse.deviceinfo
+import pmb.parse._apkbuild
 
 
 def ask_for_work_path(args):
@@ -123,6 +124,51 @@ def ask_for_timezone(args):
     return "GMT"
 
 
+def ask_for_device_nonfree(args, device):
+    """
+    Ask the user about enabling proprietary firmware (e.g. Wifi) and userland
+    (e.g. GPU drivers). All proprietary components are in subpackages
+    $pkgname-nonfree-firmware and $pkgname-nonfree-userland, and we show the
+    description of these subpackages (so they can indicate which peripherals
+    are affected).
+
+    :returns: answers as dict, e.g. {"firmware": True, "userland": False}
+    """
+    # Parse existing APKBUILD or return defaults (when called from test case)
+    apkbuild_path = args.aports + "/device/device-" + device + "/APKBUILD"
+    ret = {"firmware": args.nonfree_firmware,
+           "userland": args.nonfree_userland}
+    if not os.path.exists(apkbuild_path):
+        return ret
+    apkbuild = pmb.parse.apkbuild(args, apkbuild_path)
+
+    # Only run when there is a "nonfree" subpackage
+    nonfree_found = False
+    for subpackage in apkbuild["subpackages"]:
+        if subpackage.startswith("device-" + device + "-nonfree"):
+            nonfree_found = True
+    if not nonfree_found:
+        return ret
+
+    # Short explanation
+    logging.info("This device has proprietary components, which trade some of"
+                 " your freedom with making more peripherals work.")
+    logging.info("We would like to offer full functionality without hurting"
+                 " your freedom, but this is currently not possible for your"
+                 " device.")
+
+    # Ask for firmware and userland individually
+    for type in ["firmware", "userland"]:
+        subpkgname = "device-" + device + "-nonfree-" + type
+        if subpkgname in apkbuild["subpackages"]:
+            subpkgdesc = pmb.parse._apkbuild.subpkgdesc(apkbuild_path,
+                                                        "nonfree_" + type)
+            logging.info(subpkgname + ": " + subpkgdesc)
+            ret[type] = pmb.helpers.cli.confirm(args, "Enable this package?",
+                                                default=ret[type])
+    return ret
+
+
 def ask_for_device(args):
     devices = sorted(pmb.helpers.devices.list(args))
     logging.info("Target device (either an existing one, or a new one for"
@@ -144,7 +190,8 @@ def ask_for_device(args):
             pmb.aportgen.generate(args, "linux-" + device)
         break
 
-    return (device, device_exists)
+    nonfree = ask_for_device_nonfree(args, device)
+    return (device, device_exists, nonfree)
 
 
 def ask_for_qemu_native_mesa_driver(args, device, arch_native):
@@ -200,8 +247,10 @@ def frontend(args):
     cfg["pmbootstrap"]["work"] = args.work = ask_for_work_path(args)
 
     # Device
-    device, device_exists = ask_for_device(args)
+    device, device_exists, nonfree = ask_for_device(args)
     cfg["pmbootstrap"]["device"] = device
+    cfg["pmbootstrap"]["nonfree_firmware"] = str(nonfree["firmware"])
+    cfg["pmbootstrap"]["nonfree_userland"] = str(nonfree["userland"])
 
     # Qemu mesa driver
     if cfg["pmbootstrap"]["device"].startswith("qemu-"):

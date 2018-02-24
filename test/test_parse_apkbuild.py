@@ -16,35 +16,35 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
+
 import os
-import sys
-import glob
 import pytest
+import sys
 
 # Import from parent directory
 pmb_src = os.path.realpath(os.path.join(os.path.dirname(__file__) + "/.."))
 sys.path.append(pmb_src)
-import pmb.parse.apkindex
-import pmb.parse
-import pmb.helpers.logging
+
+import pmb.parse._apkbuild
 
 
-@pytest.fixture
-def args(request):
-    import pmb.parse
-    sys.argv = ["pmbootstrap.py", "chroot"]
-    args = pmb.parse.arguments()
-    args.log = args.work + "/log_testsuite.txt"
-    pmb.helpers.logging.init(args)
-    request.addfinalizer(args.logfd.close)
-    return args
+def test_subpkgdesc():
+    func = pmb.parse._apkbuild.subpkgdesc
+    testdata = pmb_src + "/test/testdata"
 
+    # Successful extraction
+    path = (testdata + "/init_questions_device/aports/device/"
+            "device-nonfree-firmware/APKBUILD")
+    pkgdesc = "firmware description"
+    assert func(path, "nonfree_firmware") == pkgdesc
 
-def test_deviceinfo(args):
-    """
-    Parse all deviceinfo files. When no exception gets raised, we're good.
-    """
-    for folder in glob.glob(args.aports + "/device/device-*"):
-        device = folder.split("-", 1)[1]
-        print(device)
-        pmb.parse.deviceinfo(args, device)
+    # Can't find the function
+    with pytest.raises(RuntimeError) as e:
+        func(path, "invalid_function")
+    assert str(e.value).startswith("Could not find subpackage function")
+
+    # Can't find the pkgdesc in the function
+    path = testdata + "/apkbuild/APKBUILD.missing-pkgdesc-in-subpackage"
+    with pytest.raises(RuntimeError) as e:
+        func(path, "subpackage")
+    assert str(e.value).startswith("Could not find pkgdesc of subpackage")

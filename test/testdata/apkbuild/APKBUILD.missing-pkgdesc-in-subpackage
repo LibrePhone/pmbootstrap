@@ -1,0 +1,8 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname="missing-pkgdesc-in-subpackage"
+subpackages="$pkgname-subpackage"
+
+subpackage() {
+	# this function does not have a pkgdesc
+	mkdir "$subpkgdir"
+}

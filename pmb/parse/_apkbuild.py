@@ -173,3 +173,37 @@ def apkbuild(args, path, check_pkgver=True):
     # Fill cache
     args.cache["apkbuild"][path] = ret
     return ret
+
+
+def subpkgdesc(path, function):
+    """
+    Get the pkgdesc of a subpackage in an APKBUILD.
+
+    :param path: to the APKBUILD file
+    :param function: name of the subpackage (e.g. "nonfree_userland")
+    :returns: the subpackage's pkgdesc
+    """
+    # Read all lines
+    with open(path, encoding="utf-8") as handle:
+        lines = handle.readlines()
+
+    # Prefixes
+    prefix_function = function + "() {"
+    prefix_pkgdesc = "\tpkgdesc=\""
+
+    # Find the pkgdesc
+    in_function = False
+    for line in lines:
+        if in_function:
+            if line.startswith(prefix_pkgdesc):
+                return line[len(prefix_pkgdesc):-2]
+        elif line.startswith(prefix_function):
+            in_function = True
+
+    # Failure
+    if not in_function:
+        raise RuntimeError("Could not find subpackage function, no line starts"
+                           " with '" + prefix_function + "' in " + path)
+    raise RuntimeError("Could not find pkgdesc of subpackage function '" +
+                       function + "' (spaces used instead of tabs?) in " +
+                       path)

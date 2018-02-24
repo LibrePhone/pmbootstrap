@@ -41,64 +41,58 @@ def args(tmpdir, request):
     return args
 
 
-def test_questions(args, monkeypatch, tmpdir):
-    #
-    # PREPARATION
-    #
+def fake_answers(monkeypatch, answers):
+    """
+    Patch pmb.helpers.cli.ask() function to return defined answers instead of
+    asking the user for an answer.
 
-    # Use prepared answers
+    :param answers: list of answer strings, e.g. ["y", "n", "invalid-device"].
+                    In this example, the first question is answered with "y",
+                    the second question with "n" and so on.
+    """
     def fake_ask(args, question="Continue?", choices=["y", "n"], default="n",
                  lowercase_answer=True, validation_regex=None):
         answer = answers.pop(0)
-        logging.info("pmb.helpers.cli.ask: fake answer: " + answer)
+        logging.info("pmb.helpers.cli.ask() fake answer: " + answer)
         return answer
     monkeypatch.setattr(pmb.helpers.cli, "ask", fake_ask)
 
-    # Do not generate aports
-    def fake_generate(args, pkgname):
-        return
-    monkeypatch.setattr(pmb.aportgen, "generate", fake_generate)
 
-    # Self-test
-    answers = ["first", "second"]
+def test_fake_answers_selftest(monkeypatch):
+    fake_answers(monkeypatch, ["first", "second"])
     assert pmb.helpers.cli.ask(args) == "first"
     assert pmb.helpers.cli.ask(args) == "second"
-    assert len(answers) == 0
 
-    #
-    # SIMPLE QUESTIONS
-    #
 
-    # Booleans
+def test_questions_booleans(args, monkeypatch):
     functions = [pmb.aportgen.device.ask_for_keyboard,
                  pmb.aportgen.device.ask_for_external_storage]
     for func in functions:
-        answers = ["y", "n"]
+        fake_answers(monkeypatch, ["y", "n"])
         assert func(args) is True
         assert func(args) is False
 
-    # Strings
+
+def test_questions_strings(args, monkeypatch):
     functions = [pmb.aportgen.device.ask_for_manufacturer,
                  pmb.aportgen.device.ask_for_name]
     for func in functions:
-        answers = ["Simple string answer"]
+        fake_answers(monkeypatch, ["Simple string answer"])
         assert func(args) == "Simple string answer"
 
-    #
-    # QUESTIONS WITH ANSWER VERIFICATION
-    #
 
-    # Architecture
-    answers = ["invalid_arch", "aarch64"]
+def test_questions_arch(args, monkeypatch):
+    fake_answers(monkeypatch, ["invalid_arch", "aarch64"])
     assert pmb.aportgen.device.ask_for_architecture(args) == "aarch64"
 
-    # Bootimg
+
+def test_questions_bootimg(args, monkeypatch):
     func = pmb.aportgen.device.ask_for_bootimg
-    answers = ["invalid_path", ""]
+    fake_answers(monkeypatch, ["invalid_path", ""])
     assert func(args) is None
 
     bootimg_path = pmb_src + "/test/testdata/bootimg/normal-boot.img"
-    answers = [bootimg_path]
+    fake_answers(monkeypatch, [bootimg_path])
     output = {"base": "0x80000000",
               "kernel_offset": "0x00008000",
               "ramdisk_offset": "0x04000000",
@@ -109,66 +103,119 @@ def test_questions(args, monkeypatch, tmpdir):
               "qcdt": "false"}
     assert func(args) == output
 
-    # Device
+
+def test_questions_device(args, monkeypatch):
+    # Prepare args
+    args.aports = pmb_src + "/test/testdata/init_questions_device/aports"
+    args.device = "lg-mako"
+    args.nonfree_firmware = True
+    args.nonfree_userland = False
+
+    # Do not generate aports
+    def fake_generate(args, pkgname):
+        return
+    monkeypatch.setattr(pmb.aportgen, "generate", fake_generate)
+
+    # Existing device (without non-free components so we have defaults there)
     func = pmb.config.init.ask_for_device
-    answers = ["lg-mako"]
-    assert func(args) == ("lg-mako", True)
+    nonfree = {"firmware": True, "userland": False}
+    fake_answers(monkeypatch, ["lg-mako"])
+    assert func(args) == ("lg-mako", True, nonfree)
 
-    answers = ["whoops-typo", "n", "lg-mako"]
-    assert func(args) == ("lg-mako", True)
+    # Non-existing device, go back, existing device
+    fake_answers(monkeypatch, ["whoops-typo", "n", "lg-mako"])
+    assert func(args) == ("lg-mako", True, nonfree)
 
-    answers = ["new-device", "y"]
-    assert func(args) == ("new-device", False)
+    # New device
+    fake_answers(monkeypatch, ["new-device", "y"])
+    assert func(args) == ("new-device", False, nonfree)
 
-    # Flash methods
+
+def test_questions_device_nonfree(args, monkeypatch):
+    # Prepare args
+    args.aports = pmb_src + "/test/testdata/init_questions_device/aports"
+    args.nonfree_firmware = False
+    args.nonfree_userland = False
+
+    # APKBUILD with firmware and userland (all yes)
+    func = pmb.config.init.ask_for_device_nonfree
+    device = "nonfree-firmware-and-userland"
+    fake_answers(monkeypatch, ["y", "y"])
+    nonfree = {"firmware": True, "userland": True}
+    assert func(args, device) == nonfree
+
+    # APKBUILD with firmware and userland (all no)
+    fake_answers(monkeypatch, ["n", "n"])
+    nonfree = {"firmware": False, "userland": False}
+    assert func(args, device) == nonfree
+
+    # APKBUILD with firmware only
+    func = pmb.config.init.ask_for_device_nonfree
+    device = "nonfree-firmware"
+    fake_answers(monkeypatch, ["y"])
+    nonfree = {"firmware": True, "userland": False}
+    assert func(args, device) == nonfree
+
+    # APKBUILD with userland only
+    func = pmb.config.init.ask_for_device_nonfree
+    device = "nonfree-userland"
+    fake_answers(monkeypatch, ["y"])
+    nonfree = {"firmware": False, "userland": True}
+    assert func(args, device) == nonfree
+
+
+def test_questions_flash_methods(args, monkeypatch):
     func = pmb.aportgen.device.ask_for_flash_method
-    answers = ["invalid_flash_method", "fastboot"]
+    fake_answers(monkeypatch, ["invalid_flash_method", "fastboot"])
     assert func(args) == "fastboot"
 
-    answers = ["0xffff"]
+    fake_answers(monkeypatch, ["0xffff"])
     assert func(args) == "0xffff"
 
-    answers = ["heimdall", "invalid_type", "isorec"]
+    fake_answers(monkeypatch, ["heimdall", "invalid_type", "isorec"])
     assert func(args) == "heimdall-isorec"
 
-    answers = ["heimdall", "bootimg"]
+    fake_answers(monkeypatch, ["heimdall", "bootimg"])
     assert func(args) == "heimdall-bootimg"
 
-    # Keymaps
+
+def test_questions_keymaps(args, monkeypatch):
     func = pmb.config.init.ask_for_keymaps
-    answers = ["invalid_keymap", "us/rx51_us"]
+    fake_answers(monkeypatch, ["invalid_keymap", "us/rx51_us"])
     assert func(args, "nokia-n900") == "us/rx51_us"
     assert func(args, "lg-mako") == ""
 
-    # Qemu native mesa driver
+
+def test_questions_qemu_native_mesa(args, monkeypatch):
     func = pmb.config.init.ask_for_qemu_native_mesa_driver
-    answers = ["invalid_driver", "dri-swrast"]
+    fake_answers(monkeypatch, ["invalid_driver", "dri-swrast"])
     assert func(args, "qemu-amd64", "x86_64") == "dri-swrast"
     assert func(args, "qemu-aarch64", "x86_64") is None
 
-    # UI
-    answers = ["invalid_UI", "weston"]
+
+def test_questions_ui(args, monkeypatch):
+    fake_answers(monkeypatch, ["invalid_UI", "weston"])
     assert pmb.config.init.ask_for_ui(args) == "weston"
 
-    # Work path
+
+def test_questions_work_path(args, monkeypatch, tmpdir):
     tmpdir = str(tmpdir)
-    answers = ["/dev/null", os.path.dirname(__file__), pmb.config.pmb_src,
-               tmpdir]
+    fake_answers(monkeypatch, ["/dev/null", os.path.dirname(__file__),
+                               pmb.config.pmb_src, tmpdir])
     assert pmb.config.init.ask_for_work_path(args) == tmpdir
 
-    #
-    # BUILD OPTIONS
-    #
+
+def test_questions_build_options(args, monkeypatch):
     func = pmb.config.init.ask_for_build_options
     cfg = {"pmbootstrap": {}}
 
     # Skip changing anything
-    answers = ["n"]
+    fake_answers(monkeypatch, ["n"])
     func(args, cfg)
     assert cfg == {"pmbootstrap": {}}
 
     # Answer everything
-    answers = ["y", "5", "2G", "n"]
+    fake_answers(monkeypatch, ["y", "5", "2G", "n"])
     func(args, cfg)
     assert cfg == {"pmbootstrap": {"jobs": "5",
                                    "ccache_size": "2G"}}

@@ -21,7 +21,7 @@ import os
 import logging
 import pmb.chroot.user
 import pmb.helpers.cli
-import pmb.parse.apkbuild
+import pmb.parse
 
 
 def newapkbuild(args, folder, args_passed):
