@@ -178,8 +178,8 @@ def parse(args, path, multiple_providers=True):
     """
     # Require the file to exist
     if not os.path.isfile(path):
-        logging.debug("NOTE: APKINDEX not found, assuming no binary packages"
-                      " exist for that architecture: " + path)
+        logging.verbose("NOTE: APKINDEX not found, assuming no binary packages"
+                        " exist for that architecture: " + path)
         return {}
 
     # Try to get a cached result first
