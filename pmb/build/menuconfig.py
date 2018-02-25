@@ -33,13 +33,14 @@ def get_arch(args, apkbuild):
     Get the architecture, that the user wants to run menuconfig on, depending on
     the APKBUILD and on the --arch parameter.
 
-    :param apkbuild: looks like: {"pkgname": "linux-...", "arch": ["all"]}
+    :param apkbuild: looks like: {"pkgname": "linux-...",
+                                  "arch": ["x86_64", "armhf", "aarch64"]}
                      or: {"pkgname": "linux-...", "arch": ["armhf"]}
     """
     pkgname = apkbuild["pkgname"]
 
     # Multiple architectures (requires --arch)
-    if "all" in apkbuild["arch"]:
+    if len(apkbuild["arch"]) > 1:
         if args.arch is None:
             raise RuntimeError("Package '" + pkgname + "' supports multiple"
                                " architectures, please use '--arch' to specify"
