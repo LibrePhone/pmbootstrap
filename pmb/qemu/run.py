@@ -114,7 +114,10 @@ def command_qemu(args, arch, device, img_path, spice_enabled):
 
     suffix = "rootfs_" + device
     rootfs = args.work + "/chroot_" + suffix
-    flavor = pmb.chroot.other.kernel_flavor_autodetect(args, suffix)
+    if args.flavor:
+        flavor = args.flavor
+    else:
+        flavor = pmb.chroot.other.kernel_flavor_autodetect(args, suffix)
     command = [qemu_bin]
     command += ["-kernel", rootfs + "/boot/vmlinuz-" + flavor]
     command += ["-initrd", rootfs + "/boot/initramfs-" + flavor]
