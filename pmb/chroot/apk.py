@@ -170,7 +170,7 @@ def replace_aports_packages_with_path(args, packages, suffix, arch):
         aport = pmb.build.find_aport(args, package, False)
         if aport:
             apkbuild = pmb.parse.apkbuild(args, aport + "/APKBUILD")
-            apk_path = ("/home/pmos/packages/pmos/" + arch + "/" +
+            apk_path = ("/mnt/pmbootstrap-packages/" + arch + "/" +
                         package + "-" + apkbuild["pkgver"] + "-r" +
                         apkbuild["pkgrel"] + ".apk")
             if os.path.exists(args.work + "/chroot_" + suffix + apk_path):
@@ -217,11 +217,20 @@ def install(args, packages, suffix="native", build=True):
             message += " " + pkgname
     logging.info(message)
 
-    # Install/update everything
+    # Local packages: Using the path instead of pkgname makes apk update
+    # packages of the same version if the build date is different
     packages_todo = replace_aports_packages_with_path(args, packages_todo,
                                                       suffix, arch)
-    pmb.chroot.root(args, ["apk", "--no-progress", "add", "-u"] + packages_todo,
-                    suffix)
+
+    # Use a virtual package to mark only the explicitly requested packages as
+    # explicitly installed, not their dependencies or specific paths (#1212)
+    commands = [["add"] + packages]
+    if packages != packages_todo:
+        commands = [["add", "-u", "--virtual", ".pmbootstrap"] + packages_todo,
+                    ["add"] + packages,
+                    ["del", ".pmbootstrap"]]
+    for command in commands:
+        pmb.chroot.root(args, ["apk", "--no-progress"] + command, suffix)
 
 
 def upgrade(args, suffix="native"):
