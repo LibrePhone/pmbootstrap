@@ -50,11 +50,21 @@ def test_deviceinfo(args):
 
 def test_aports_device(args):
     """
-    Require "postmarketos-base" to be in the device APKBUILD's depends.
+    Various tests performed on the /device/device-* aports.
     """
 
     for path in glob.glob(args.aports + "/device/device-*/APKBUILD"):
         apkbuild = pmb.parse.apkbuild(args, path)
+
+        # Depends: Require "postmarketos-base"
         if "postmarketos-base" not in apkbuild["depends"]:
             raise RuntimeError("Missing 'postmarketos-base' in depends of " +
                                path)
+
+        # Depends: Must not have firmware packages
+        for depend in apkbuild["depends"]:
+            if depend.startswith("firmware-") or depend == "linux-firmware":
+                raise RuntimeError("Firmware package '" + depend + "' found in"
+                                   " depends of " + path + ". These go into"
+                                   " subpackages now, see"
+                                   " <https://postmarketos.org/devicepkg>.")
