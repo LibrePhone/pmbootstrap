@@ -42,8 +42,8 @@ def odin(args, flavor, folder):
                            " Only 'heimdall' methods are supported.")
 
     # Partitions
-    partition_kernel = args.deviceinfo["flash_heimdall_partition_kernel"]
-    partition_initfs = args.deviceinfo["flash_heimdall_partition_initfs"]
+    partition_kernel = args.deviceinfo["flash_heimdall_partition_kernel"] or "KERNEL"
+    partition_initfs = args.deviceinfo["flash_heimdall_partition_initfs"] or "RECOVERY"
 
     # Temporary folder
     temp_folder = "/tmp/odin-flashable-tar"
