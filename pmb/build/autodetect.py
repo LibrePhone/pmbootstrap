@@ -53,9 +53,11 @@ def arch(args, pkgname):
     Find a good default in case the user did not specify for which architecture
     a package should be built.
 
-    :returns: native architecture (x86_64 in most cases) when the APKBUILD has
-              "noarch" or "all". Otherwise the first architecture in the
-              APKBUILD.
+    :returns: arch string like "x86_64" or "armhf". Preferred order, depending
+              on what is supported by the APKBUILD:
+              * native arch
+              * device arch
+              * first arch in the APKBUILD
     """
     aport = pmb.build.find_aport(args, pkgname)
     ret = arch_from_deviceinfo(args, pkgname, aport)
@@ -63,8 +65,14 @@ def arch(args, pkgname):
         return ret
 
     apkbuild = pmb.parse.apkbuild(args, aport + "/APKBUILD")
-    if "noarch" in apkbuild["arch"] or "all" in apkbuild["arch"]:
+    arches = apkbuild["arch"]
+    if "noarch" in arches or "all" in arches or args.arch_native in arches:
         return args.arch_native
+
+    arch_device = args.deviceinfo["arch"]
+    if arch_device in arches:
+        return arch_device
+
     return apkbuild["arch"][0]
 
 
