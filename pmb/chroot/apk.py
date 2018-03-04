@@ -242,7 +242,7 @@ def upgrade(args, suffix="native"):
     pmb.helpers.repo.update(args, arch)
 
     # Rebuild and upgrade out-of-date packages
-    packages = installed(args, suffix).keys()
+    packages = list(installed(args, suffix).keys())
     install(args, packages, suffix)
 
 
