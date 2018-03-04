@@ -207,7 +207,14 @@ def menuconfig(args):
 
 
 def update(args):
-    pmb.helpers.repo.update(args, True)
+    existing_only = not args.non_existing
+    if not pmb.helpers.repo.update(args, args.arch, True, existing_only):
+        logging.info("No APKINDEX files exist, so none have been updated."
+                     " The pmbootstrap command downloads the APKINDEX files on"
+                     " demand.")
+        logging.info("If you want to force downloading the APKINDEX files for"
+                     " all architectures (not recommended), use:"
+                     " pmbootstrap update --non-existing")
 
 
 def newapkbuild(args):

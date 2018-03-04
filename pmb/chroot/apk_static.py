@@ -160,7 +160,7 @@ def init(args):
     Download, verify, extract $WORK/apk.static.
     """
     # Get the APKINDEX
-    pmb.helpers.repo.update(args)
+    pmb.helpers.repo.update(args, args.arch_native)
     url = args.mirror_alpine + args.alpine_version + "/main"
     apkindex = (args.work + "/cache_apk_" + args.arch_native + "/APKINDEX." +
                 pmb.helpers.repo.hash(url) + ".tar.gz")

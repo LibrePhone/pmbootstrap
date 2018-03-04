@@ -46,7 +46,7 @@ def test_qt_versions(args):
     qt5-qtbase version.
     """
     # Upstream version
-    pmb.helpers.repo.update(args)
+    pmb.helpers.repo.update(args, "armhf")
     repository = args.mirror_alpine + args.alpine_version + "/community"
     hash = pmb.helpers.repo.hash(repository)
     index_path = (args.work + "/cache_apk_armhf/APKINDEX." + hash +
@@ -85,7 +85,7 @@ def test_aportgen_versions(args):
     """
 
     # Get Alpine's "main" repository APKINDEX path
-    pmb.helpers.repo.update(args)
+    pmb.helpers.repo.update(args, "armhf")
     repository = args.mirror_alpine + args.alpine_version + "/main"
     hash = pmb.helpers.repo.hash(repository)
     index_path = (args.work + "/cache_apk_armhf/APKINDEX." + hash +

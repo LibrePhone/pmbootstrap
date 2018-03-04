@@ -106,25 +106,40 @@ def apkindex_files(args, arch=None):
     return ret
 
 
-def update(args, force=False):
+def update(args, arch=None, force=False, existing_only=False):
     """
-    Download the APKINDEX files for all URLs and architectures.
-    :arg force: even update when the APKINDEX file is fairly recent
-    """
+    Download the APKINDEX files for all URLs depending on the architectures.
 
-    architectures = pmb.config.build_device_architectures
+    :param arch: * one Alpine architecture name ("x86_64", "armhf", ...)
+                 * None for all architectures
+    :param force: even update when the APKINDEX file is fairly recent
+    :param existing_only: only update the APKBUILD files that already exist,
+                          this is used by "pmbootstrap update"
+
+    :returns: True when files have been downloaded, False otherwise
+    """
+    # Architectures and retention time
+    architectures = [arch] if arch else pmb.config.build_device_architectures
     retention_hours = pmb.config.apkindex_retention_time
     retention_seconds = retention_hours * 3600
 
+    # Find outdated APKINDEX files. Formats:
+    # outdated: {URL: apkindex_path, ... }
+    # outdated_arches: ["armhf", "x86_64", ... ]
     outdated = {}
+    outdated_arches = []
     for url in urls(args, False):
         for arch in architectures:
+            # APKINDEX file name from the URL
             url_full = url + "/" + arch + "/APKINDEX.tar.gz"
             cache_apk_outside = args.work + "/cache_apk_" + arch
             apkindex = cache_apk_outside + "/APKINDEX." + hash(url) + ".tar.gz"
 
+            # Find update reason, possibly skip non-existing files
             reason = None
             if not os.path.exists(apkindex):
+                if existing_only:
+                    continue
                 reason = "file does not exist yet"
             elif force:
                 reason = "forced update"
@@ -133,19 +148,25 @@ def update(args, force=False):
             if not reason:
                 continue
 
+            # Update outdated and outdated_arches
             logging.debug("APKINDEX outdated (" + reason + "): " + url_full)
             outdated[url_full] = apkindex
+            if arch not in outdated_arches:
+                outdated_arches.append(arch)
 
+    # Bail out or show log message
     if not len(outdated):
-        return
+        return False
+    logging.info("Update package index for " + ", ".join(outdated_arches) +
+                 " (" + str(len(outdated)) + " file(s))")
 
-    # Show one message only
-    logging.info("Update package index (" + str(len(outdated)) + "x)")
+    # Download and move to right location
     for url, target in outdated.items():
-        # Download and move to right location
         temp = pmb.helpers.http.download(args, url, "APKINDEX", False,
                                          logging.DEBUG)
         target_folder = os.path.dirname(target)
         if not os.path.exists(target_folder):
             pmb.helpers.run.root(args, ["mkdir", "-p", target_folder])
         pmb.helpers.run.root(args, ["cp", temp, target])
+
+    return True

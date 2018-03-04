@@ -134,7 +134,8 @@ def init(args, suffix="native"):
                                     "/chroot_native/usr/bin/qemu-" + arch_debian + "-static",
                                     chroot + "/usr/bin/qemu-" + arch_debian + "-static"])
 
-    # Install alpine-base (no clean exit for non-native chroot!)
+    # Install alpine-base
+    pmb.helpers.repo.update(args, arch)
     pmb.chroot.apk_static.run(args, ["--no-progress", "--root", chroot,
                                      "--cache-dir", apk_cache, "--initdb", "--arch", arch,
                                      "add", "alpine-base"])

@@ -207,7 +207,6 @@ def arguments():
     sub.add_parser("shutdown", help="umount, unregister binfmt")
     sub.add_parser("index", help="re-index all repositories with custom built"
                    " packages (do this after manually removing package files)")
-    sub.add_parser("update", help="update all APKINDEX files")
     arguments_export(sub)
     arguments_flasher(sub)
     arguments_initfs(sub)
@@ -246,6 +245,15 @@ def arguments():
     # Action: stats
     stats = sub.add_parser("stats", help="show ccache stats")
     stats.add_argument("--arch", default=arch_native, choices=arch_choices)
+
+    # Action: update
+    update = sub.add_parser("update", help="update all existing APKINDEX"
+                            " files")
+    update.add_argument("--arch", default=None, choices=arch_choices,
+                        help="only update a specific architecture")
+    update.add_argument("--non-existing", action="store_true", help="do not"
+                        " only update the existing APKINDEX files, but all of"
+                        " them", dest="non_existing")
 
     # Action: build_init / chroot
     build_init = sub.add_parser("build_init", help="initialize build"
