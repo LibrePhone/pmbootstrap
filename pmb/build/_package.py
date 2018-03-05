@@ -258,7 +258,7 @@ def override_source(args, apkbuild, pkgver, src, suffix="native"):
     append_path = "/tmp/APKBUILD.append"
     append_path_outside = args.work + "/chroot_" + suffix + append_path
     if os.path.exists(append_path_outside):
-        pmb.chroot.root(args, ["rm", append_path])
+        pmb.chroot.root(args, ["rm", append_path], suffix)
 
     # Add src path to pkgdesc, cut it off after max length
     pkgdesc = ("[" + src + "] " + apkbuild["pkgdesc"])[:127]
@@ -299,14 +299,14 @@ def override_source(args, apkbuild, pkgver, src, suffix="native"):
     with open(append_path_outside, "w", encoding="utf-8") as handle:
         for line in append.split("\n"):
             handle.write(line[13:].replace(" " * 4, "\t") + "\n")
-    pmb.chroot.user(args, ["cat", append_path])
+    pmb.chroot.user(args, ["cat", append_path], suffix)
 
     # Append it to the APKBUILD
     apkbuild_path = "/home/pmos/build/APKBUILD"
     shell_cmd = ("cat " + apkbuild_path + " " + append_path + " > " +
                  append_path + "_")
-    pmb.chroot.user(args, ["sh", "-c", shlex.quote(shell_cmd)])
-    pmb.chroot.user(args, ["mv", append_path + "_", apkbuild_path])
+    pmb.chroot.user(args, ["sh", "-c", shlex.quote(shell_cmd)], suffix)
+    pmb.chroot.user(args, ["mv", append_path + "_", apkbuild_path], suffix)
 
 
 def run_abuild(args, apkbuild, arch, strict=False, force=False, cross=None,

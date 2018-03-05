@@ -363,23 +363,24 @@ def test_build_local_source_high_level(args, tmpdir):
     pmb.helpers.run.root(args, ["chown", "root:root", unreadable])
     pmb.helpers.run.root(args, ["chmod", "500", unreadable])
 
-    # Delete all hello-world --src packages
-    pattern = (args.work + "/packages/" + args.arch_native +
-               "/hello-world-*_p*.apk")
-    for path in glob.glob(pattern):
-        pmb.helpers.run.root(args, ["rm", path])
-    assert len(glob.glob(pattern)) == 0
+    # Test native arch and foreign arch chroot
+    for arch in [args.arch_native, "armhf"]:
+        # Delete all hello-world --src packages
+        pattern = args.work + "/packages/" + arch + "/hello-world-*_p*.apk"
+        for path in glob.glob(pattern):
+            pmb.helpers.run.root(args, ["rm", path])
+        assert len(glob.glob(pattern)) == 0
 
-    # Build hello-world --src package
-    pmb.helpers.run.user(args, [pmb.config.pmb_src + "/pmbootstrap.py",
-                                "--aports", aports, "build", "--src", src,
-                                "hello-world"])
+        # Build hello-world --src package
+        pmb.helpers.run.user(args, [pmb.config.pmb_src + "/pmbootstrap.py",
+                                    "--aports", aports, "build", "--src", src,
+                                    "hello-world", "--arch", arch])
 
-    # Verify that the package has been built
-    paths = glob.glob(pattern)
-    assert len(paths) == 1
+        # Verify that the package has been built and delete it
+        paths = glob.glob(pattern)
+        assert len(paths) == 1
+        pmb.helpers.run.root(args, ["rm", paths[0]])
 
-    # Clean up: delete package and tempfolder, update index
-    pmb.helpers.run.root(args, ["rm", paths[0]])
+    # Clean up: update index, delete temp folder
     pmb.build.index_repo(args, args.arch_native)
     pmb.helpers.run.root(args, ["rm", "-r", tmpdir])
