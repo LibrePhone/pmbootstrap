@@ -46,7 +46,7 @@ def previous_install(args):
 
 def mount_sdcard(args):
     # Sanity checks
-    if args.deviceinfo["external_disk_install"] != "true":
+    if args.deviceinfo["external_storage"] != "true":
         raise RuntimeError("According to the deviceinfo, this device does"
                            " not support a sdcard installation.")
     if not os.path.exists(args.sdcard):

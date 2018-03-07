@@ -127,7 +127,7 @@ def test_aportgen_device_wizard(args, monkeypatch):
     assert deviceinfo["manufacturer"] == answers["Manufacturer"]
     assert deviceinfo["arch"] == "armhf"
     assert deviceinfo["keyboard"] == "false"
-    assert deviceinfo["external_disk"] == "true"
+    assert deviceinfo["external_storage"] == "true"
     assert deviceinfo["flash_method"] == "heimdall-isorec"
     assert deviceinfo["generate_bootimg"] == ""
     assert deviceinfo["generate_legacy_uboot_initfs"] == ""

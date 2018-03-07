@@ -218,13 +218,12 @@ deviceinfo_attributes = [
     "date",
     "dtb",
     "modules_initfs",
-    "external_disk_install",
     "arch",
     "nonfree",
 
     # device
     "keyboard",
-    "external_disk",
+    "external_storage",
     "screen_width",
     "screen_height",
     "dev_touchscreen",

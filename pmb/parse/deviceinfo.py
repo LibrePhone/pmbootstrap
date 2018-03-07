@@ -66,4 +66,11 @@ def deviceinfo(args, device=None):
                            " deviceinfo_flash_method. Please adjust your"
                            " deviceinfo file: " + path)
 
+    # Sanity check: "external_disk*" is legacy
+    if "external_disk" in ret or "external_disk_install" in ret:
+        raise RuntimeError("Instead of deviceinfo_external_disk and"
+                           " deviceinfo_external_disk_install, please use the"
+                           " new variable deviceinfo_external_storage in your"
+                           " deviceinfo file: " + path)
+
     return ret
