@@ -27,7 +27,7 @@ def bootimg(args, path):
 
     logging.info("NOTE: You will be prompted for your sudo password, so we can set"
                  " up a chroot to extract and analyze your boot.img file")
-    pmb.chroot.apk.install(args, ["file", "mkbootimg"])
+    pmb.chroot.apk.install(args, ["file", "unpackbootimg"])
 
     temp_path = pmb.chroot.other.tempfolder(args, "/tmp/bootimg_parser")
     bootimg_path = args.work + "/chroot_native" + temp_path + "/boot.img"

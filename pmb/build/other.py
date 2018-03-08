@@ -58,7 +58,8 @@ def find_aport(args, package, must_exist=True):
             # Search in subpackages
             for path_current in glob.glob(args.aports + "/*/*/APKBUILD"):
                 apkbuild = pmb.parse.apkbuild(args, path_current)
-                if package in apkbuild["subpackages"]:
+                if (package in apkbuild["subpackages"] or
+                        package in apkbuild["provides"]):
                     ret = os.path.dirname(path_current)
                     break
 

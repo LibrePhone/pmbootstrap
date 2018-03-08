@@ -191,6 +191,7 @@ apkbuild_attributes = {
     "pkgdesc": {"array": False},
     "pkgrel": {"array": False},
     "pkgver": {"array": False},
+    "provides": {"array": True},
     "subpackages": {"array": True},
 
     # cross-compilers
