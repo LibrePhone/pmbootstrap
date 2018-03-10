@@ -122,8 +122,7 @@ def start(args, arch):
                  args.port_distccd)
     pmb.chroot.user(args, cmdline)
 
-    # Write down the arch and cmdline (which also contains the relevant
-    # environment variables, /proc/$pid/cmdline does not!)
+    # Write down the arch and cmdline
     info = configparser.ConfigParser()
     info["distccd"] = {}
     info["distccd"]["arch"] = arch

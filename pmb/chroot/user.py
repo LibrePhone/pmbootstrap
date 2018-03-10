@@ -17,19 +17,31 @@ You should have received a copy of the GNU General Public License
 along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
 import pmb.chroot.root
+import pmb.helpers.run
 
 
 def user(args, cmd, suffix="native", working_dir="/", log=True,
-         auto_init=True, return_stdout=False, check=True):
+         auto_init=True, return_stdout=False, check=True, env={}):
     """
-    Run a command inside a chroot as "user". We always use the
-    BusyBox implementation of 'su', because other implementations
-    may override the PATH environment variable (#1071).
+    Run a command inside a chroot as "user". We always use the BusyBox
+    implementation of 'su', because other implementations may override the PATH
+    environment variable (#1071).
 
-    :param log: When set to true, redirect all output to the logfile
-    :param auto_init: Automatically initialize the chroot
+    :param cmd: command as list, e.g. ["echo", "string with spaces"]
+    :param suffix: of the chroot to execute code in
+    :param working_dir: path inside chroot where the command should run
+    :param log: when set to true, redirect all output to the logfile
+    :param auto_init: automatically initialize the chroot
+    :param return_stdout: write stdout to a buffer and return it as string when
+                          the command is through
+    :param check: raise an exception, when the command fails
+    :param env: dict of environment variables to be passed to the command, e.g.
+                {"JOBS": "5"}
+    :returns: * stdout when return_stdout is True
+              * None otherwise
     """
-    cmd = ["busybox", "su", "pmos", "-c", " ".join(cmd)]
+    flat_cmd = pmb.helpers.run.flat_cmd(cmd, env=env)
+    cmd = ["busybox", "su", "pmos", "-c", flat_cmd]
     return pmb.chroot.root(args, cmd, suffix, working_dir, log,
                            auto_init, return_stdout, check)
 

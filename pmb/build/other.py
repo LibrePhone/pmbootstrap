@@ -16,9 +16,10 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
-import os
-import logging
 import glob
+import logging
+import os
+import shlex
 
 import pmb.build.other
 import pmb.chroot
@@ -156,8 +157,9 @@ def index_repo(args, arch=None):
             path_repo_chroot = "/home/pmos/packages/pmos/" + path_arch
             logging.debug("(native) index " + path_arch + " repository")
             commands = [
-                ["apk", "-q", "index", "--output", "APKINDEX.tar.gz_",
-                 "--rewrite-arch", path_arch, "*.apk"],
+                # Wrap the index command with sh so we can use '*.apk'
+                ["sh", "-c", "apk -q index --output APKINDEX.tar.gz_"
+                 " --rewrite-arch " + shlex.quote(path_arch) + " *.apk"],
                 ["abuild-sign", "APKINDEX.tar.gz_"],
                 ["mv", "APKINDEX.tar.gz_", "APKINDEX.tar.gz"]
             ]

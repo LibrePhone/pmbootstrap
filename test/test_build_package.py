@@ -181,6 +181,9 @@ def test_is_necessary_warn_depends(args, monkeypatch):
 
 
 def test_init_buildenv(args, monkeypatch):
+    # First init native chroot buildenv properly without patched functions
+    pmb.build.init(args)
+
     # Disable effects of functions we don't want to test here
     monkeypatch.setattr(pmb.build._package, "build_depends",
                         return_fake_build_depends)
@@ -227,12 +230,11 @@ def test_run_abuild(args, monkeypatch):
     # Normal run
     output = "armhf/test-1-r2.apk"
     env = {"CARCH": "armhf", "SUDO_APK": "abuild-apk --no-progress"}
-    sudo_apk = "SUDO_APK='abuild-apk --no-progress'"
-    cmd = ["CARCH=armhf", sudo_apk, "abuild", "-d"]
+    cmd = ["abuild", "-d"]
     assert func(args, apkbuild, "armhf") == (output, cmd, env)
 
     # Force and strict
-    cmd = ["CARCH=armhf", sudo_apk, "abuild", "-r", "-f"]
+    cmd = ["abuild", "-r", "-f"]
     assert func(args, apkbuild, "armhf", True, True) == (output, cmd, env)
 
     # cross=native
@@ -240,8 +242,7 @@ def test_run_abuild(args, monkeypatch):
            "SUDO_APK": "abuild-apk --no-progress",
            "CROSS_COMPILE": "armv6-alpine-linux-muslgnueabihf-",
            "CC": "armv6-alpine-linux-muslgnueabihf-gcc"}
-    cmd = ["CARCH=armhf", sudo_apk, "CROSS_COMPILE=armv6-alpine-linux-muslgnueabihf-",
-           "CC=armv6-alpine-linux-muslgnueabihf-gcc", "abuild", "-d"]
+    cmd = ["abuild", "-d"]
     assert func(args, apkbuild, "armhf", cross="native") == (output, cmd, env)
 
     # cross=distcc

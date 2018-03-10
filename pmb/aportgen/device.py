@@ -88,7 +88,7 @@ def ask_for_bootimg(args):
 
     while True:
         path = os.path.expanduser(pmb.helpers.cli.ask(args, "Path", None, "", False))
-        if not len(path):
+        if not path:
             return None
         try:
             return pmb.parse.bootimg(args, path)

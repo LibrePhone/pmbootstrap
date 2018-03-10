@@ -78,17 +78,13 @@ def menuconfig(args, pkgname):
     logging.info("(native) extract kernel source")
     pmb.chroot.user(args, ["abuild", "unpack"], "native", "/home/pmos/build")
     logging.info("(native) apply patches")
-    pmb.chroot.user(args, ["CARCH=" + arch, "abuild", "prepare"], "native",
-                    "/home/pmos/build", log=False)
+    pmb.chroot.user(args, ["abuild", "prepare"], "native",
+                    "/home/pmos/build", log=False, env={"CARCH": arch})
 
     # Run abuild menuconfig
-    cmd = []
-    environment = {"CARCH": arch, "TERM": "xterm"}
-    for key, value in environment.items():
-        cmd += [key + "=" + value]
-    cmd += ["abuild", "-d", "menuconfig"]
     logging.info("(native) run menuconfig")
-    pmb.chroot.user(args, cmd, "native", "/home/pmos/build", log=False)
+    pmb.chroot.user(args, ["abuild", "-d", "menuconfig"], "native",
+                    "/home/pmos/build", log=False, env={"CARCH": arch})
 
     # Update config + checksums
     config = "config-" + apkbuild["_flavor"] + "." + arch
