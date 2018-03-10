@@ -154,6 +154,8 @@ def parse(args, path, multiple_providers=True):
     """
     Parse an APKINDEX.tar.gz file, and return its content as dictionary.
 
+    :param path: path to an APKINDEX.tar.gz file or apk package database
+                 (almost the same format, but not compressed).
     :param multiple_providers: assume that there are more than one provider for
                                the alias. This makes sense when parsing the
                                APKINDEX files from a repository (#1122), but
@@ -218,6 +220,33 @@ def parse(args, path, multiple_providers=True):
         args.cache["apkindex"][path] = {"lastmod": lastmod}
     args.cache["apkindex"][path][cache_key] = ret
     return ret
+
+
+def parse_blocks(args, path):
+    """
+    Read all blocks from an APKINDEX.tar.gz into a list.
+
+    :path: full path to the APKINDEX.tar.gz file.
+    :returns: all blocks in the APKINDEX, without restructuring them by
+              pkgname or removing duplicates with lower versions (use
+              parse() if you need these features). Structure:
+              [block, block, ...]
+
+    NOTE: "block" is the return value from parse_next_block() above.
+    """
+    # Parse all lines
+    with tarfile.open(path, "r:gz") as tar:
+        with tar.extractfile(tar.getmember("APKINDEX")) as handle:
+            lines = handle.readlines()
+
+    # Parse lines into blocks
+    ret = []
+    start = [0]
+    while True:
+        block = pmb.parse.apkindex.parse_next_block(args, path, lines, start)
+        if not block:
+            return ret
+        ret.append(block)
 
 
 def clear_cache(args, path):

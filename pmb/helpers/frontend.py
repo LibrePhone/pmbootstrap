@@ -324,9 +324,10 @@ def log_distccd(args):
 
 
 def zap(args):
-    pmb.chroot.zap(args, dry=args.dry, packages=args.packages, http=args.http,
-                   mismatch_bins=args.mismatch_bins, old_bins=args.old_bins,
-                   distfiles=args.distfiles)
+    pmb.chroot.zap(args, dry=args.dry, http=args.http,
+                   distfiles=args.distfiles, pkgs_local=args.pkgs_local,
+                   pkgs_local_mismatch=args.pkgs_local_mismatch,
+                   pkgs_online_mismatch=args.pkgs_online_mismatch)
 
     # Don't write the "Done" message
     pmb.helpers.logging.disable()

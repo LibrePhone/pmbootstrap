@@ -230,17 +230,21 @@ def arguments():
     zap.add_argument("--dry", action="store_true", help="instead of actually"
                      " deleting anything, print out what would have been"
                      " deleted")
-    zap.add_argument("-p", "--packages", action="store_true", help="also delete"
-                     " the precious, self-compiled packages")
     zap.add_argument("-hc", "--http", action="store_true", help="also delete http"
-                     "cache")
-    zap.add_argument("-m", "--mismatch-bins", action="store_true", help="also delete"
-                     " binary packages that are newer than the corresponding"
-                     " package in aports")
-    zap.add_argument("-o", "--old-bins", action="store_true", help="also delete outdated"
-                     " binary packages downloaded from mirrors (e.g. from Alpine)")
+                     " cache")
     zap.add_argument("-d", "--distfiles", action="store_true", help="also delete"
-                     " downloaded files cache")
+                     " downloaded source tarballs")
+    zap.add_argument("-p", "--pkgs-local", action="store_true",
+                     dest="pkgs_local",
+                     help="also delete *all* locally compiled packages")
+    zap.add_argument("-m", "--pkgs-local-mismatch", action="store_true",
+                     dest="pkgs_local_mismatch",
+                     help="also delete locally compiled packages without"
+                     " existing aport of same version")
+    zap.add_argument("-o", "--pkgs-online-mismatch", action="store_true",
+                     dest="pkgs_online_mismatch",
+                     help="also delete outdated packages from online mirrors"
+                     " (that have been downloaded to the apk cache)")
 
     # Action: stats
     stats = sub.add_parser("stats", help="show ccache stats")
