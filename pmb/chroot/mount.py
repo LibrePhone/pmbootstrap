@@ -22,10 +22,31 @@ import pmb.parse
 import pmb.helpers.mount
 
 
+def mount_dev_tmpfs(args, suffix="native"):
+    """
+    Mount tmpfs inside the chroot's dev folder to make sure we can create
+    device nodes, even if the filesystem of the work folder does not support
+    it.
+    """
+    # Do nothing when it is already mounted
+    dev = args.work + "/chroot_" + suffix + "/dev"
+    if pmb.helpers.mount.ismount(dev):
+        return
+
+    # Create the folder structure and mount it
+    if not os.path.exists(dev):
+        pmb.helpers.run.root(args, ["mkdir", "-p", dev])
+    pmb.helpers.run.root(args, ["mount", "-t", "tmpfs",
+                                "-o", "size=1M,noexec,dev",
+                                "tmpfs", dev])
+
+
 def mount(args, suffix="native"):
-    arch = pmb.parse.arch.from_chroot_suffix(args, suffix)
+    # Mount tmpfs as the chroot's /dev
+    mount_dev_tmpfs(args, suffix)
 
     # Get all mountpoints
+    arch = pmb.parse.arch.from_chroot_suffix(args, suffix)
     mountpoints = {}
     for source, target in pmb.config.chroot_mount_bind.items():
         source = source.replace("$WORK", args.work)

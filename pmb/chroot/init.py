@@ -46,10 +46,7 @@ def copy_resolv_conf(args, suffix="native"):
 
 
 def create_device_nodes(args, suffix):
-    error = ("Failed to create nodes in the '" + suffix + "' chroot. Please"
-             " run 'pmbootstrap init' again and put your work folder on a"
-             " normal Linux filesystem. (No ntfs, fat, encfs or encfs"
-             " encrypted home folder, shared folder etc.)")
+    error = "Failed to create device nodes in the '" + suffix + "' chroot."
 
     # Folder sturcture
     chroot = args.work + "/chroot_" + suffix
