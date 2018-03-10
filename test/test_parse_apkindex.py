@@ -101,6 +101,42 @@ def test_parse_next_block_no_error(args):
     assert start == [45]
 
 
+def test_parse_next_block_virtual(args):
+    """
+    Test parsing a virtual package from an APKINDEX.
+    """
+    # Read the file
+    func = pmb.parse.apkindex.parse_next_block
+    path = pmb.config.pmb_src + "/test/testdata/apkindex/virtual_package"
+    with open(path, "r", encoding="utf-8") as handle:
+        lines = handle.readlines()
+
+    # First block
+    start = [0]
+    block = {'arch': 'x86_64',
+             'depends': ['so:libc.musl-x86_64.so.1'],
+             'origin': 'hello-world',
+             'pkgname': 'hello-world',
+             'provides': ['cmd:hello-world'],
+             'timestamp': '1500000000',
+             'version': '2-r0'}
+    assert func(args, path, lines, start) == block
+    assert start == [20]
+
+    # Second block: virtual package
+    block = {'arch': 'noarch',
+             'depends': ['hello-world'],
+             'pkgname': '.pmbootstrap',
+             'provides': [],
+             'version': '0'}
+    assert func(args, path, lines, start) == block
+    assert start == [31]
+
+    # No more blocks
+    assert func(args, path, lines, start) is None
+    assert start == [31]
+
+
 def test_parse_add_block(args):
     func = pmb.parse.apkindex.parse_add_block
     multiple_providers = False
@@ -229,6 +265,24 @@ def test_parse(args):
                     'so:libc.musl-x86_64.so.1': {"musl": block_musl}}
     assert pmb.parse.apkindex.parse(args, path, True) == ret_multiple
     assert args.cache["apkindex"][path]["multiple"] == ret_multiple
+
+
+def test_parse_virtual(args):
+    """
+    This APKINDEX contains a virtual package .pbmootstrap. It must not be part
+    of the output.
+    """
+    path = pmb.config.pmb_src + "/test/testdata/apkindex/virtual_package"
+    block = {'arch': 'x86_64',
+             'depends': ['so:libc.musl-x86_64.so.1'],
+             'origin': 'hello-world',
+             'pkgname': 'hello-world',
+             'provides': ['cmd:hello-world'],
+             'timestamp': '1500000000',
+             'version': '2-r0'}
+    ret = {"hello-world": block, "cmd:hello-world": block}
+    assert pmb.parse.apkindex.parse(args, path, False) == ret
+    assert args.cache["apkindex"][path]["single"] == ret
 
 
 def test_providers_invalid_package(args, tmpdir):

@@ -37,9 +37,16 @@ def parse_next_block(args, path, lines, start):
     :returns: a dictionary with the following structure:
               { "arch": "noarch",
                 "depends": ["busybox-extras", "lddtree", ... ],
+                "origin": "postmarketos-mkinitfs",
                 "pkgname": "postmarketos-mkinitfs",
                 "provides": ["mkinitfs=0.0.1"],
+                "timestamp": "1500000000",
                 "version": "0.0.4-r10" }
+              NOTE: "depends" is not set for packages without any dependencies,
+                    e.g. musl.
+              NOTE: "timestamp" and "origin" are not set for virtual packages
+                    (#1273). We use that information to skip these virtual
+                    packages in parse().
     :returns: None, when there are no more blocks
     """
 
@@ -77,7 +84,7 @@ def parse_next_block(args, path, lines, start):
     # Format and return the block
     if end_of_block_found:
         # Check for required keys
-        for key in ["pkgname", "version", "timestamp"]:
+        for key in ["arch", "pkgname", "version"]:
             if key not in ret:
                 raise RuntimeError("Missing required key '" + key +
                                    "' in block " + str(ret) + ", file: " + path)
@@ -208,6 +215,12 @@ def parse(args, path, multiple_providers=True):
         block = parse_next_block(args, path, lines, start)
         if not block:
             break
+
+        # Skip virtual packages
+        if "timestamp" not in block:
+            logging.verbose("Skipped virtual package " + str(block) + " in"
+                            " file: " + path)
+            continue
 
         # Add the next package and all aliases
         parse_add_block(ret, block, None, multiple_providers)
