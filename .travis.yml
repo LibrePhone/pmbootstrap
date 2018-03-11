@@ -13,7 +13,7 @@ script:
   - yes "" | ./pmbootstrap.py init
   - ./pmbootstrap.py kconfig_check
   - test/check_checksums.py --build
-  - test/testcases_fast.sh
+  - test/testcases_fast.sh --all
 after_success:
   - coveralls
 after_failure:

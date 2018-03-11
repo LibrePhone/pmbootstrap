@@ -81,7 +81,7 @@ def cut_off_function_names(apkbuild):
     return apkbuild
 
 
-def apkbuild(args, path, check_pkgver=True):
+def apkbuild(args, path, check_pkgver=True, check_pkgname=True):
     """
     Parse relevant information out of the APKBUILD file. This is not meant
     to be perfect and catch every edge case (for that, a full shell parser
@@ -89,7 +89,8 @@ def apkbuild(args, path, check_pkgver=True):
     covered by pmbootstrap and not take too long.
 
     :param path: full path to the APKBUILD
-    :param version_check: verify that the pkgver is valid.
+    :param check_pkgver: verify that the pkgver is valid.
+    :param check_pkgname: the pkgname must match the name of the aport folder
     :returns: relevant variables from the APKBUILD. Arrays get returned as
               arrays.
     """
@@ -152,11 +153,12 @@ def apkbuild(args, path, check_pkgver=True):
 
     # Sanity check: pkgname
     suffix = "/" + ret["pkgname"] + "/APKBUILD"
-    if not os.path.realpath(path).endswith(suffix):
-        logging.info("Folder: '" + os.path.dirname(path) + "'")
-        logging.info("Pkgname: '" + ret["pkgname"] + "'")
-        raise RuntimeError("The pkgname must be equal to the name of"
-                           " the folder, that contains the APKBUILD!")
+    if check_pkgname:
+        if not os.path.realpath(path).endswith(suffix):
+            logging.info("Folder: '" + os.path.dirname(path) + "'")
+            logging.info("Pkgname: '" + ret["pkgname"] + "'")
+            raise RuntimeError("The pkgname must be equal to the name of"
+                               " the folder, that contains the APKBUILD!")
 
     # Sanity check: arch
     if not len(ret["arch"]):

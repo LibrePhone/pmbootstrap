@@ -147,12 +147,26 @@ def checksum(args):
 
 
 def chroot(args):
+    # Suffix
     suffix = _parse_suffix(args)
+    if (args.user and suffix != "native" and
+            not suffix.startswith("buildroot_")):
+        raise RuntimeError("--user is only supported for native or"
+                           " buildroot_* chroots.")
+
+    # apk: check minimum version, install packages
     pmb.chroot.apk.check_min_version(args, suffix)
     if args.add:
         pmb.chroot.apk.install(args, args.add.split(","), suffix)
-    logging.info("(" + suffix + ") % " + " ".join(args.command))
-    pmb.chroot.root(args, args.command, suffix, log=False)
+
+    # Run the command as user/root
+    if args.user:
+        logging.info("(" + suffix + ") % su pmos -c '" +
+                     " ".join(args.command) + "'")
+        pmb.chroot.user(args, args.command, suffix, log=False)
+    else:
+        logging.info("(" + suffix + ") % " + " ".join(args.command))
+        pmb.chroot.root(args, args.command, suffix, log=False)
 
 
 def config(args):

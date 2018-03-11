@@ -159,16 +159,13 @@ def init(args):
     """
     Download, verify, extract $WORK/apk.static.
     """
-    # Get the APKINDEX
-    pmb.helpers.repo.update(args, args.arch_native)
-    url = args.mirror_alpine + args.alpine_version + "/main"
-    apkindex = (args.work + "/cache_apk_" + args.arch_native + "/APKINDEX." +
-                pmb.helpers.repo.hash(url) + ".tar.gz")
-
-    # Extract and verify the apk-tools-static version
+    # Get and parse the APKINDEX
+    apkindex = pmb.helpers.repo.alpine_apkindex_path(args, "main")
     index_data = pmb.parse.apkindex.package(args, "apk-tools-static",
                                             indexes=[apkindex])
     version = index_data["version"]
+
+    # Extract and verify the apk-tools-static version
     version_min = pmb.config.apk_tools_static_min_version
     apk_name = "apk-tools-static-" + version + ".apk"
     if pmb.parse.version.compare(version, version_min) == -1:

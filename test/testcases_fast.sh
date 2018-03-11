@@ -1,12 +1,16 @@
 #!/bin/sh -e
+# usage: testcases_fast.sh [--all]
 
 # Disable slow testcases
-# aport_in_sync_with_git: clones Alpine's aports repo
-# aportgen: clones Alpine's aports repo
-disabled="
-	aport_in_sync_with_git
-	aportgen
-"
+disabled="qemu_running_processes"
+
+# Optionally enable all test cases
+if [ "$1" = "--all" ]; then
+    disabled=""
+else
+    echo "Disabled test case(s): $disabled"
+    echo "Use '$(basename "$0") --all' to enable all test cases."
+fi
 
 # Make sure we have a valid device (#1128)
 cd "$(dirname "$0")/.."

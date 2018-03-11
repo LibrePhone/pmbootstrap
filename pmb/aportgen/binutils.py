@@ -24,9 +24,7 @@ import pmb.helpers.run
 def generate(args, pkgname):
     # Copy original aport
     arch = pkgname.split("-")[1]
-    path_original = "main/binutils"
-    upstream = (args.work + "/cache_git/aports_upstream/" + path_original)
-    pmb.helpers.git.clone(args, "aports_upstream")
+    upstream = pmb.aportgen.core.get_upstream_aport(args, "main/binutils")
     pmb.helpers.run.user(args, ["cp", "-r", upstream, args.work + "/aportgen"])
 
     # Architectures to build this package for
@@ -74,5 +72,5 @@ def generate(args, pkgname):
         "gold": None,
     }
 
-    pmb.aportgen.core.rewrite(args, pkgname, path_original, fields, "binutils",
-                              replace_functions)
+    pmb.aportgen.core.rewrite(args, pkgname, "main/binutils", fields,
+                              "binutils", replace_functions)

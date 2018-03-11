@@ -17,6 +17,8 @@ You should have received a copy of the GNU General Public License
 along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
 import fnmatch
+import logging
+import pmb.helpers.git
 
 
 def format_function(name, body, remove_indent=4):
@@ -117,3 +119,47 @@ def rewrite(args, pkgname, path_original, fields={}, replace_pkgname=None,
         handle.seek(0)
         handle.write("".join(lines_new))
         handle.truncate()
+
+
+def get_upstream_aport(args, upstream_path):
+    """
+    Perform a git checkout of Alpine's aports and get the path to the aport.
+
+    :param upstream_path: where the aport is in the git repository, e.g.
+                          "main/gcc"
+    :returns: absolute path on disk where the Alpine aport is checked out
+              example: /opt/pmbootstrap_work/cache_git/aports/upstream/main/gcc
+    """
+    # APKBUILD
+    pmb.helpers.git.clone(args, "aports_upstream")
+    aport_path = (args.work + "/cache_git/aports_upstream/" + upstream_path)
+    apkbuild = pmb.parse.apkbuild(args, aport_path + "/APKBUILD",
+                                  check_pkgname=False)
+    apkbuild_version = apkbuild["pkgver"] + "-r" + apkbuild["pkgrel"]
+
+    # Binary package
+    split = upstream_path.split("/", 1)
+    repo = split[0]
+    pkgname = split[1]
+    index_path = pmb.helpers.repo.alpine_apkindex_path(args, repo)
+    package = pmb.parse.apkindex.package(args, pkgname, indexes=[index_path])
+
+    # Compare version (return when equal)
+    compare = pmb.parse.version.compare(apkbuild_version, package["version"])
+    if compare == 0:
+        return aport_path
+
+    # Different version message
+    logging.error("ERROR: Package '" + pkgname + "' has a different version in"
+                  " local checkout of Alpine's aports (" + apkbuild_version +
+                  ") compared to Alpine's binary package (" +
+                  package["version"] + ")!")
+
+    # APKBUILD < binary
+    if compare == -1:
+        raise RuntimeError("You can update your local checkout with:"
+                           " 'pmbootstrap chroot --add=git --user -- git -C"
+                           " /mnt/pmbootstrap-git/aports_upstream pull'")
+    # APKBUILD > binary
+    raise RuntimeError("You can force an update of your binary package"
+                       " APKINDEX files with: 'pmbootstrap update'")

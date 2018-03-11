@@ -32,6 +32,19 @@ def test_chroot_interactive_shell():
     assert ret == "hello_world\n"
 
 
+def test_chroot_interactive_shell_user():
+    """
+    Open a shell with 'pmbootstrap chroot' as user, and test the resulting ID.
+    """
+    pmb_src = os.path.realpath(os.path.join(os.path.dirname(__file__) + "/.."))
+    os.chdir(pmb_src)
+    ret = subprocess.check_output(["./pmbootstrap.py", "-q", "chroot",
+                                  "--user"], timeout=300, input="id -un",
+                                  universal_newlines=True,
+                                  stderr=subprocess.STDOUT)
+    assert ret == "pmos\n"
+
+
 def test_chroot_arguments():
     """
     Open a shell with 'pmbootstrap chroot' for every architecture, pass 'uname -m\n'

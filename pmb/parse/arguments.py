@@ -265,6 +265,8 @@ def arguments():
     chroot = sub.add_parser("chroot", help="start shell in chroot")
     chroot.add_argument("--add", help="build/install comma separated list of"
                         " packages in the chroot before entering it")
+    chroot.add_argument("--user", help="run the command as user, not as root",
+                        action="store_true")
     chroot.add_argument("command", default=["sh"], help="command"
                         " to execute inside the chroot. default: sh", nargs='*')
     for action in [build_init, chroot]:

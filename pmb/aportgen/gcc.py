@@ -24,9 +24,7 @@ import pmb.helpers.run
 def generate(args, pkgname):
     # Copy original aport
     arch = pkgname.split("-")[1]
-    path_original = "main/gcc"
-    upstream = (args.work + "/cache_git/aports_upstream/" + path_original)
-    pmb.helpers.git.clone(args, "aports_upstream")
+    upstream = pmb.aportgen.core.get_upstream_aport(args, "main/gcc")
     pmb.helpers.run.user(args, ["cp", "-r", upstream, args.work + "/aportgen"])
 
     # Architectures to build this package for
@@ -105,10 +103,6 @@ def generate(args, pkgname):
         '*package() {*': "_package() {"
     }
 
-    pmb.aportgen.core.rewrite(
-        args,
-        pkgname,
-        path_original,
-        fields,
-        replace_simple=replace_simple,
-        below_header=below_header)
+    pmb.aportgen.core.rewrite(args, pkgname, "main/gcc", fields,
+                              replace_simple=replace_simple,
+                              below_header=below_header)

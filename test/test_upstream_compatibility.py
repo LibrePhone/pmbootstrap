@@ -46,13 +46,9 @@ def test_qt_versions(args):
     qt5-qtbase version.
     """
     # Upstream version
-    pmb.helpers.repo.update(args, "armhf")
-    repository = args.mirror_alpine + args.alpine_version + "/community"
-    hash = pmb.helpers.repo.hash(repository)
-    index_path = (args.work + "/cache_apk_armhf/APKINDEX." + hash +
-                  ".tar.gz")
+    index = pmb.helpers.repo.alpine_apkindex_path(args, "community", "armhf")
     index_data = pmb.parse.apkindex.package(args, "qt5-qtbase",
-                                            indexes=[index_path])
+                                            indexes=[index])
     pkgver_upstream = index_data["version"].split("-r")[0]
 
     # Iterate over our packages
@@ -83,13 +79,8 @@ def test_aportgen_versions(args):
     the same version (pkgver *and* pkgrel!) as the upstream packages
     they are based on.
     """
-
     # Get Alpine's "main" repository APKINDEX path
-    pmb.helpers.repo.update(args, "armhf")
-    repository = args.mirror_alpine + args.alpine_version + "/main"
-    hash = pmb.helpers.repo.hash(repository)
-    index_path = (args.work + "/cache_apk_armhf/APKINDEX." + hash +
-                  ".tar.gz")
+    index = pmb.helpers.repo.alpine_apkindex_path(args, "main", "armhf")
 
     # Alpine packages and patterns for our derivatives
     map = {"binutils": "binutils-*",
@@ -103,7 +94,7 @@ def test_aportgen_versions(args):
     for pkgname, pattern in map.items():
         # Upstream version
         index_data = pmb.parse.apkindex.package(args, pkgname,
-                                                indexes=[index_path])
+                                                indexes=[index])
         version_upstream = index_data["version"]
 
         # Iterate over our packages

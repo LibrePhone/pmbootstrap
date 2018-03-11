@@ -170,3 +170,26 @@ def update(args, arch=None, force=False, existing_only=False):
         pmb.helpers.run.root(args, ["cp", temp, target])
 
     return True
+
+
+def alpine_apkindex_path(args, repo="main", arch=None):
+    """
+    Get the path to a specific Alpine APKINDEX file on disk and download it if
+    necessary.
+
+    :param repo: Alpine repository name (e.g. "main")
+    :param arch: Alpine architecture (e.g. "armhf"), defaults to native arch.
+    :returns: full path to the APKINDEX file
+    """
+    # Repo sanity check
+    if repo not in ["main", "community", "testing", "non-free"]:
+        raise RuntimeError("Invalid Alpine repository: " + repo)
+
+    # Download the file
+    update(args, arch)
+
+    # Find it on disk
+    arch = arch or args.arch_native
+    repo_link = args.mirror_alpine + args.alpine_version + "/" + repo
+    cache_folder = args.work + "/cache_apk_" + arch
+    return cache_folder + "/APKINDEX." + hash(repo_link) + ".tar.gz"
