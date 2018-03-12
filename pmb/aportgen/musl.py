@@ -54,7 +54,7 @@ def generate(args, pkgname):
         path_target = (args.work + "/cache_distfiles/" + subpkgname + "-" +
                        version + "-" + arch + ".apk")
         if not os.path.exists(path_target):
-            pmb.helpers.run.user(args, ["cp", path, path_target])
+            pmb.helpers.run.root(args, ["cp", path, path_target])
 
     # Hash the distfiles
     hashes = pmb.chroot.user(args, ["sha512sum",
