@@ -31,7 +31,6 @@ import sys
 import shutil
 import shlex
 import time
-import logging
 
 # Import from parent directory
 pmb_src = os.path.realpath(os.path.join(os.path.dirname(__file__) + "/.."))
@@ -113,8 +112,6 @@ class Qemu(object):
         pmbootstrap_yes(args, config, ["install", "--no-fde"])
         self.process = pmbootstrap_run(args, config, ["qemu", "--display",
                                                       "none"], background=True)
-        logging.info("(test) wait 90s until the VM booted up")
-        time.sleep(90)
 
 
 @pytest.fixture
@@ -134,23 +131,44 @@ def ssh_run(args, command):
                                  "-o", "StrictHostKeyChecking=no",
                                  "-p", "2222", "testuser@localhost", "--",
                                  command],
-                          return_stdout=True)
+                          check=False, return_stdout=True)
     return ret
 
 
-def is_running(args, programs):
+def is_running(args, programs, tries=180, sleep_before_retry=1):
     """
     Simple check that looks for program names in the output of "ps ax".
     This is error-prone, only use it with programs that have a unique name.
+    With defaults retries and sleep_before_retry values, it will try each
+    second for 3 minutes.
+
+    :param programs: list of programs to check for, e.g. ["xfce4-desktop"]
+    :param tries: amount of tries with the wrong result before giving up
+    :param sleep_before_retry: time in seconds to sleep before trying again
     """
-    all = ssh_run(args, "ps ax")
-    ret = True
-    for program in programs:
-        if program in all:
+    print("Looking for programs to appear in the VM (tries: " + str(tries) +
+          "): " + ", ".join(programs))
+    for i in range(0, tries):
+        # Sleep
+        if i > 0:
+            time.sleep(sleep_before_retry)
+
+        # Get running programs via SSH
+        all = ssh_run(args, "ps ax")
+        if not all:
             continue
-        print(program + ": not found in 'ps ax'!")
-        ret = False
-    return ret
+
+        # Missing programs
+        missing = []
+        for program in programs:
+            if program not in all:
+                missing.append(program)
+        if not missing:
+            return True
+
+    # Not found
+    print("Programs not running: " + ", ".join(missing))
+    return False
 
 
 def test_xfce4(args, tmpdir, qemu):
@@ -159,7 +177,7 @@ def test_xfce4(args, tmpdir, qemu):
                              "Thunar", "dbus-daemon", "xfwm4"])
 
     # self-test of is_running()
-    assert is_running(args, ["invalid-process"]) is False
+    assert is_running(args, ["invalid-process"], 1) is False
 
 
 def test_plasma_mobile(args, tmpdir, qemu):
