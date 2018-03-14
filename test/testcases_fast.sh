@@ -35,4 +35,4 @@ done
 
 # Run enabled testcases with coverage enabled
 # shellcheck disable=SC2086
-pytest --cov=pmb $enabled
+pytest --cov=pmb $enabled --tb=native
