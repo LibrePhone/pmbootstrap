@@ -232,10 +232,34 @@ def update(args):
 
 
 def newapkbuild(args):
-    if not len(args.args_passed):
-        logging.info("See 'pmbootstrap newapkbuild -h' for usage information.")
-        raise RuntimeError("No arguments to pass to newapkbuild specified!")
-    pmb.build.newapkbuild(args, args.folder, args.args_passed)
+    # Check for SRCURL usage
+    is_url = False
+    for prefix in ["http://", "https://", "ftp://"]:
+        if args.pkgname_pkgver_srcurl.startswith(prefix):
+            is_url = True
+            break
+
+    # Sanity check: -n is only allowed with SRCURL
+    if args.pkgname and not is_url:
+        raise RuntimeError("You can only specify a pkgname (-n) when using"
+                           " SRCURL as last parameter.")
+
+    # Passthrough: Strings (e.g. -d "my description")
+    pass_through = []
+    for entry in pmb.config.newapkbuild_arguments_strings:
+        value = getattr(args, entry[1])
+        if value:
+            pass_through += [entry[0], value]
+
+    # Passthrough: Switches (e.g. -C for CMake)
+    for entry in (pmb.config.newapkbuild_arguments_switches_pkgtypes +
+                  pmb.config.newapkbuild_arguments_switches_other):
+        if getattr(args, entry[1]) is True:
+            pass_through.append(entry[0])
+
+    # Passthrough: PKGNAME[-PKGVER] | SRCURL
+    pass_through.append(args.pkgname_pkgver_srcurl)
+    pmb.build.newapkbuild(args, args.folder, pass_through, args.force)
 
 
 def kconfig_check(args):

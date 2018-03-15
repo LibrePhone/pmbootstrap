@@ -1,5 +1,5 @@
 """
-Copyright 2017 Oliver Smith
+Copyright 2018 Oliver Smith
 
 This file is part of pmbootstrap.
 
@@ -24,7 +24,7 @@ import pmb.helpers.cli
 import pmb.parse
 
 
-def newapkbuild(args, folder, args_passed):
+def newapkbuild(args, folder, args_passed, force=False):
     # Initialize build environment and build folder
     pmb.build.init(args)
     build = "/home/pmos/build"
@@ -34,15 +34,14 @@ def newapkbuild(args, folder, args_passed):
     pmb.chroot.user(args, ["mkdir", "-p", build])
 
     # Run newapkbuild
-    pmb.chroot.user(args, ["newapkbuild"] + args_passed, log=False,
-                    working_dir=build)
+    pmb.chroot.user(args, ["newapkbuild"] + args_passed, working_dir=build)
     glob_result = glob.glob(build_outside + "/*/APKBUILD")
     if not len(glob_result):
         return
 
     # Paths for copying
     source_apkbuild = glob_result[0]
-    pkgname = pmb.parse.apkbuild(args, source_apkbuild)["pkgname"]
+    pkgname = pmb.parse.apkbuild(args, source_apkbuild, False)["pkgname"]
     target = args.aports + "/" + folder + "/" + pkgname
 
     # Move /home/pmos/build/$pkgname/* to /home/pmos/build/*
@@ -54,8 +53,8 @@ def newapkbuild(args, folder, args_passed):
     # Overwrite confirmation
     if os.path.exists(target):
         logging.warning("WARNING: Folder already exists: " + target)
-        if not pmb.helpers.cli.confirm(args, "Continue and delete its"
-                                       " contents?"):
+        question = "Continue and delete its contents?"
+        if not force and not pmb.helpers.cli.confirm(args, question):
             raise RuntimeError("Aborted.")
         pmb.helpers.run.user(args, ["rm", "-r", target])
 

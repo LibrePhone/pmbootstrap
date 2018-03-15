@@ -143,13 +143,44 @@ def arguments_pkgrel_bump(subparser):
 
 
 def arguments_newapkbuild(subparser):
-    ret = subparser.add_parser("newapkbuild", help="get a template to package"
+    """
+    Wrapper for Alpine's "newapkbuild" command.
+
+    Most parameters will get directly passed through, and they are defined in
+    "pmb/config/__init__.py". That way they can be used here and when passing
+    them through in "pmb/helpers/frontend.py". The order of the parameters is
+    kept the same as in "newapkbuild -h".
+    """
+    sub = subparser.add_parser("newapkbuild", help="get a template to package"
                                " new software")
-    ret.add_argument("folder", help="aports subfolder, where the new aport will"
-                     " be located (main, cross, device, ...)")
-    ret.add_argument("args_passed", nargs=argparse.REMAINDER,
-                     help="arguments directly passed to Alpine's newapkbuild,"
-                     " more information: 'pmbootstrap newapkbuild main -h'")
+    sub.add_argument("--folder", help="set postmarketOS aports folder"
+                     " (default: main)", default="main")
+
+    # Passthrough: Strings (e.g. -d "my description")
+    for entry in pmb.config.newapkbuild_arguments_strings:
+        sub.add_argument(entry[0], dest=entry[1], help=entry[2])
+
+    # Passthrough: Package type switches (e.g. -C for CMake)
+    group = sub.add_mutually_exclusive_group()
+    for entry in pmb.config.newapkbuild_arguments_switches_pkgtypes:
+        group.add_argument(entry[0], dest=entry[1], help=entry[2],
+                           action="store_true")
+
+    # Passthrough: Other switches (e.g. -c for copying sample files)
+    for entry in pmb.config.newapkbuild_arguments_switches_other:
+        sub.add_argument(entry[0], dest=entry[1], help=entry[2],
+                         action="store_true")
+
+    # Force switch
+    sub.add_argument("-f", dest="force", action="store_true",
+                     help="force even if directory already exists")
+
+    # Passthrough: PKGNAME[-PKGVER] | SRCURL
+    sub.add_argument("pkgname_pkgver_srcurl",
+                     metavar="PKGNAME[-PKGVER] | SRCURL",
+                     help="set either the package name (optionally with the"
+                     " PKGVER at the end, e.g. 'hello-world-1.0') or the"
+                     " download link to the source archive")
 
 
 def arguments():

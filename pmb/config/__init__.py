@@ -399,3 +399,29 @@ aportgen = {
 # QEMU
 #
 qemu_native_mesa_drivers = ["dri-swrast", "dri-virtio"]
+
+#
+# NEWAPKBUILD
+# Options passed through to the "newapkbuild" command from Alpine Linux. They
+# are duplicated here, so we can use Python's argparse for argument parsing and
+# help page display. The -f (force) flag is not defined here, as we use that in
+# the Python code only and don't pass it through.
+#
+newapkbuild_arguments_strings = [
+    ["-n", "pkgname", "set package name (only use with SRCURL)"],
+    ["-d", "pkgdesc", "set package description"],
+    ["-l", "license", "set package license identifier from"
+                      " <https://spdx.org/licenses/>"],
+    ["-u", "url", "set package URL"],
+]
+newapkbuild_arguments_switches_pkgtypes = [
+    ["-a", "autotools", "create autotools package (use ./configure ...)"],
+    ["-C", "cmake", "create CMake package (assume cmake/ is there)"],
+    ["-m", "meson", "create meson package (assume meson.build is there)"],
+    ["-p", "perl", "create perl package (assume Makefile.PL is there)"],
+    ["-y", "python", "create python package (assume setup.py is there)"],
+]
+newapkbuild_arguments_switches_other = [
+    ["-s", "sourceforge", "use sourceforge source URL"],
+    ["-c", "copy_samples", "copy a sample init.d, conf.d and install script"],
+]
