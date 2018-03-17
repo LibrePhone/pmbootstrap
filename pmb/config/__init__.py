@@ -45,8 +45,8 @@ apk_tools_static_min_version = "2.9.0-r0"
 work_version = "1"
 
 # Only save keys to the config file, which we ask for in 'pmbootstrap init'.
-config_keys = ["ccache_size", "device", "extra_packages", "jobs", "keymap",
-               "nonfree_firmware", "nonfree_userland",
+config_keys = ["ccache_size", "device", "extra_packages", "hostname", "jobs",
+               "keymap", "nonfree_firmware", "nonfree_userland",
                "qemu_native_mesa_driver", "timezone", "ui", "user", "work"]
 
 # Config file/commandline default values
@@ -62,6 +62,7 @@ defaults = {
     "config": os.path.expanduser("~") + "/.config/pmbootstrap.cfg",
     "device": "samsung-i9100",
     "extra_packages": "none",
+    "hostname": "",
     # A higher value is typically desired, but this can lead to VERY long open
     # times on slower devices due to host systems being MUCH faster than the
     # target device: <https://github.com/postmarketOS/pmbootstrap/issues/429>

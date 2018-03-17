@@ -219,3 +219,28 @@ def test_questions_build_options(args, monkeypatch):
     func(args, cfg)
     assert cfg == {"pmbootstrap": {"jobs": "5",
                                    "ccache_size": "2G"}}
+
+
+def test_questions_hostname(args, monkeypatch):
+    func = pmb.config.init.ask_for_hostname
+    device = "test-device"
+
+    # Valid hostname
+    fake_answers(monkeypatch, ["valid"])
+    assert func(args, device) == "valid"
+
+    # Hostname too long ("aaaaa...")
+    fake_answers(monkeypatch, ["a" * 64, "a" * 63])
+    assert func(args, device) == "a" * 63
+
+    # Fail the regex
+    fake_answers(monkeypatch, ["$invalid", "valid"])
+    assert func(args, device) == "valid"
+
+    # Begins or ends with minus
+    fake_answers(monkeypatch, ["-invalid", "invalid-", "valid"])
+    assert func(args, device) == "valid"
+
+    # Device name: empty string
+    fake_answers(monkeypatch, [device])
+    assert func(args, device) == ""

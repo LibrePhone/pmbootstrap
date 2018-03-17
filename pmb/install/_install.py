@@ -18,7 +18,9 @@ along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
 import logging
 import os
+import re
 import glob
+import shlex
 
 import pmb.chroot
 import pmb.chroot.apk
@@ -234,6 +236,28 @@ def setup_keymap(args):
         logging.info("NOTE: No valid keymap specified for device")
 
 
+def setup_hostname(args):
+    """
+    Set the hostname and update localhost address in /etc/hosts
+    """
+    # Default to device name
+    hostname = args.hostname
+    if not hostname:
+        hostname = args.device
+
+    if not pmb.helpers.other.validate_hostname(hostname):
+        raise RuntimeError("Hostname '" + hostname + "' is not valid, please"
+                           " run 'pmbootstrap init' to configure it.")
+
+    # Update /etc/hosts
+    suffix = "rootfs_" + args.device
+    pmb.chroot.root(args, ["sh", "-c", "echo " + shlex.quote(hostname) +
+                    " > /etc/hostname"], suffix)
+    regex = ("s/^127\.0\.0\.1.*/127.0.0.1\t" + re.escape(hostname) +
+             " localhost.localdomain localhost/")
+    pmb.chroot.root(args, ["sed", "-i", "-e", regex, "/etc/hosts"], suffix)
+
+
 def install_system_image(args):
     # Partition and fill image/sdcard
     logging.info("*** (3/5) PREPARE INSTALL BLOCKDEVICE ***")
@@ -376,6 +400,9 @@ def install(args):
 
     # Set timezone
     pmb.chroot.root(args, ["setup-timezone", "-z", args.timezone], suffix)
+
+    # Set the hostname as the device name
+    setup_hostname(args)
 
     if args.android_recovery_zip:
         install_recovery_zip(args)

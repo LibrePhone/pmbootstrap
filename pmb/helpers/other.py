@@ -16,8 +16,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
-import os
 import logging
+import os
+import re
 import pmb.chroot
 import pmb.config
 import pmb.helpers.run
@@ -127,3 +128,26 @@ def migrate_work_folder(args):
                        " folder manually ('sudo rm -rf " + args.work +
                        "') and start over with 'pmbootstrap init'. All your"
                        " binary packages will be lost.")
+
+
+def validate_hostname(hostname):
+    """
+    Check whether the string is a valid hostname, according to
+    <http://en.wikipedia.org/wiki/Hostname#Restrictions_on_valid_host_names>
+    """
+    # Check length
+    if len(hostname) > 63:
+        logging.fatal("ERROR: Hostname '" + hostname + "' is too long.")
+        return False
+
+    # Check that it only contains valid chars
+    if not re.match("^[0-9a-z-]*$", hostname):
+        logging.fatal("ERROR: Hostname must only contain letters (a-z),"
+                      " digits (0-9) or minus signs (-)")
+        return False
+
+    # Check that doesn't begin or end with a minus sign
+    if hostname[:1] == "-" or hostname[-1:] == "-":
+        logging.fatal("ERROR: Hostname must not begin or end with a minus sign")
+        return False
+    return True

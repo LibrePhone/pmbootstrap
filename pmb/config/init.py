@@ -240,6 +240,18 @@ def ask_for_build_options(args, cfg):
     cfg["pmbootstrap"]["ccache_size"] = answer
 
 
+def ask_for_hostname(args, device):
+    while True:
+        ret = pmb.helpers.cli.ask(args, "Device hostname (short form, e.g. 'foo')",
+                                  None, (args.hostname or device), True)
+        if not pmb.helpers.other.validate_hostname(ret):
+            continue
+        # Don't store device name in user's config (gets replaced in install)
+        if ret == device:
+            return ""
+        return ret
+
+
 def frontend(args):
     cfg = pmb.config.load(args)
 
@@ -280,6 +292,9 @@ def frontend(args):
 
     # Configure timezone info
     cfg["pmbootstrap"]["timezone"] = ask_for_timezone(args)
+
+    # Hostname
+    cfg["pmbootstrap"]["hostname"] = ask_for_hostname(args, device)
 
     # Save config
     pmb.config.save(args, cfg)
