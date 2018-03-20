@@ -1,10 +1,7 @@
 # pmbootstrap
+[**Introduction**](https://postmarketos.org/blog/2017/05/26/intro/) | [**Security Warning**](https://ollieparanoid.github.io/post/security-warning/) | [**Devices**](https://wiki.postmarketos.org/wiki/Devices) | [![travis badge](https://api.travis-ci.org/postmarketOS/pmbootstrap.png?branch=master)](https://travis-ci.org/postmarketOS/pmbootstrap) | [![Coverage Status](https://coveralls.io/repos/github/postmarketOS/pmbootstrap/badge.svg?branch=master)](https://coveralls.io/github/postmarketOS/pmbootstrap?branch=master)
 
-[**Introduction**](https://postmarketos.org/blog/2017/05/26/intro/) | [**Security Warning**](https://ollieparanoid.github.io/post/security-warning/) | [**Supported Devices**](https://wiki.postmarketos.org/wiki/Supported_devices) | [![travis badge](https://api.travis-ci.org/postmarketOS/pmbootstrap.png?branch=master)](https://travis-ci.org/postmarketOS/pmbootstrap) | [![Coverage status](https://coveralls.io/repos/github/postmarketOS/pmbootstrap/badge.svg)](https://coveralls.io/github/postmarketOS)
-
-Sophisticated chroot/build/flash tool to develop and install postmarketOS.
-
-For in-depth information please refer to the [postmarketOS wiki](https://wiki.postmarketos.org).
+Sophisticated chroot/build/flash tool to develop and install [postmarketOS](https://postmarketos.org).
 
 ## Requirements
 * 2 GB of RAM recommended for compiling
@@ -15,50 +12,171 @@ For in-depth information please refer to the [postmarketOS wiki](https://wiki.po
 * Python 3.4+
 * OpenSSL
 
-## Usage
+## Usage Examples
+Please refer to the [postmarketOS wiki](https://wiki.postmarketos.org) for in-depth coverage of topics such as [porting to a new device](https://wiki.postmarketos.org/wiki/Porting_to_a_new_device) or [installation](https://wiki.postmarketos.org/wiki/Installation_guide). The help output (`pmbootstrap -h`) has detailed usage instructions for every command. Read on for some generic examples of what can be done with `pmbootstrap`.
 
-Assuming you have a supported device, you can build and flash a postmarketOS image by running through the following steps. For new devices check the [porting guide](https://wiki.postmarketos.org/wiki/Porting_to_a_new_device).
-
-First, clone the git repository and initialize your pmbootstrap environment:
-
-```shell
+### Basics
+Initial setup:
+```
 $ git clone https://github.com/postmarketOS/pmbootstrap
 $ cd pmbootstrap
-$ ./pmbootstrap.py init
+$ alias pmbootstrap=$PWD/pmbootstrap.py
+$ pmbootstrap init
 ```
 
-While running any pmbootstrap command, it's always useful to have a log open in a separate window where further details can be seen:
+To make the `pmbootstrap` alias persistent, [see the wiki](https://wiki.postmarketos.org/wiki/Porting_to_a_new_device#Shortcut).
 
-```shell
-$ ./pmbootstrap.py log
+Run this in a second window to see all shell commands that get executed:
+```
+$ pmbootstrap log
 ```
 
-It's now time to run a full build which will create the boot and system images:
-
-```shell
-$ ./pmbootstrap.py install
+### Packages
+Build `aports/main/hello-world`:
+```
+$ pmbootstrap build hello-world
 ```
 
-Once your device is connected and is ready to be flashed (e.g. via fastboot), you can run a flash of the kernel (boot) and system partitions:
-
-```shell
-$ ./pmbootstrap.py flasher flash_kernel
-$ ./pmbootstrap.py flasher flash_system
+Cross-compile to `armhf`:
+```
+$ pmbootstrap build --arch=armhf hello-world
 ```
 
-After a reboot, the device will prompt for the full-disk encryption password, which you typed in the install step (unless you have disabled full-disk encryption with `--no-fde`). Once the partition has been unlocked it is possible to connect via SSH:
+Build with source code from local folder:
+```
+$ pmbootstrap build linux-postmarketos-mainline --src=~/code/linux
+```
 
-```shell
-$ dhclient -v enp0s20f0u1
-$ ssh user@172.16.42.1
+Update checksums:
+```
+$ pmbootstrap checksum hello-world
+```
+
+Generate a template for a new package:
+```
+$ pmbootstrap newapkbuild "https://github.com/postmarketOS/osk-sdl/archive/0.51.tar.gz"
+```
+
+### Chroots
+Enter the `armhf` building chroot:
+```
+$ pmbootstrap chroot -b armhf
+```
+
+Run a command inside a chroot:
+```
+$ pmbootstrap chroot -- echo test
+```
+
+Safely delete all chroots:
+```
+$ pmbootstrap zap
+```
+
+### Device Porting Assistance
+Analyze Android [`boot.img`](https://wiki.postmarketos.org/wiki/Glossary#boot.img) files (also works with recovery OS images like TWRP):
+```
+$ pmbootstrap bootimg_analyze ~/Downloads/twrp-3.2.1-0-fp2.img
+```
+
+Check kernel configs:
+```
+$ pmbootstrap kconfig_check
+```
+
+Edit a kernel config:
+```
+$ pmbootstrap menuconfig --arch=armhf postmarketos-mainline
+```
+
+### System Image
+Build the system image:
+```
+$ pmbootstrap install
+```
+
+Update existing installation on SD card (full disk encryption disabled):
+```
+$ pmbootstrap install --sdcard=/dev/mmcblk0 --no-fde --rsync
+```
+
+Run the image in Qemu:
+```
+$ pmbootstrap qemu --image-size=1G
+```
+
+Flash to the device:
+```
+$ pmbootstrap flasher flash_kernel
+$ pmbootstrap flasher flash_system --partition=userdata
+```
+
+Export the system image, kernel, initramfs, `boot.img` etc.:
+```
+$ pmbootstrap export
+```
+
+Extract the initramfs
+```
+$ pmbootstrap initfs extract
+```
+
+Build and flash Android recovery zip:
+```
+$ pmbootstrap install --android-recovery-zip
+$ pmbootstrap flasher --method=adb sideload
+```
+
+### Repository Maintenance
+Increase the `pkgrel` for each aport where the binary package has outdated dependencies (e.g. after soname bumps):
+```
+$ pmbootstrap pkgrel_bump --auto
+```
+
+Generate cross-compiler aports based on the latest version from Alpine's aports:
+```
+$ pmbootstrap aportgen binutils-armhf gcc-armhf
+```
+
+Manually rebuild package index:
+```
+$ pmbootstrap index
+```
+
+Delete local binary packages without existing aport of same version:
+```
+$ pmbootstrap zap -m
+```
+
+### Debugging
+Use `-v` on any action to get verbose logging:
+```
+$ pmbootstrap -v build hello-world
+```
+
+Parse a single APKBUILD and return it as JSON:
+```
+$ pmbootstrap apkbuild_parse hello-world
+```
+
+Parse a package from an APKINDEX and return it as JSON:
+```
+$ pmbootstrap apkindex_parse $WORK/cache_apk_x86_64/APKINDEX.8b865e19.tar.gz hello-world
+```
+
+`ccache` statistics:
+```
+$ pmbootstrap stats --arch=armhf
+```
+
+`distccd` log:
+```
+$ pmbootstrap log_distccd
 ```
 
 ## Development
-
 ### Testing
-
 Install `pytest` (via your package manager or pip) and run it inside the pmbootstrap folder.
 
 ## License
-
 [GPLv3](LICENSE)
