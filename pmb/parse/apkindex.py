@@ -196,8 +196,11 @@ def parse(args, path, multiple_providers=True):
     cache_key = "multiple" if multiple_providers else "single"
     if path in args.cache["apkindex"]:
         cache = args.cache["apkindex"][path]
-        if cache["lastmod"] == lastmod and cache_key in cache:
-            return cache[cache_key]
+        if cache["lastmod"] == lastmod:
+            if cache_key in cache:
+                return cache[cache_key]
+        else:
+            clear_cache(args, path)
 
     # Read all lines
     if tarfile.is_tarfile(path):
