@@ -98,7 +98,7 @@ def parse_next_block(args, path, lines, start):
                 for value in values:
                     if value.startswith("!"):
                         continue
-                    for operator in [">", "=", "<"]:
+                    for operator in [">", "=", "<", "~"]:
                         if operator in value:
                             value = value.split(operator)[0]
                             break
