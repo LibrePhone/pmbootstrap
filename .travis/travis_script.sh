@@ -7,6 +7,16 @@ cd "$DIR/.."
 # Functions for pretty Travis output
 . .travis/common.sh
 
+# Wiki device documentation
+fold_start "wiki_check" "Wiki device documentation"
+if [ "$TRAVIS_BRANCH" = "master" ]; then
+	echo "*** Pull request to master (assuming all devices boot)"
+	test/check_devices_in_wiki.py --booting
+else
+	test/check_devices_in_wiki.py
+fi
+fold_end "wiki_check"
+
 # Static code analysis
 fold_start "static_analysis" "Static code analysis"
 test/static_code_analysis.sh
