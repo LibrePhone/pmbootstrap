@@ -306,13 +306,13 @@ def install_system_image(args):
 
     # System flash information
     if not args.sdcard:
-        logging.info("* pmbootstrap flasher flash_system")
-        logging.info("  Flashes the system image, that has been"
-                     " generated to your device:")
+        logging.info("* pmbootstrap flasher flash_rootfs")
+        logging.info("  Flashes the generated rootfs image to your device:")
         logging.info("  " + args.work + "/chroot_native/home/pmos/rootfs/" +
                      args.device + ".img")
-        logging.info("  (NOTE: This file has a partition table,"
-                     " which contains a boot- and root subpartition.)")
+        logging.info("  (NOTE: This file has a partition table, which contains"
+                     " /boot and / subpartitions. That way we don't need to"
+                     " change the partition layout on your device.)")
 
     logging.info("* pmbootstrap flasher flash_kernel")
     logging.info("  Flashes the kernel + initramfs to your device:")

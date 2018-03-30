@@ -108,10 +108,10 @@ $ pmbootstrap qemu --image-size=1G
 Flash to the device:
 ```
 $ pmbootstrap flasher flash_kernel
-$ pmbootstrap flasher flash_system --partition=userdata
+$ pmbootstrap flasher flash_rootfs --partition=userdata
 ```
 
-Export the system image, kernel, initramfs, `boot.img` etc.:
+Export the rootfs, kernel, initramfs, `boot.img` etc.:
 ```
 $ pmbootstrap export
 ```

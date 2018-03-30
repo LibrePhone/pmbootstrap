@@ -318,7 +318,7 @@ flashers = {
                 {
                     "list_devices": [["fastboot", "-i", "$VENDOR_ID",
                                       "devices", "-l"]],
-                    "flash_system": [["fastboot", "-i", "$VENDOR_ID",
+                    "flash_rootfs": [["fastboot", "-i", "$VENDOR_ID",
                                       "flash", "$PARTITION_SYSTEM", "$IMAGE"]],
                     "flash_kernel": [["fastboot", "-i", "$VENDOR_ID",
                                       "flash", "boot", "$BOOT/boot.img-$FLAVOR"]],
@@ -337,7 +337,7 @@ flashers = {
         "actions":
         {
             "list_devices": [["heimdall", "detect"]],
-            "flash_system": [
+            "flash_rootfs": [
                 ["heimdall_wait_for_device.sh"],
                 ["heimdall", "flash", "--$PARTITION_SYSTEM", "$IMAGE"]],
             "flash_kernel": [["heimdall_flash_kernel.sh",
@@ -352,7 +352,7 @@ flashers = {
         "actions":
         {
             "list_devices": [["heimdall", "detect"]],
-            "flash_system": [
+            "flash_rootfs": [
                 ["heimdall_wait_for_device.sh"],
                 ["heimdall", "flash", "--$PARTITION_SYSTEM", "$IMAGE"]],
             "flash_kernel": [

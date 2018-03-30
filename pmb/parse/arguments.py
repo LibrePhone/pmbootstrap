@@ -50,11 +50,15 @@ def arguments_flasher(subparser):
     for action in [boot, flash_kernel]:
         action.add_argument("--flavor", default=None)
 
-    # Flash system
-    flash_system = sub.add_parser(
-        "flash_system", help="flash the system partition")
-    flash_system.add_argument("--partition", default=None, help="partition to flash"
-                              " the system image")
+    # Flash rootfs
+    flash_rootfs = sub.add_parser("flash_rootfs", aliases=["flash_system"],
+                                  help="flash the rootfs to a partition on the"
+                                  " device (partition layout does not get"
+                                  " changed)")
+    flash_rootfs.add_argument("--partition", default=None,
+                              help="partition to flash to (Android: default"
+                                   " is 'system', but 'userdata' may have more"
+                                   " space)")
 
     # Actions without extra arguments
     sub.add_parser("sideload", help="sideload recovery zip")
@@ -62,8 +66,6 @@ def arguments_flasher(subparser):
                    " inside the device rootfs chroot on this computer")
     sub.add_parser("list_devices", help="show connected devices")
 
-    # Deprecated "pmbootstrap flasher export"
-    arguments_export(sub)
     return ret
 
 

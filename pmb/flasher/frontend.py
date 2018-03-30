@@ -25,7 +25,6 @@ import pmb.install
 import pmb.chroot.apk
 import pmb.chroot.initfs
 import pmb.chroot.other
-import pmb.export.frontend
 import pmb.helpers.frontend
 import pmb.parse.kconfig
 
@@ -60,7 +59,7 @@ def list_flavors(args):
         logging.info("* " + flavor)
 
 
-def system(args):
+def rootfs(args):
     # Generate system image, install flasher
     img_path = "/home/pmos/rootfs/" + args.device + ".img"
     if not os.path.exists(args.work + "/chroot_native" + img_path):
@@ -77,8 +76,8 @@ def system(args):
                                " to flash.")
 
     # Run the flasher
-    logging.info("(native) flash system image")
-    pmb.flasher.run(args, "flash_system")
+    logging.info("(native) flash rootfs image")
+    pmb.flasher.run(args, "flash_rootfs")
 
 
 def list_devices(args):
@@ -114,22 +113,21 @@ def frontend(args):
     action = args.action_flasher
     method = args.flash_method or args.deviceinfo["flash_method"]
 
-    if method == "none" and action in ["boot", "flash_kernel", "flash_system"]:
+    # Legacy alias
+    if action == "flash_system":
+        action = "flash_rootfs"
+
+    if method == "none" and action in ["boot", "flash_kernel", "flash_rootfs"]:
         logging.info("This device doesn't support any flash method.")
         return
 
     if action in ["boot", "flash_kernel"]:
         kernel(args)
-    if action == "flash_system":
-        system(args)
+    if action == "flash_rootfs":
+        rootfs(args)
     if action == "list_flavors":
         list_flavors(args)
     if action == "list_devices":
         list_devices(args)
     if action == "sideload":
         sideload(args)
-    if action == "export":
-        logging.info("WARNING: 'pmbootstrap flasher export' is deprecated and"
-                     " will be removed soon. The new syntax is 'pmbootstrap"
-                     " export'.")
-        pmb.export.frontend(args)

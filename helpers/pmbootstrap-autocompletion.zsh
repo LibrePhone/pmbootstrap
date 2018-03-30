@@ -36,7 +36,8 @@ _pmbootstrap_targets()
 				| sed 's/linux-//g'
 			;;
 		flasher)
-			echo flash_kernel flash_system
+			echo boot flash_kernel flash_rootfs sideload list_flavors \
+				list_devices
 			;;
 	esac
 }

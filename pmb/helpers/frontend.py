@@ -32,6 +32,7 @@ import pmb.config
 import pmb.chroot
 import pmb.chroot.initfs
 import pmb.chroot.other
+import pmb.export
 import pmb.flasher
 import pmb.helpers.logging
 import pmb.helpers.other

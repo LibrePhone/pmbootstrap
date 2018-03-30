@@ -41,7 +41,7 @@ def symlinks(args, flavor, folder):
         "uInitrd-" + flavor: "Initramfs, legacy u-boot image format",
         "uImage-" + flavor: "Kernel, legacy u-boot image format",
         "vmlinuz-" + flavor: "Linux kernel",
-        args.device + ".img": "System partition",
+        args.device + ".img": "Rootfs with partitions for /boot and /",
         "pmos-" + args.device + ".zip": "Android recovery flashable zip",
     }
 
