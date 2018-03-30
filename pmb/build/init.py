@@ -38,7 +38,9 @@ def init(args, suffix="native"):
                            build=False)
 
     # Fix permissions
-    pmb.chroot.root(args, ["chmod", "-R", "a+rw",
+    pmb.chroot.root(args, ["chown", "root:abuild",
+                           "/var/cache/distfiles"], suffix)
+    pmb.chroot.root(args, ["chmod", "g+w",
                            "/var/cache/distfiles"], suffix)
 
     # Generate package signing keys

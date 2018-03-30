@@ -57,7 +57,7 @@ def ask_for_work_path(args):
             if not os.path.exists(ret):
                 os.makedirs(ret, 0o700, True)
                 with open(ret + "/version", "w") as handle:
-                    handle.write(pmb.config.work_version + "\n")
+                    handle.write(str(pmb.config.work_version) + "\n")
 
             # Make sure, that we can write into it
             os.makedirs(ret + "/cache_http", 0o700, True)

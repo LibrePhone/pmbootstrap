@@ -79,29 +79,30 @@ def check_binfmt_misc(args):
                        " armhf on x86_64):\n See: <" + link + ">")
 
 
-def migrate_success(args):
-    logging.info("Migration done")
+def migrate_success(args, version):
+    logging.info("Migration to version " + str(version) + " done")
     with open(args.work + "/version", "w") as handle:
-        handle.write(pmb.config.work_version + "\n")
+        handle.write(str(version) + "\n")
 
 
 def migrate_work_folder(args):
     # Read current version
-    current = "0"
+    current = 0
     path = args.work + "/version"
     if os.path.exists(path):
         with open(path, "r") as f:
-            current = f.read().rstrip()
+            current = int(f.read().rstrip())
 
     # Compare version, print warning or do nothing
     required = pmb.config.work_version
     if current == required:
         return
     logging.info("WARNING: Your work folder version needs to be migrated"
-                 " (from version " + current + " to " + required + ")!")
+                 " (from version " + str(current) + " to " + str(required) +
+                 ")!")
 
     # 0 => 1
-    if current == "0" and required == "1":
+    if current == 0:
         # Ask for confirmation
         logging.info("Changelog:")
         logging.info("* Building chroots have a different username: "
@@ -119,15 +120,37 @@ def migrate_work_folder(args):
             pmb.helpers.run.root(args, ["sed", "-i",
                                         "s./home/user/./home/pmos/.g", conf])
         # Update version file
-        migrate_success(args)
-        return
+        migrate_success(args, 1)
+        current = 1
+
+    # 1 => 2
+    if current == 1:
+        # Ask for confirmation
+        logging.info("Changelog:")
+        logging.info("* Fix: cache_distfiles was writable for everyone")
+        logging.info("Migration will do the following:")
+        logging.info("* Fix permissions of '" + args.work +
+                     "/cache_distfiles'")
+        if not pmb.helpers.cli.confirm(args):
+            raise RuntimeError("Aborted.")
+
+        # Fix permissions
+        dir = "/var/cache/distfiles"
+        for cmd in [["chown", "-R", "root:abuild", dir],
+                    ["chmod", "-R", "664", dir],
+                    ["chmod", "a+X", dir]]:
+            pmb.chroot.root(args, cmd)
+        migrate_success(args, 2)
+        current = 2
 
     # Can't migrate, user must delete it
-    raise RuntimeError("Sorry, we can't migrate that automatically. Please run"
-                       " 'pmbootstrap shutdown', then delete your current work"
-                       " folder manually ('sudo rm -rf " + args.work +
-                       "') and start over with 'pmbootstrap init'. All your"
-                       " binary packages will be lost.")
+    if current != required:
+        raise RuntimeError("Sorry, we can't migrate that automatically. Please"
+                           " run 'pmbootstrap shutdown', then delete your"
+                           " current work folder manually ('sudo rm -rf " +
+                           args.work + "') and start over with 'pmbootstrap"
+                           " init'. All your binary packages and caches will"
+                           " be lost.")
 
 
 def validate_hostname(hostname):
