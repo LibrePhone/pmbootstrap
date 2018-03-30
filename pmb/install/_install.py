@@ -303,16 +303,6 @@ def install_system_image(args):
     logging.info("*** (5/5) FLASHING TO DEVICE ***")
     logging.info("Run the following to flash your installation to the"
                  " target device:")
-    logging.info("* pmbootstrap flasher flash_kernel")
-    logging.info("  Flashes the kernel + initramfs to your device:")
-    logging.info("  " + args.work + "/chroot_rootfs_" + args.device +
-                 "/boot")
-    method = args.deviceinfo["flash_method"]
-    if (method in pmb.config.flashers and "boot" in
-            pmb.config.flashers[method]["actions"]):
-        logging.info("  (NOTE: " + method + " also supports booting"
-                     " the kernel/initramfs directly without flashing."
-                     " Use 'pmbootstrap flasher boot' to do that.)")
 
     # System flash information
     if not args.sdcard:
@@ -323,6 +313,17 @@ def install_system_image(args):
                      args.device + ".img")
         logging.info("  (NOTE: This file has a partition table,"
                      " which contains a boot- and root subpartition.)")
+
+    logging.info("* pmbootstrap flasher flash_kernel")
+    logging.info("  Flashes the kernel + initramfs to your device:")
+    logging.info("  " + args.work + "/chroot_rootfs_" + args.device +
+                 "/boot")
+    method = args.deviceinfo["flash_method"]
+    if (method in pmb.config.flashers and "boot" in
+            pmb.config.flashers[method]["actions"]):
+        logging.info("  (NOTE: " + method + " also supports booting"
+                     " the kernel/initramfs directly without flashing."
+                     " Use 'pmbootstrap flasher boot' to do that.)")
 
     # Export information
     logging.info("* If the above steps do not work, you can also create"
