@@ -46,7 +46,7 @@ work_version = 2
 
 # Only save keys to the config file, which we ask for in 'pmbootstrap init'.
 config_keys = ["ccache_size", "device", "extra_packages", "hostname", "jobs",
-               "keymap", "nonfree_firmware", "nonfree_userland",
+               "kernel", "keymap", "nonfree_firmware", "nonfree_userland",
                "qemu_native_mesa_driver", "timezone", "ui", "user", "work"]
 
 # Config file/commandline default values
@@ -68,6 +68,7 @@ defaults = {
     # target device: <https://github.com/postmarketOS/pmbootstrap/issues/429>
     "iter_time": "200",
     "jobs": str(multiprocessing.cpu_count() + 1),
+    "kernel": "stable",
     "keymap": "",
     "log": "$WORK/log.txt",
     "mirror_alpine": "http://dl-cdn.alpinelinux.org/alpine/",

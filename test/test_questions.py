@@ -110,6 +110,7 @@ def test_questions_device(args, monkeypatch):
     args.device = "lg-mako"
     args.nonfree_firmware = True
     args.nonfree_userland = False
+    args.kernel = "downstream"
 
     # Do not generate aports
     def fake_generate(args, pkgname):
@@ -120,15 +121,36 @@ def test_questions_device(args, monkeypatch):
     func = pmb.config.init.ask_for_device
     nonfree = {"firmware": True, "userland": False}
     fake_answers(monkeypatch, ["lg-mako"])
-    assert func(args) == ("lg-mako", True, nonfree)
+    kernel = args.kernel
+    assert func(args) == ("lg-mako", True, kernel, nonfree)
 
     # Non-existing device, go back, existing device
     fake_answers(monkeypatch, ["whoops-typo", "n", "lg-mako"])
-    assert func(args) == ("lg-mako", True, nonfree)
+    assert func(args) == ("lg-mako", True, kernel, nonfree)
 
     # New device
     fake_answers(monkeypatch, ["new-device", "y"])
-    assert func(args) == ("new-device", False, nonfree)
+    assert func(args) == ("new-device", False, kernel, nonfree)
+
+
+def test_questions_device_kernel(args, monkeypatch):
+    # Prepare args
+    args.aports = pmb_src + "/test/testdata/init_questions_device/aports"
+    args.kernel = "downstream"
+
+    # Kernel hardcoded in depends
+    func = pmb.config.init.ask_for_device_kernel
+    device = "lg-mako"
+    assert func(args, device) == args.kernel
+
+    # Choose "mainline"
+    device = "sony-amami"
+    fake_answers(monkeypatch, ["mainline"])
+    assert func(args, device) == "mainline"
+
+    # Choose "downstream"
+    fake_answers(monkeypatch, ["downstream"])
+    assert func(args, device) == "downstream"
 
 
 def test_questions_device_nonfree(args, monkeypatch):

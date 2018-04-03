@@ -95,7 +95,8 @@ def ls(args, flavor, suffix, extra=False):
 def frontend(args):
     # Find the appropriate kernel flavor
     suffix = "rootfs_" + args.device
-    flavor = pmb.chroot.other.kernel_flavor_autodetect(args, suffix)
+    flavors = pmb.chroot.other.kernel_flavors_installed(args, suffix)
+    flavor = flavors[0]
     if hasattr(args, "flavor") and args.flavor:
         flavor = args.flavor
 
@@ -124,7 +125,7 @@ def frontend(args):
             pmb.chroot.initfs_hooks.delete(args, args.hook, suffix)
 
         # Rebuild the initfs for all kernels after adding/removing a hook
-        for flavor in pmb.chroot.other.kernel_flavors_installed(args, suffix):
+        for flavor in flavors:
             build(args, flavor, suffix)
 
     if action in ["ls", "extract"]:

@@ -19,9 +19,24 @@ along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 import os
 import glob
 import pmb.chroot.apk
+import pmb.install
 
 
-def kernel_flavors_installed(args, suffix):
+def kernel_flavors_installed(args, suffix, autoinstall=True):
+    """
+    Get all installed kernel flavors and make sure that there's at least one
+
+    :param suffix: the chroot suffix, e.g. "native" or "rootfs_qemu-amd64"
+    :param autoinstall: make sure that at least one kernel flavor is installed
+    :returns: list of installed kernel flavors, e.g. ["postmarketos-mainline"]
+    """
+    # Automatically install the selected kernel
+    if autoinstall:
+        packages = (["device-" + args.device] +
+                    pmb.install.get_kernel_package(args, args.device))
+        pmb.chroot.apk.install(args, packages, suffix)
+
+    # Find all kernels in /boot
     prefix = "vmlinuz-"
     prefix_len = len(prefix)
     pattern = args.work + "/chroot_" + suffix + "/boot/" + prefix + "*"
@@ -31,16 +46,9 @@ def kernel_flavors_installed(args, suffix):
         if flavor[-4:] == "-dtb":
             flavor = flavor[:-4]
         ret.append(flavor)
+
+    # Return without duplicates
     return list(set(ret))
-
-
-def kernel_flavor_autodetect(args, suffix):
-    """
-    Make sure, that there is at least one kernel installed, return the first
-    kernel that can be found.
-    """
-    pmb.chroot.apk.install(args, ["device-" + args.device], suffix)
-    return kernel_flavors_installed(args, suffix)[0]
 
 
 def tempfolder(args, path, suffix="native"):

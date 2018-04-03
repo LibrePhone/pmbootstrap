@@ -24,13 +24,13 @@ package() {
 }
 
 kernel_downstream() {
-	pkgdesc="Display and wifi works (see device table for details)"
+	pkgdesc="Downstream description"
 	depends="linux-sony-amami"
 	mkdir "$subpkgdir"
 }
 
 kernel_mainline() {
-	pkgdesc="For kernel development only (most features aren't working)"
+	pkgdesc="Mainline description"
 	depends="linux-postmarketos-mainline"
 	mkdir "$subpkgdir"
 }

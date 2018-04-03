@@ -209,3 +209,37 @@ def subpkgdesc(path, function):
     raise RuntimeError("Could not find pkgdesc of subpackage function '" +
                        function + "' (spaces used instead of tabs?) in " +
                        path)
+
+
+def kernels(args, device):
+    """
+    Get the possible kernels from a device-* APKBUILD.
+
+    :param device: the device name, e.g. "lg-mako"
+    :returns: None when the kernel is hardcoded in depends
+    :returns: kernel types and their description (as read from the subpackages)
+              possible types: "downstream", "stable", "mainline"
+              example: {"mainline": "Mainline description",
+                        "downstream": "Downstream description"}
+    """
+    # Read the APKBUILD
+    apkbuild_path = args.aports + "/device/device-" + device + "/APKBUILD"
+    if not os.path.exists(apkbuild_path):
+        return None
+    subpackages = apkbuild(args, apkbuild_path)["subpackages"]
+
+    # Read kernels from subpackages
+    ret = {}
+    subpackage_prefix = "device-" + device + "-kernel-"
+    for subpackage in subpackages:
+        if not subpackage.startswith(subpackage_prefix):
+            continue
+        name = subpackage[len(subpackage_prefix):]
+        func = "kernel_" + name
+        desc = pmb.parse._apkbuild.subpkgdesc(apkbuild_path, func)
+        ret[name] = desc
+
+    # Return
+    if ret:
+        return ret
+    return None

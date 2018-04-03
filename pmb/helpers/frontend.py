@@ -44,41 +44,16 @@ import pmb.parse
 import pmb.qemu
 
 
-def _build_device_depends_note(args, pkgname):
-    """
-    Previously 'pmbootstrap build device-...' built the device package in the
-    native chroot without installing its dependencies (e.g. armhf kernel!) and
-    created a symlink to all supported architectures.
-
-    Not installing depends while building is incompatible with how Alpine's
-    abuild does it, so we changed the behavior. Now pmbootstrap reads the
-    device's architecture from the deviceinfo file and automatically builds
-    for that architecture, if you did not specify any architecture. And the
-    dependencies get installed correctly before the build.
-
-    To make migration easier for the users, we show a hint if building a device
-    package was requested.
-    """
-    # Only relevant for device packages when -i is not set
-    if not pkgname.startswith("device-") or getattr(args, "ignore_depends"):
-        return
-
-    device = pkgname.split("-", 1)[1]
-    logging.info("NOTE: " + device + "'s kernel will be installed as dependency"
-                 " before building (old behavior: 'pmbootstrap build -i')")
-
-
 def _parse_flavor(args):
     """
     Verify the flavor argument if specified, or return a default value.
     """
-    # Make sure, that at least one kernel is installed
+    # Install at least one kernel and get installed flavors
     suffix = "rootfs_" + args.device
-    pmb.chroot.apk.install(args, ["device-" + args.device], suffix)
+    flavors = pmb.chroot.other.kernel_flavors_installed(args, suffix)
 
     # Parse and verify the flavor argument
     flavor = args.flavor
-    flavors = pmb.chroot.other.kernel_flavors_installed(args, suffix)
     if flavor:
         if flavor not in flavors:
             raise RuntimeError("No kernel installed with flavor " + flavor + "!" +
@@ -115,11 +90,6 @@ def build(args):
     # Strict mode: zap everything
     if args.strict:
         pmb.chroot.zap(args, False)
-
-    # Detect old usage for device- packages
-    if not args.ignore_depends:
-        for package in args.packages:
-            _build_device_depends_note(args, package)
 
     # Set src and force
     src = os.path.realpath(os.path.expanduser(args.src[0])) if args.src else None

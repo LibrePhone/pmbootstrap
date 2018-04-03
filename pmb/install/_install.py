@@ -92,6 +92,30 @@ def get_nonfree_packages(args, device):
     return ret
 
 
+def get_kernel_package(args, device):
+    """
+    Get the kernel package based on user's choice in "pmbootstrap init".
+
+    :param device: code name, e.g. "lg-mako"
+    :returns: [] or the package in a list, e.g. ["linux-postmarketos-stable"]
+    """
+    # Get kernels for the device
+    kernels = pmb.parse._apkbuild.kernels(args, device)
+    if not kernels or args.kernel == "none":
+        return []
+
+    # Sanity check
+    if args.kernel not in kernels:
+        raise RuntimeError("Selected kernel (" + args.kernel + ") is not"
+                           " configured for device " + device + ". Please"
+                           " run 'pmbootstrap init' to select a valid kernel.")
+
+    # Return the pkgname
+    if args.kernel == "downstream":
+        return ["linux-" + device]
+    return ["linux-postmarketos-" + args.kernel]
+
+
 def copy_files_from_chroot(args):
     """
     Copy all files from the rootfs chroot to /mnt/install, except
@@ -365,6 +389,7 @@ def install(args):
                  args.device))
     install_packages = (pmb.config.install_device_packages +
                         ["device-" + args.device] +
+                        get_kernel_package(args, args.device) +
                         get_nonfree_packages(args, args.device))
     if args.ui.lower() != "none":
         install_packages += ["postmarketos-ui-" + args.ui]

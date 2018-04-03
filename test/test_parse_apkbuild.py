@@ -24,8 +24,18 @@ import sys
 # Import from parent directory
 pmb_src = os.path.realpath(os.path.join(os.path.dirname(__file__) + "/.."))
 sys.path.append(pmb_src)
-
 import pmb.parse._apkbuild
+
+
+@pytest.fixture
+def args(tmpdir, request):
+    import pmb.parse
+    sys.argv = ["pmbootstrap.py", "init"]
+    args = pmb.parse.arguments()
+    args.log = args.work + "/log_testsuite.txt"
+    pmb.helpers.logging.init(args)
+    request.addfinalizer(args.logfd.close)
+    return args
 
 
 def test_subpkgdesc():
@@ -48,3 +58,17 @@ def test_subpkgdesc():
     with pytest.raises(RuntimeError) as e:
         func(path, "subpackage")
     assert str(e.value).startswith("Could not find pkgdesc of subpackage")
+
+
+def test_kernels(args):
+    # Kernel hardcoded in depends
+    args.aports = pmb_src + "/test/testdata/init_questions_device/aports"
+    func = pmb.parse._apkbuild.kernels
+    device = "lg-mako"
+    assert func(args, device) is None
+
+    # Upstream and downstream kernel
+    device = "sony-amami"
+    ret = {"downstream": "Downstream description",
+           "mainline": "Mainline description"}
+    assert func(args, device) == ret

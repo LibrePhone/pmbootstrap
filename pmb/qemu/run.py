@@ -117,7 +117,7 @@ def command_qemu(args, arch, device, img_path, spice_enabled):
     if args.flavor:
         flavor = args.flavor
     else:
-        flavor = pmb.chroot.other.kernel_flavor_autodetect(args, suffix)
+        flavor = pmb.chroot.other.kernel_flavors_installed(args, suffix)[0]
     command = [qemu_bin]
     command += ["-kernel", rootfs + "/boot/vmlinuz-" + flavor]
     command += ["-initrd", rootfs + "/boot/initramfs-" + flavor]
