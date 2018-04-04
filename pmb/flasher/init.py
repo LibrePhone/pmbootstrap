@@ -23,7 +23,7 @@ import pmb.helpers.mount
 
 def init(args):
     # Validate method
-    method = args.deviceinfo["flash_method"]
+    method = args.flash_method or args.deviceinfo["flash_method"]
     if method not in pmb.config.flashers:
         raise RuntimeError("Flash method " + method + " is not supported by the"
                            " current configuration. However, adding a new flash method is "
