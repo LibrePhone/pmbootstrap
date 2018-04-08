@@ -47,7 +47,8 @@ work_version = 2
 # Only save keys to the config file, which we ask for in 'pmbootstrap init'.
 config_keys = ["ccache_size", "device", "extra_packages", "hostname", "jobs",
                "kernel", "keymap", "nonfree_firmware", "nonfree_userland",
-               "qemu_native_mesa_driver", "timezone", "ui", "user", "work"]
+               "qemu_native_mesa_driver", "ssh_keys", "timezone", "ui", "user",
+               "work"]
 
 # Config file/commandline default values
 # $WORK gets replaced with the actual value for args.work (which may be
@@ -77,6 +78,7 @@ defaults = {
     "nonfree_userland": False,
     "port_distccd": "33632",
     "qemu_native_mesa_driver": "dri-virtio",
+    "ssh_keys": False,
     "timezone": "GMT",
     "ui": "weston",
     "user": "user",

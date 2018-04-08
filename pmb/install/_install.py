@@ -208,19 +208,16 @@ def setup_login(args):
     pmb.chroot.root(args, ["passwd", "-l", "root"], suffix)
 
 
-def copy_ssh_key(args):
+def copy_ssh_keys(args):
     """
-    Offer to copy user's SSH public keys to the device if they exist
+    If requested, copy user's SSH public keys to the device if they exist
     """
+    if not args.ssh_keys:
+        return
     keys = []
-    for key in ["RSA", "Ed25519"]:
-        user_ssh_pubkey = os.path.expanduser("~/.ssh/id_" + key.lower() + ".pub")
-        if not os.path.exists(user_ssh_pubkey):
-            continue
-        if pmb.helpers.cli.confirm(
-                args, "Would you like to copy your " + key + " SSH public key to the device?"):
-            with open(user_ssh_pubkey, "r") as infile:
-                keys += infile.readlines()
+    for key in glob.glob(os.path.expanduser("~/.ssh/id_*.pub")):
+        with open(key, "r") as infile:
+            keys += infile.readlines()
 
     if not len(keys):
         logging.info("NOTE: Public SSH keys not found. Since no SSH keys " +
@@ -307,9 +304,7 @@ def install_system_image(args):
     copy_files_from_chroot(args)
     create_home_from_skel(args)
     configure_apk(args)
-
-    # If user has a ssh pubkey, offer to copy it to device
-    copy_ssh_key(args)
+    copy_ssh_keys(args)
     pmb.chroot.shutdown(args, True)
 
     # Convert system image to sparse using img2simg

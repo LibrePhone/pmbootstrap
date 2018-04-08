@@ -294,6 +294,14 @@ def ask_for_hostname(args, device):
         return ret
 
 
+def ask_for_ssh_keys(args):
+    if not len(glob.glob(os.path.expanduser("~/.ssh/id_*.pub"))):
+        return False
+    return pmb.helpers.cli.confirm(args,
+                                   "Would you like to copy your SSH public keys to the device?",
+                                   default=args.ssh_keys)
+
+
 def frontend(args):
     cfg = pmb.config.load(args)
 
@@ -338,6 +346,9 @@ def frontend(args):
 
     # Hostname
     cfg["pmbootstrap"]["hostname"] = ask_for_hostname(args, device)
+
+    # SSH keys
+    cfg["pmbootstrap"]["ssh_keys"] = str(ask_for_ssh_keys(args))
 
     # Save config
     pmb.config.save(args, cfg)
