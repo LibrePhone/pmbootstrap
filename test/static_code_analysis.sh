@@ -44,6 +44,7 @@ sh_files="
 	./aports/main/postmarketos-android-recovery-installer/update-binary
 	./aports/main/mdss-fb-init-hack/mdss-fb-init-hack.sh
 	./aports/main/postmarketos-ui-hildon/postmarketos-ui-hildon.post-install
+	./helpers/envsetup.sh
 	$(find . -path './aports/main/postmarketos-ui-hildon/*.sh')
 	$(find . -name '*.trigger')
 	$(find . -path './aports/main/devicepkg-dev/*.sh')
