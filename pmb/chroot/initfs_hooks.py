@@ -52,6 +52,8 @@ def ls(args, suffix):
         line = "* " + hook
         if hook in hooks_chroot:
             line += " (installed)"
+        else:
+            line += " (not installed)"
         logging.info(line)
 
 
