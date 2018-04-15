@@ -98,7 +98,7 @@ def setup_work(args, tmpdir):
                                     "/_aports/" + folder])
     pmb.helpers.run.user(args, ["cp", "-r", args.aports + "/device/device-" +
                                 args.device, tmpdir + "/_aports/device"])
-    for pkgname in ["testlib", "testapp"]:
+    for pkgname in ["testlib", "testapp", "testsubpkg"]:
         pmb.helpers.run.user(args, ["cp", "-r",
                                     "test/testdata/pkgrel_bump/aports/" + pkgname,
                                     tmpdir + "/_aports/main/" + pkgname])
@@ -112,12 +112,16 @@ def setup_work(args, tmpdir):
                                 "/_pmbootstrap.cfg"])
 
 
-def verify_pkgrels(args, tmpdir, pkgrel_testlib, pkgrel_testapp):
+def verify_pkgrels(args, tmpdir, pkgrel_testlib, pkgrel_testapp,
+                   pkgrel_testsubpkg):
     """
-    Verify the pkgrels of the two test APKBUILDs "testlib" and "testapp".
+    Verify the pkgrels of the three test APKBUILDs ("testlib", "testapp",
+    "testsubpkg").
     """
     args.cache["apkbuild"] = {}
-    mapping = {"testlib": pkgrel_testlib, "testapp": pkgrel_testapp}
+    mapping = {"testlib": pkgrel_testlib,
+               "testapp": pkgrel_testapp,
+               "testsubpkg": pkgrel_testsubpkg}
     for pkgname, pkgrel in mapping.items():
         # APKBUILD path
         path = tmpdir + "/_aports/main/" + pkgname + "/APKBUILD"
@@ -133,38 +137,37 @@ def test_pkgrel_bump_high_level(args, tmpdir):
     setup_work(args, tmpdir)
 
     # Let pkgrel_bump exit normally
-    pmbootstrap(args, tmpdir, ["build", "testlib"])
-    pmbootstrap(args, tmpdir, ["build", "testapp"])
+    pmbootstrap(args, tmpdir, ["build", "testlib", "testapp", "testsubpkg"])
     pmbootstrap(args, tmpdir, ["pkgrel_bump", "--dry", "--auto"])
-    verify_pkgrels(args, tmpdir, 0, 0)
+    verify_pkgrels(args, tmpdir, 0, 0, 0)
 
     # Increase soname (testlib soname changes with the pkgrel)
     pmbootstrap(args, tmpdir, ["pkgrel_bump", "testlib"])
-    verify_pkgrels(args, tmpdir, 1, 0)
+    verify_pkgrels(args, tmpdir, 1, 0, 0)
     pmbootstrap(args, tmpdir, ["build", "testlib"])
     pmbootstrap(args, tmpdir, ["pkgrel_bump", "--dry", "--auto"])
-    verify_pkgrels(args, tmpdir, 1, 0)
+    verify_pkgrels(args, tmpdir, 1, 0, 0)
 
     # Delete package with previous soname (--auto-dry exits with >0 now)
     pmb.helpers.run.root(args, ["rm", tmpdir + "/packages/" +
                                 args.arch_native + "/testlib-1.0-r0.apk"])
     pmbootstrap(args, tmpdir, ["index"])
     pmbootstrap(args, tmpdir, ["pkgrel_bump", "--dry", "--auto"], False)
-    verify_pkgrels(args, tmpdir, 1, 0)
+    verify_pkgrels(args, tmpdir, 1, 0, 0)
 
-    # Bump the pkgrel of testapp and build it
+    # Bump pkgrel and build testapp/testsubpkg
     pmbootstrap(args, tmpdir, ["pkgrel_bump", "--auto"])
-    verify_pkgrels(args, tmpdir, 1, 1)
-    pmbootstrap(args, tmpdir, ["build", "testapp"])
+    verify_pkgrels(args, tmpdir, 1, 1, 1)
+    pmbootstrap(args, tmpdir, ["build", "testapp", "testsubpkg"])
 
     # After rebuilding, pkgrel_bump --auto-dry exits with 0
     pmbootstrap(args, tmpdir, ["pkgrel_bump", "--dry", "--auto"])
-    verify_pkgrels(args, tmpdir, 1, 1)
+    verify_pkgrels(args, tmpdir, 1, 1, 1)
 
     # Test running with specific package names
     pmbootstrap(args, tmpdir, ["pkgrel_bump", "invalid_package_name"], False)
     pmbootstrap(args, tmpdir, ["pkgrel_bump", "--dry", "testlib"], False)
-    verify_pkgrels(args, tmpdir, 1, 1)
+    verify_pkgrels(args, tmpdir, 1, 1, 1)
 
     # Clean up
     pmbootstrap(args, tmpdir, ["shutdown"])

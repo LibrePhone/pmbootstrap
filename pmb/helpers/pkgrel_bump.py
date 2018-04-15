@@ -16,7 +16,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
-import glob
 import logging
 import os
 
@@ -66,7 +65,7 @@ def auto_apkindex_files(args):
     Get the paths to the APKINDEX files, that need to be analyzed, sorted by
     arch. Relevant are the local pmbootstrap generated APKINDEX as well as the
     APKINDEX from the pmOS binary repo.
-.
+
     :returns: {"armhf": "...../APKINDEX.tar.gz", ...}
     """
     pmb.helpers.repo.update(args)
@@ -84,46 +83,44 @@ def auto_apkindex_files(args):
     return ret
 
 
-def auto_apkindex_package(args, pkgname, aport_version, apkindex, arch,
-                          dry=False):
+def auto_apkindex_package(args, arch, aport, apk, dry=False):
     """
     Bump the pkgrel of a specific package if it is outdated in the given
     APKINDEX.
 
-    :param pkgname: name of the package
-    :param aport_version: combination of pkgver and pkgrel (e.g. "1.23-r1")
-    :param apkindex: path to the APKINDEX.tar.gz file
     :param arch: the architecture, e.g. "armhf"
+    :param aport: parsed APKBUILD of the binary package's origin:
+                  {"pkgname": ..., "pkgver": ..., "pkgrel": ..., ...}
+    :param apk: information about the binary package from the APKINDEX:
+                {"version": ..., "depends": [...], ...}
     :param dry: don't modify the APKBUILD, just print the message
     :returns: True when there was an APKBUILD that needed to be changed.
     """
-    # Binary package
-    binary = pmb.parse.apkindex.package(args, pkgname, must_exist=False,
-                                        indexes=[apkindex])
-    if not binary:
-        return
+    version_aport = aport["pkgver"] + "-r" + aport["pkgrel"]
+    version_apk = apk["version"]
+    pkgname = aport["pkgname"]
 
     # Skip when aport version != binary package version
-    compare = pmb.parse.version.compare(aport_version,
-                                        binary["version"])
+    compare = pmb.parse.version.compare(version_aport, version_apk)
     if compare == -1:
-        logging.warning("WARNING: Skipping '" + pkgname +
-                        "' in index " + apkindex + ", because the"
-                        " binary version " + binary["version"] +
-                        " is higher than the aport version " +
-                        aport_version)
+        logging.warning("{}: skipping, because the aport version {} is lower"
+                        " than the binary version {}".format(pkgname,
+                                                             version_aport,
+                                                             version_apk))
         return
     if compare == 1:
-        logging.verbose(pkgname + ": aport version bigger than the"
-                        " one in the APKINDEX, skipping:" +
-                        apkindex)
+        logging.verbose("{}: skipping, because the aport version {} is higher"
+                        " than the binary version {}".format(pkgname,
+                                                             version_aport,
+                                                             version_apk))
         return
 
     # Find missing depends
-    logging.verbose(pkgname + ": checking depends: " +
-                    ",".join(binary["depends"]))
+    depends = apk["depends"]
+    logging.verbose("{}: checking depends: {}".format(pkgname,
+                                                      ", ".join(depends)))
     missing = []
-    for depend in binary["depends"]:
+    for depend in depends:
         providers = pmb.parse.apkindex.providers(args, depend, arch,
                                                  must_exist=False)
         if providers == {}:
@@ -143,21 +140,26 @@ def auto_apkindex_package(args, pkgname, aport_version, apkindex, arch,
 
 def auto(args, dry=False):
     """
-    :returns: True when there was an APKBUILD that needed to be changed.
+    :returns: list of aport names, where the pkgrel needed to be changed
     """
-    # Get APKINDEX files
-    arch_apkindexes = auto_apkindex_files(args)
-
-    # Iterate over aports
-    ret = False
-    for aport in glob.glob(args.aports + "/*/*"):
-        pkgname = os.path.basename(aport)
-        aport = pmb.parse.apkbuild(args, aport + "/APKBUILD")
-        aport_version = aport["pkgver"] + "-r" + aport["pkgrel"]
-
-        for arch, apkindexes in arch_apkindexes.items():
-            for apkindex in apkindexes:
-                if auto_apkindex_package(args, pkgname, aport_version, apkindex,
-                                         arch, dry):
-                    ret = True
+    ret = []
+    for arch, paths in auto_apkindex_files(args).items():
+        for path in paths:
+            logging.info("scan " + path)
+            index = pmb.parse.apkindex.parse(args, path, False)
+            for pkgname, apk in index.items():
+                origin = apk["origin"]
+                # Only increase once!
+                if origin in ret:
+                    logging.verbose("{}: origin '{}' found again".format(pkgname,
+                                    origin))
+                    continue
+                aport_path = pmb.build.other.find_aport(args, origin, False)
+                if not aport_path:
+                    logging.warning("{}: origin '{}' aport not found".format(
+                                    pkgname, origin))
+                    continue
+                aport = pmb.parse.apkbuild(args, aport_path + "/APKBUILD")
+                if auto_apkindex_package(args, arch, aport, apk, dry):
+                    ret.append(pkgname)
     return ret
