@@ -45,6 +45,7 @@ sh_files="
 	./aports/main/mdss-fb-init-hack/mdss-fb-init-hack.sh
 	./aports/main/postmarketos-ui-hildon/postmarketos-ui-hildon.post-install
 	./helpers/envsetup.sh
+	./helpers/envkernel.sh
 	$(find . -path './aports/main/postmarketos-ui-hildon/*.sh')
 	$(find . -name '*.trigger')
 	$(find . -path './aports/main/devicepkg-dev/*.sh')

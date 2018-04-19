@@ -240,6 +240,9 @@ def arguments():
     sub.add_parser("shutdown", help="umount, unregister binfmt")
     sub.add_parser("index", help="re-index all repositories with custom built"
                    " packages (do this after manually removing package files)")
+    sub.add_parser("work_migrate", help="run this before using pmbootstrap"
+                                        " non-interactively to migrate the"
+                                        " work folder version on demand")
     arguments_export(sub)
     arguments_flasher(sub)
     arguments_initfs(sub)

@@ -317,6 +317,11 @@ def stats(args):
     pmb.chroot.user(args, ["ccache", "-s"], suffix, log=False)
 
 
+def work_migrate(args):
+    # do nothing (pmb/__init__.py already did the migration)
+    pmb.helpers.logging.disable()
+
+
 def log(args):
     if args.clear_log:
         pmb.helpers.run.user(args, ["truncate", "-s", "0", args.log],
