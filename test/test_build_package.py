@@ -230,11 +230,11 @@ def test_run_abuild(args, monkeypatch):
     # Normal run
     output = "armhf/test-1-r2.apk"
     env = {"CARCH": "armhf", "SUDO_APK": "abuild-apk --no-progress"}
-    cmd = ["abuild", "-d"]
+    cmd = ["abuild", "-D", "postmarketOS", "-d"]
     assert func(args, apkbuild, "armhf") == (output, cmd, env)
 
     # Force and strict
-    cmd = ["abuild", "-r", "-f"]
+    cmd = ["abuild", "-D", "postmarketOS", "-r", "-f"]
     assert func(args, apkbuild, "armhf", True, True) == (output, cmd, env)
 
     # cross=native
@@ -242,7 +242,7 @@ def test_run_abuild(args, monkeypatch):
            "SUDO_APK": "abuild-apk --no-progress",
            "CROSS_COMPILE": "armv6-alpine-linux-muslgnueabihf-",
            "CC": "armv6-alpine-linux-muslgnueabihf-gcc"}
-    cmd = ["abuild", "-d"]
+    cmd = ["abuild", "-D", "postmarketOS", "-d"]
     assert func(args, apkbuild, "armhf", cross="native") == (output, cmd, env)
 
     # cross=distcc

@@ -351,7 +351,7 @@ def run_abuild(args, apkbuild, arch, strict=False, force=False, cross=None,
         env["DISTCC_HOSTS"] = "127.0.0.1:" + args.port_distccd
 
     # Build the abuild command
-    cmd = ["abuild", "-D" "postmarketOS"]
+    cmd = ["abuild", "-D", "postmarketOS"]
     if strict:
         cmd += ["-r"]  # install depends with abuild
     else:
