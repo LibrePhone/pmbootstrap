@@ -287,6 +287,9 @@ install_device_packages = [
     "ttf-droid"
 ]
 
+# Groups for the default user
+install_user_groups = ["wheel", "video", "audio"]
+
 
 #
 # FLASH

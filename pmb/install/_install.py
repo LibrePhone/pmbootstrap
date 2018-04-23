@@ -184,7 +184,8 @@ def set_user(args):
     if not pmb.chroot.user_exists(args, args.user, suffix):
         pmb.chroot.root(args, ["adduser", "-D", "-u", "1000", args.user],
                         suffix)
-        pmb.chroot.root(args, ["addgroup", args.user, "wheel"], suffix)
+        for group in pmb.config.install_user_groups:
+            pmb.chroot.root(args, ["addgroup", args.user, group], suffix)
 
 
 def setup_login(args):
