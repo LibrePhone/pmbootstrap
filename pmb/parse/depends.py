@@ -151,12 +151,9 @@ def recurse(args, pkgnames, suffix="native"):
 
         # Nothing found
         if not package:
-            logging.info("NOTE: Run 'pmbootstrap pkgrel_bump --auto' to mark"
-                         " packages with outdated dependencies for rebuild."
-                         " This will most likely fix this issue (soname"
-                         " bump?).")
-            raise RuntimeError("Could not find package '" + pkgname_depend +
-                               "' in any aports folder or APKINDEX.")
+            raise RuntimeError("Could not find dependency '" + pkgname_depend +
+                               "' in any aports folder or APKINDEX. See:"
+                               " <https://postmarketos.org/depends>")
 
         # Append to todo/ret (unless it is a duplicate)
         pkgname = package["pkgname"]

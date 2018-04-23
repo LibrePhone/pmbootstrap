@@ -133,7 +133,7 @@ def test_recurse_invalid(args, monkeypatch):
     # Invalid package
     with pytest.raises(RuntimeError) as e:
         func(args, ["invalid-pkgname"])
-    assert str(e.value).startswith("Could not find package")
+    assert str(e.value).startswith("Could not find dependency")
 
 
 def return_none(*args, **kwargs):
