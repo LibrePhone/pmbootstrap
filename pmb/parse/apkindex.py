@@ -300,7 +300,7 @@ def providers(args, package, arch=None, must_exist=True, indexes=None):
         arch = arch or args.arch_native
         indexes = pmb.helpers.repo.apkindex_files(args, arch)
 
-    ret = {}
+    ret = collections.OrderedDict()
     for path in indexes:
         # Skip indexes not providing the package
         index_packages = parse(args, path)
