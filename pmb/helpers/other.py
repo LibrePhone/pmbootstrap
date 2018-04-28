@@ -68,7 +68,7 @@ def check_binfmt_misc(args):
     /proc/sys/fs/binfmt_misc/ exists. If it exists, then do nothing.
     Otherwise, raise an exception pointing to user to the Wiki.
     """
-    path = "/proc/sys/fs/binfmt_misc/"
+    path = "/proc/sys/fs/binfmt_misc/status"
     if os.path.exists(path):
         return
 
