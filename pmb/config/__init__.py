@@ -132,10 +132,10 @@ chroot_home_symlinks = {
     "/mnt/pmbootstrap-packages": "/home/pmos/packages/pmos",
 }
 
-# The package alpine-base only creates some device nodes. Specify here, which
-# additional nodes will get created during initialization of the chroot.
-# Syntax for each entry: [permissions, type, major, minor, name]
+# Device nodes to be created in each chroot. Syntax for each entry:
+# [permissions, type, major, minor, name]
 chroot_device_nodes = [
+    [666, "c", 1, 3, "null"],
     [666, "c", 1, 5, "zero"],
     [666, "c", 1, 7, "full"],
     [644, "c", 1, 8, "random"],

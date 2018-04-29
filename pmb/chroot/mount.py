@@ -16,10 +16,51 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
+import logging
 import os
 import pmb.config
 import pmb.parse
 import pmb.helpers.mount
+
+
+def create_device_nodes(args, suffix):
+    """
+    Create device nodes for null, zero, full, random, urandom in the chroot.
+    """
+    try:
+        chroot = args.work + "/chroot_" + suffix
+
+        # Create all device nodes as specified in the config
+        for dev in pmb.config.chroot_device_nodes:
+            path = chroot + "/dev/" + str(dev[4])
+            if not os.path.exists(path):
+                pmb.helpers.run.root(args, ["mknod",
+                                            "-m", str(dev[0]),  # permissions
+                                            path,  # name
+                                            str(dev[1]),  # type
+                                            str(dev[2]),  # major
+                                            str(dev[3]),  # minor
+                                            ])
+
+        # Verify major and minor numbers of created nodes
+        for dev in pmb.config.chroot_device_nodes:
+            path = chroot + "/dev/" + str(dev[4])
+            stat_result = os.stat(path)
+            rdev = stat_result.st_rdev
+            assert os.major(rdev) == dev[2], "Wrong major in " + path
+            assert os.minor(rdev) == dev[3], "Wrong minor in " + path
+
+        # Verify /dev/zero reading and writing
+        path = chroot + "/dev/zero"
+        with open(path, "r+b", 0) as handle:
+            assert handle.write(bytes([0xff])), "Write failed for " + path
+            assert handle.read(1) == bytes([0x00]), "Read failed for " + path
+
+    # On failure: Show filesystem-related error
+    except Exception as e:
+        logging.info(str(e) + "!")
+        raise RuntimeError("Failed to create device nodes in the '" +
+                           suffix + "' chroot.")
 
 
 def mount_dev_tmpfs(args, suffix="native"):
@@ -33,12 +74,15 @@ def mount_dev_tmpfs(args, suffix="native"):
     if pmb.helpers.mount.ismount(dev):
         return
 
-    # Create the folder structure and mount it
-    if not os.path.exists(dev):
-        pmb.helpers.run.root(args, ["mkdir", "-p", dev])
+    # Create the $chroot/dev folder and mount tmpfs there
+    pmb.helpers.run.root(args, ["mkdir", "-p", dev])
     pmb.helpers.run.root(args, ["mount", "-t", "tmpfs",
                                 "-o", "size=1M,noexec,dev",
                                 "tmpfs", dev])
+
+    # Create pts, shm folders and device nodes
+    pmb.helpers.run.root(args, ["mkdir", "-p", dev + "/pts", dev + "/shm"])
+    create_device_nodes(args, suffix)
 
 
 def mount(args, suffix="native"):

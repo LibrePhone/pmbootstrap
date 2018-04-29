@@ -45,46 +45,6 @@ def copy_resolv_conf(args, suffix="native"):
         pmb.helpers.run.root(args, ["touch", chroot])
 
 
-def create_device_nodes(args, suffix):
-    error = "Failed to create device nodes in the '" + suffix + "' chroot."
-
-    # Folder sturcture
-    chroot = args.work + "/chroot_" + suffix
-    pmb.helpers.run.root(args, ["mkdir", "-p", chroot + "/dev"])
-
-    try:
-        # Create all device nodes as specified in the config
-        for dev in pmb.config.chroot_device_nodes:
-            path = chroot + "/dev/" + str(dev[4])
-            if not os.path.exists(path):
-                pmb.helpers.run.root(args, ["mknod",
-                                            "-m", str(dev[0]),  # permissions
-                                            path,  # name
-                                            str(dev[1]),  # type
-                                            str(dev[2]),  # major
-                                            str(dev[3]),  # minor
-                                            ])
-
-        # Verify major and minor numbers of created nodes
-        for dev in pmb.config.chroot_device_nodes:
-            path = chroot + "/dev/" + str(dev[4])
-            stat_result = os.stat(path)
-            rdev = stat_result.st_rdev
-            assert os.major(rdev) == dev[2], "Wrong major in " + path
-            assert os.minor(rdev) == dev[3], "Wrong minor in " + path
-
-        # Verify /dev/zero reading and writing
-        path = chroot + "/dev/zero"
-        with open(path, "r+b", 0) as handle:
-            assert handle.write(bytes([0xff])), "Write failed for " + path
-            assert handle.read(1) == bytes([0x00]), "Read failed for " + path
-
-    # On failure: Show filesystem-related error
-    except Exception as e:
-        logging.info(str(e) + "!")
-        raise RuntimeError(error)
-
-
 def init(args, suffix="native"):
     # When already initialized: just prepare the chroot
     chroot = args.work + "/chroot_" + suffix
@@ -110,8 +70,7 @@ def init(args, suffix="native"):
 
     logging.info("(" + suffix + ") install alpine-base")
 
-    # Initialize device nodes and cache
-    create_device_nodes(args, suffix)
+    # Initialize cache
     apk_cache = args.work + "/cache_apk_" + arch
     pmb.helpers.run.root(args, ["ln", "-s", "-f", "/var/cache/apk", chroot +
                                 "/etc/apk/cache"])
