@@ -51,7 +51,7 @@ def deviceinfo(args, device=None):
         device = args.device
 
     if not os.path.exists(args.aports):
-        logging.fatal("Aports directory is missing")
+        logging.fatal("Aports directory is missing, expected: " + args.aports)
         logging.fatal("Please provide a path to the aports directory using the -p flag")
         raise RuntimeError("Aports directory missing")
 
