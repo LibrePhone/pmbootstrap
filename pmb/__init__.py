@@ -68,7 +68,8 @@ def main():
     except Exception as e:
         logging.info("ERROR: " + str(e))
         if os.path.exists(args.log):
-            logging.info("Run 'pmbootstrap log' for details.")
+            # Hint to read the log file (only gets printed to stdout)
+            print("Run 'pmbootstrap log' for details.")
         else:
             logging.info("Crashed before the log file was created.")
             logging.info("Running init again like the following gives more details:")
