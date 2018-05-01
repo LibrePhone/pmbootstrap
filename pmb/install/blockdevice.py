@@ -70,56 +70,73 @@ def mount_sdcard(args):
             raise RuntimeError("Aborted.")
 
 
-def create_and_mount_image(args, size):
+def create_and_mount_image(args, size_boot, size_root):
     """
     Create a new image file, and mount it as /dev/install.
 
-    :param size: of the whole image in bytes
+    :param size_boot: size of the boot partition in bytes
+    :param size_root: size of the root partition in bytes
     """
     # Short variables for paths
     chroot = args.work + "/chroot_native"
-    img_path = "/home/pmos/rootfs/" + args.device + ".img"
-    img_path_outside = chroot + img_path
+    img_path_prefix = "/home/pmos/rootfs/" + args.device
+    img_path_full = img_path_prefix + ".img"
+    img_path_boot = img_path_prefix + "-boot.img"
+    img_path_root = img_path_prefix + "-root.img"
 
-    # Umount and delete existing image
-    if os.path.exists(img_path_outside):
-        pmb.helpers.mount.umount_all(args, chroot + "/mnt")
-        pmb.install.losetup.umount(args, img_path)
-        pmb.chroot.root(args, ["rm", img_path])
-        if os.path.exists(img_path_outside):
-            raise RuntimeError("Failed to remove old image file: " +
-                               img_path_outside)
+    # Umount and delete existing images
+    for img_path in [img_path_full, img_path_boot, img_path_root]:
+        outside = chroot + img_path
+        if os.path.exists(outside):
+            pmb.helpers.mount.umount_all(args, chroot + "/mnt")
+            pmb.install.losetup.umount(args, img_path)
+            pmb.chroot.root(args, ["rm", img_path])
 
     # Make sure there is enough free space
-    size_mb = round(size / (1024**2))
+    size_mb = round((size_boot + size_root) / (1024**2))
     disk_data = os.statvfs(args.work)
     free = round((disk_data.f_bsize * disk_data.f_bavail) / (1024**2))
     if size_mb > free:
         raise RuntimeError("Not enough free space to create rootfs image! (free: " + str(free) + "M, required: " + str(size_mb) + "M)")
-    mb = str(size_mb) + "M"
 
-    # Create empty image file
-    logging.info("(native) create " + args.device + ".img (" + mb + ")")
+    # Create empty image files
     pmb.chroot.user(args, ["mkdir", "-p", "/home/pmos/rootfs"])
-    pmb.chroot.root(args, ["truncate", "-s", mb, img_path])
+    size_mb_full = str(size_mb) + "M"
+    size_mb_boot = str(round(size_boot / (1024**2))) + "M"
+    size_mb_root = str(round(size_root / (1024**2))) + "M"
+    images = {img_path_full: size_mb_full}
+    if args.split:
+        images = {img_path_boot: size_mb_boot,
+                  img_path_root: size_mb_root}
+    for img_path, size_mb in images.items():
+        logging.info("(native) create " + os.path.basename(img_path) + " (" + size_mb + ")")
+        pmb.chroot.root(args, ["truncate", "-s", size_mb, img_path])
 
     # Mount to /dev/install
-    logging.info("(native) mount /dev/install (" + args.device + ".img)")
-    pmb.install.losetup.mount(args, img_path)
-    device = pmb.install.losetup.device_by_back_file(args, img_path)
-    pmb.helpers.mount.bind_blockdevice(args, device, args.work +
-                                       "/chroot_native/dev/install")
+    mount_image_paths = {img_path_full: "/dev/install"}
+    if args.split:
+        mount_image_paths = {img_path_boot: "/dev/installp1",
+                             img_path_root: "/dev/installp2"}
+
+    for img_path, mount_point in mount_image_paths.items():
+        logging.info("(native) mount " + mount_point +
+                     " (" + os.path.basename(img_path) + ")")
+        pmb.install.losetup.mount(args, img_path)
+        device = pmb.install.losetup.device_by_back_file(args, img_path)
+        pmb.helpers.mount.bind_blockdevice(args, device, args.work +
+                                           "/chroot_native" + mount_point)
 
 
-def create(args, size):
+def create(args, size_boot, size_root):
     """
     Create /dev/install (the "install blockdevice").
 
-    :param size: of the whole image in bytes
+    :param size_boot: size of the boot partition in bytes
+    :param size_root: size of the root partition in bytes
     """
     pmb.helpers.mount.umount_all(
         args, args.work + "/chroot_native/dev/install")
     if args.sdcard:
         mount_sdcard(args)
     else:
-        create_and_mount_image(args, size)
+        create_and_mount_image(args, size_boot, size_root)

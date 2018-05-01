@@ -1,3 +1,4 @@
+import glob
 import logging
 import os
 
@@ -13,10 +14,11 @@ def frontend(args):
     if not os.path.exists(target):
         pmb.helpers.run.user(args, ["mkdir", "-p", target])
 
-    # System image note
-    img_path = "/home/pmos/rootfs/" + args.device + ".img"
-    if not os.path.exists(args.work + "/chroot_native" + img_path):
-        logging.info("NOTE: To export the system image, run 'pmbootstrap"
+    # Rootfs image note
+    chroot = args.work + "/chroot_native"
+    pattern = chroot + "/home/pmos/rootfs/" + args.device + "*.img"
+    if not glob.glob(pattern):
+        logging.info("NOTE: To export the rootfs image, run 'pmbootstrap"
                      " install' first (without the 'sdcard' parameter).")
 
     # Rebuild the initramfs, just to make sure (see #69)

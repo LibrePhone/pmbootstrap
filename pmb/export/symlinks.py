@@ -42,6 +42,8 @@ def symlinks(args, flavor, folder):
         "uImage-" + flavor: "Kernel, legacy u-boot image format",
         "vmlinuz-" + flavor: "Linux kernel",
         args.device + ".img": "Rootfs with partitions for /boot and /",
+        args.device + "-boot.img": "Boot partition image",
+        args.device + "-root.img": "Root partition image",
         "pmos-" + args.device + ".zip": "Android recovery flashable zip",
     }
 
@@ -51,6 +53,8 @@ def symlinks(args, flavor, folder):
     path_buildroot = args.work + "/chroot_buildroot_" + args.deviceinfo["arch"]
     patterns = [path_boot + "/*-" + flavor,
                 path_native + "/home/pmos/rootfs/" + args.device + ".img",
+                path_native + "/home/pmos/rootfs/" + args.device + "-boot.img",
+                path_native + "/home/pmos/rootfs/" + args.device + "-root.img",
                 path_buildroot +
                 "/var/lib/postmarketos-android-recovery-installer/pmos-" +
                 args.device + ".zip"]

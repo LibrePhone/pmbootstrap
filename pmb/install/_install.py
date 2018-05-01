@@ -46,9 +46,9 @@ def mount_device_rootfs(args, suffix="native"):
 
 def get_subpartitions_size(args):
     """
-    Calculate the size of the whole image and boot subpartition.
+    Calculate the size of the boot and root subpartition.
 
-    :returns: (full, boot) the size of the full image and boot
+    :returns: (boot, root) the size of the boot and root
               partition as integer in bytes
     """
     # Calculate required sizes first
@@ -66,7 +66,7 @@ def get_subpartitions_size(args):
     full *= 1.20
     full += 50 * 1024 * 1024
     boot += 15 * 1024 * 1024
-    return (full, boot)
+    return (boot, full - boot)
 
 
 def get_nonfree_packages(args, device):
@@ -284,11 +284,13 @@ def install_system_image(args):
     # Partition and fill image/sdcard
     logging.info("*** (3/5) PREPARE INSTALL BLOCKDEVICE ***")
     pmb.chroot.shutdown(args, True)
-    (size_image, size_boot) = get_subpartitions_size(args)
+    (size_boot, size_root) = get_subpartitions_size(args)
     if not args.rsync:
-        pmb.install.blockdevice.create(args, size_image)
-        pmb.install.partition(args, size_boot)
-    pmb.install.partitions_mount(args)
+        pmb.install.blockdevice.create(args, size_boot, size_root)
+        if not args.split:
+            pmb.install.partition(args, size_boot)
+    if not args.split:
+        pmb.install.partitions_mount(args)
 
     if args.full_disk_encryption:
         logging.info("WARNING: Full disk encryption is enabled!")
@@ -309,7 +311,7 @@ def install_system_image(args):
     pmb.chroot.shutdown(args, True)
 
     # Convert system image to sparse using img2simg
-    if args.deviceinfo["flash_sparse"] == "true":
+    if args.deviceinfo["flash_sparse"] == "true" and not args.split:
         logging.info("(native) make sparse system image")
         pmb.chroot.apk.install(args, ["libsparse"])
         sys_image = args.device + ".img"
@@ -325,7 +327,7 @@ def install_system_image(args):
                  " target device:")
 
     # System flash information
-    if not args.sdcard:
+    if not args.sdcard and not args.split:
         logging.info("* pmbootstrap flasher flash_rootfs")
         logging.info("  Flashes the generated rootfs image to your device:")
         logging.info("  " + args.work + "/chroot_native/home/pmos/rootfs/" +
@@ -346,9 +348,14 @@ def install_system_image(args):
                      " Use 'pmbootstrap flasher boot' to do that.)")
 
     # Export information
-    logging.info("* If the above steps do not work, you can also create"
-                 " symlinks to the generated files with 'pmbootstrap export'"
-                 " and flash outside of pmbootstrap.")
+    if args.split:
+        logging.info("* Boot and root image files have been generated, run"
+                     " 'pmbootstrap export' to create symlinks and flash"
+                     " outside of pmbootstrap.")
+    else:
+        logging.info("* If the above steps do not work, you can also create"
+                     " symlinks to the generated files with 'pmbootstrap export'"
+                     " and flash outside of pmbootstrap.")
 
 
 def install_recovery_zip(args):
