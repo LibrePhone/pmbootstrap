@@ -28,7 +28,11 @@ def run(args, action, flavor=None):
     cfg = pmb.config.flashers[method]
     if action not in cfg["actions"]:
         raise RuntimeError("action " + action + " is not"
-                           " configured for method " + method + "!")
+                           " configured for method " + method + "!"
+                           " You can use the '--method' option to specify a"
+                           " different flash method. See also:"
+                           " <https://wiki.postmarketos.org/wiki/"
+                           "Deviceinfo_flash_methods>")
 
     # Variable setup
     vars = pmb.flasher.variables(args, flavor, method)
