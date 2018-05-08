@@ -94,12 +94,14 @@ def get_nonfree_packages(args, device):
 
 def get_kernel_package(args, device):
     """
-    Get the kernel package based on user's choice in "pmbootstrap init".
+    Get the device's kernel subpackage based on the user's choice in
+    "pmbootstrap init".
 
-    :param device: code name, e.g. "lg-mako"
-    :returns: [] or the package in a list, e.g. ["linux-postmarketos-stable"]
+    :param device: code name, e.g. "sony-amami"
+    :returns: [] or the package in a list, e.g.
+              ["device-sony-amami-kernel-mainline"]
     """
-    # Get kernels for the device
+    # Empty list: single kernel devices / "none" selected
     kernels = pmb.parse._apkbuild.kernels(args, device)
     if not kernels or args.kernel == "none":
         return []
@@ -110,10 +112,8 @@ def get_kernel_package(args, device):
                            " configured for device " + device + ". Please"
                            " run 'pmbootstrap init' to select a valid kernel.")
 
-    # Return the pkgname
-    if args.kernel == "downstream":
-        return ["linux-" + device]
-    return ["linux-postmarketos-" + args.kernel]
+    # Selected kernel subpackage
+    return ["device-" + device + "-kernel-" + args.kernel]
 
 
 def copy_files_from_chroot(args):
