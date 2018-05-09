@@ -3,6 +3,7 @@ python: "3.6"
 sudo: required
 addons:
   apt:
+    update: true
     sources:
     - debian-sid
 install:
