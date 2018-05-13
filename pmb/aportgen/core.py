@@ -105,7 +105,7 @@ def rewrite(args, pkgname, path_original, fields={}, replace_pkgname=None,
 
             # Replace simple
             for pattern, replacement in replace_simple.items():
-                if fnmatch.fnmatch(line, pattern):
+                if fnmatch.fnmatch(line, pattern + "\n"):
                     line = replacement
                     if replacement:
                         line += "\n"

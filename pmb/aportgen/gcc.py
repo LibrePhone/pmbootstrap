@@ -49,7 +49,6 @@ def generate(args, pkgname):
 
     below_header = "CTARGET_ARCH=" + arch + """
         CTARGET="$(arch_to_hostspec ${CTARGET_ARCH})"
-        CBUILDROOT="/usr/$CTARGET"
         LANG_OBJC=false
         LANG_JAVA=false
         LANG_GO=false
@@ -57,40 +56,16 @@ def generate(args, pkgname):
         LANG_ADA=false
         options="!strip !tracedeps"
 
-        # Wrap the package function, to make the resulting package
-        # lazy-reproducible
-        package() {
-            # Repack the *.a files to be reproducible (see #64)
-            _temp="$_builddir"/_reproducible-patch
-            cd "$_builddir"
-            for f in $(find -name '*.a'); do
-                # Copy to a temporary folder
-                echo "Repack $f to be reproducible"
-                mkdir -p "$_temp"
-                cd "$_temp"
-                cp "$_builddir"/"$f" .
+        # abuild doesn't try to tries to install "build-base-$CTARGET_ARCH"
+        # when this variable matches "no*"
+        BOOTSTRAP="nobuildbase"
 
-                # Repack with a sorted file order
-                ar x *.a
-                rm *.a
-                ar r sorted.a $(find -name '*.o' | sort)
+        # abuild will only cross compile when this variable is set, but it
+        # needs to find a valid package database in there for dependency
+        # resolving, so we set it to /.
+        CBUILDROOT="/"
 
-                # Copy back and clean up
-                cp -v sorted.a "$_builddir"/"$f"
-                cd ..
-                rm -r "$_temp"
-            done
-
-            # Unmodified package function from the gcc APKBUILD
-            _package
-
-            # Workaround for: postmarketOS/binary-package-repo#1
-            echo "Replacing hardlinks with symlinks"
-            rm -v "$pkgdir"/usr/bin/"$CTARGET"-c++
-            ln -s -v /usr/bin/"$CTARGET"-g++ "$pkgdir"/usr/bin/"$CTARGET"-c++
-            rm -v "$pkgdir"/usr/bin/"$CTARGET"-gcc-"$pkgver"
-            ln -s -v /usr/bin/"$CTARGET"-gcc "$pkgdir"/usr/bin/"$CTARGET"-gcc-"$pkgver"
-        }
+        _cross_configure="--disable-bootstrap --with-sysroot=/usr/$CTARGET"
     """
 
     replace_simple = {
@@ -99,8 +74,10 @@ def generate(args, pkgname):
         # pmbootstrap picks it up properly).
         '*subpackages="$subpackages libstdc++:libcxx:*': None,
 
-        # Rename package to _package, so we can wrap it (see above)
-        '*package() {*': "_package() {"
+        # We set the cross_configure variable at the beginning, so it does not
+        # use CBUILDROOT as sysroot. In the original APKBUILD this is a local
+        # variable, but we make it a global one.
+        '*_cross_configure=*': None,
     }
 
     pmb.aportgen.core.rewrite(args, pkgname, "main/gcc", fields,
