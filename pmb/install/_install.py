@@ -185,6 +185,8 @@ def set_user(args):
         pmb.chroot.root(args, ["adduser", "-D", "-u", "1000", args.user],
                         suffix)
         for group in pmb.config.install_user_groups:
+            pmb.chroot.root(args, ["addgroup", "-S", group], suffix,
+                            check=False)
             pmb.chroot.root(args, ["addgroup", args.user, group], suffix)
 
 
