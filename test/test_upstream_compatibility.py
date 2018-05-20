@@ -46,7 +46,7 @@ def test_qt_versions(args):
     qt5-qtbase version.
     """
     # Upstream version
-    index = pmb.helpers.repo.alpine_apkindex_path(args, "community", "armhf")
+    index = pmb.helpers.repo.alpine_apkindex_path(args, "community", "x86_64")
     index_data = pmb.parse.apkindex.package(args, "qt5-qtbase",
                                             indexes=[index])
     pkgver_upstream = index_data["version"].split("-r")[0]
@@ -80,7 +80,7 @@ def test_aportgen_versions(args):
     they are based on.
     """
     # Get Alpine's "main" repository APKINDEX path
-    index = pmb.helpers.repo.alpine_apkindex_path(args, "main", "armhf")
+    index = pmb.helpers.repo.alpine_apkindex_path(args, "main", "x86_64")
 
     # Alpine packages and patterns for our derivatives
     map = {"binutils": "binutils-*",
