@@ -68,13 +68,15 @@ def partition(args, size_boot):
     logging.info("(native) partition /dev/install (boot: " + mb_boot +
                  ", root: the rest)")
 
+    filesystem = args.deviceinfo["boot_filesystem"] or "ext2"
+
     # Actual partitioning with 'parted'. Using check=False, because parted
     # sometimes "fails to inform the kernel". In case it really failed with
     # partitioning, the follow-up mounting/formatting will not work, so it
     # will stop there (see #463).
     commands = [
         ["mktable", "msdos"],
-        ["mkpart", "primary", "ext2", "2048s", mb_boot],
+        ["mkpart", "primary", filesystem, "2048s", mb_boot],
         ["mkpart", "primary", mb_boot, "100%"],
         ["set", "1", "boot", "on"]
     ]

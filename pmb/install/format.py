@@ -24,9 +24,15 @@ import pmb.chroot
 def format_and_mount_boot(args):
     mountpoint = "/mnt/install/boot"
     device = "/dev/installp1"
-    logging.info("(native) format " + device + " (boot, ext2), mount to " +
+    filesystem = args.deviceinfo["boot_filesystem"] or "ext2"
+    logging.info("(native) format " + device + " (boot, " + filesystem + "), mount to " +
                  mountpoint)
-    pmb.chroot.root(args, ["mkfs.ext2", "-F", "-q", "-L", "pmOS_boot", device])
+    if filesystem == "fat16":
+        pmb.chroot.root(args, ["mkfs.fat", "-F", "16", "-n", "pmOS_boot", device])
+    elif filesystem == "ext2":
+        pmb.chroot.root(args, ["mkfs.ext2", "-F", "-q", "-L", "pmOS_boot", device])
+    else:
+        raise RuntimeError("Filesystem " + filesystem + " is not supported!")
     pmb.chroot.root(args, ["mkdir", "-p", mountpoint])
     pmb.chroot.root(args, ["mount", device, mountpoint])
 

@@ -237,6 +237,7 @@ deviceinfo_attributes = [
 
     # bootloader
     "flash_method",
+    "boot_filesystem",
 
     # flash
     "flash_heimdall_partition_kernel",
@@ -277,7 +278,7 @@ default_ip = "172.16.42.1"
 # Packages, that will be installed inside the native chroot to perform
 # the installation to the device.
 # util-linux: losetup, fallocate
-install_native_packages = ["cryptsetup", "util-linux", "e2fsprogs", "parted"]
+install_native_packages = ["cryptsetup", "util-linux", "e2fsprogs", "parted", "dosfstools"]
 install_device_packages = [
 
     # postmarketos
@@ -288,7 +289,7 @@ install_device_packages = [
 ]
 
 # Groups for the default user
-install_user_groups = ["wheel", "video", "audio"]
+install_user_groups = ["wheel", "video", "audio", "input"]
 
 
 #
