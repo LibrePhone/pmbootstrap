@@ -97,6 +97,8 @@ def get_depends(args, apkbuild):
     """
     # Read makedepends and depends
     ret = list(apkbuild["makedepends"])
+    if "!check" not in apkbuild["options"]:
+        ret += apkbuild["checkdepends"]
     if "ignore_depends" not in args or not args.ignore_depends:
         ret += apkbuild["depends"]
     ret = sorted(set(ret))

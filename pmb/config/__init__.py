@@ -190,6 +190,7 @@ apkbuild_attributes = {
     "depends": {"array": True},
     "depends_dev": {"array": True},
     "makedepends": {"array": True},
+    "checkdepends": {"array": True},
     "options": {"array": True},
     "pkgname": {"array": False},
     "pkgdesc": {"array": False},
