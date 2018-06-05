@@ -6,13 +6,12 @@ import sys
 
 def get_changed_files():
     try:
-        raw = subprocess.check_output(['git', 'diff', '--name-only', os.environ['TRAVIS_COMMIT_RANGE']])
-    except (KeyError, subprocess.CalledProcessError) as e:
-        if 'TRAVIS_PULL_REQUEST' in os.environ and os.environ['TRAVIS_PULL_REQUEST'] == "true":
-            branch = os.environ['TRAVIS_PULL_REQUEST_BRANCH']
-            raw = subprocess.check_output(['git', 'diff', '--name-only', 'master...{}'.format(branch)])
-        else:
-            raw = subprocess.check_output(['git', 'diff', '--name-only', 'HEAD~1'])
+        branch = os.environ['CI_COMMIT_REF_NAME']
+        raw = subprocess.check_output(['git', 'diff', '--name-only',
+                                       'master...{}'.format(branch)])
+    except (KeyError, subprocess.CalledProcessError):
+            raw = subprocess.check_output(['git', 'diff', '--name-only',
+                                           'HEAD~1'])
     return raw.decode().splitlines()
 
 
@@ -84,11 +83,6 @@ if __name__ == "__main__":
         else:
             print("usage: {} [--build]".format(sys.argv[0]))
             exit(1)
-
-    if 'TRAVIS_COMMIT_RANGE' in os.environ:
-        print('Checking commit range: {}'.format(os.environ['TRAVIS_COMMIT_RANGE']))
-    if 'TRAVIS_PULL_REQUEST_BRANCH' in os.environ:
-        print('Checking PR branch: {}'.format(os.environ['TRAVIS_PULL_REQUEST_BRANCH']))
 
     packages = get_changed_packages()
 

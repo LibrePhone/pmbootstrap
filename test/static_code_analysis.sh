@@ -46,6 +46,8 @@ sh_files="
 	./aports/main/postmarketos-ui-hildon/postmarketos-ui-hildon.post-install
 	./helpers/envsetup.sh
 	./helpers/envkernel.sh
+	./.gitlab/setup-pmos-environment.sh
+	./.gitlab/shared-runner-tests.sh
 	$(find . -path './aports/main/postmarketos-ui-hildon/*.sh')
 	$(find . -name '*.trigger')
 	$(find . -path './aports/main/devicepkg-dev/*.sh')
@@ -64,7 +66,8 @@ done
 cd "$DIR"/..
 echo "Test with flake8: *.py"
 echo "NOTE: Run 'autopep8 -ria $PWD' to fix code style issues"
-py_files="$(find . -name '*.py')"
+# Note: omitting a virtualenv if it is here (e.g. gitlab CI)
+py_files="$(find . -not -path '*/venv/*' -name '*.py')"
 _ignores="E501,E402,E722"
 # shellcheck disable=SC2086
 flake8 --exclude=__init__.py --ignore "$_ignores" $py_files

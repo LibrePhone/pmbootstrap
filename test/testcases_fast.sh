@@ -34,5 +34,7 @@ for file in test/test_*.py; do
 done
 
 # Run enabled testcases with coverage enabled
+# Note: Pytest is called through python so that this is compatible with
+# running from a venv (e.g. in gitlab CI)
 # shellcheck disable=SC2086
-pytest --cov=pmb $enabled --tb=native
+python -m pytest -vv --cov=pmb $enabled --tb=native

@@ -1,0 +1,79 @@
+---
+# Author: Clayton Craft <clayton@craftyguy.net>
+
+image: python:3.6-slim-stretch
+
+cache:
+  paths:
+    - venv
+
+before_script:
+  - ./.gitlab/setup-pmos-environment.sh
+  # venv created in CI_PROJECT_DIR for caching
+  - "[[ ! -d venv ]] && virtualenv venv -p $(which python3.6)"
+  - "source venv/bin/activate"
+  - "pip3 install flake8 pytest-cov python-coveralls pytest"
+  - "python3 --version"
+
+stages:
+  - checks
+  - tests
+
+wiki-test:
+  stage: checks
+  script:
+    - "./test/check_devices_in_wiki.py"
+
+static-code-analysis:
+  stage: checks
+  script:
+    - "./test/static_code_analysis.sh"
+
+pmbootstrap-tests:
+  stage: tests
+  script:
+    # Note: This script uses CI_PROJECT_DIR
+    - su pmos -c "CI_PROJECT_DIR=$CI_PROJECT_DIR .gitlab/shared-runner-tests.sh"
+  after_script:
+    # Move logs so it can be saved as artifacts
+    - "[[ -f /home/pmos/.local/var/pmbootstrap/log.txt ]] && mv /home/pmos/.local/var/pmbootstrap/log.txt $CI_PROJECT_DIR/log.txt"
+    - "[[ -f /home/pmos/.local/var/pmbootstrap/log_testsuite.txt ]] && mv /home/pmos/.local/var/pmbootstrap/log_testsuite.txt $CI_PROJECT_DIR/log_testsuite.txt"
+    - "[[ -f /home/pmos/.config/pmbootstrap.cfg ]] && cp /home/pmos/.config/pmbootstrap.cfg $CI_PROJECT_DIR/pmbootstrap.cfg"
+    - "sudo dmesg > $CI_PROJECT_DIR/dmesg.txt"
+  artifacts:
+    when: always
+    paths:
+      - "log.txt"
+      - "log_testsuite.txt"
+      - "dmesg.txt"
+      - "pmbootstrap.cfg"
+    expire_in: 1 week
+
+pmbootstrap-qemu-tests:
+  stage: tests
+  tags:
+    # This requires a specific runner, shared runners generally don't work.
+    - qemu
+  script:
+    # Note: this is a workaround for pmbootstrap's losetup failing
+    # due to loop devices not coming up fast enough when modprobe is
+    # called by pmbootstrap.
+    - "[[ ! -c /dev/loop0 ]] && sudo modprobe loop"
+    # Init test (pipefail disabled so 'yes' doesn't fail test)
+    - "set +o pipefail; yes ''| ./pmbootstrap.py init; set -o pipefail"
+    # qemu running process tests
+    - "python -m pytest -vv ./test/test_qemu_running_processes.py"
+  after_script:
+    # Move logs so it can be saved as artifacts
+    - "[[ -f ~/.local/var/pmbootstrap/log.txt ]] && mv ~/.local/var/pmbootstrap/log.txt $CI_PROJECT_DIR/log.txt"
+    - "[[ -f ~/.local/var/pmbootstrap/log_testsuite.txt ]] && mv ~/.local/var/pmbootstrap/log_testsuite.txt $CI_PROJECT_DIR/log_testsuite.txt"
+    - "[[ -f /home/pmos/.config/pmbootstrap.cfg ]] && cp /home/pmos/.config/pmbootstrap.cfg $CI_PROJECT_DIR/pmbootstrap.cfg"
+    - "sudo dmesg > $CI_PROJECT_DIR/dmesg.txt"
+  artifacts:
+    when: always
+    paths:
+      - "log.txt"
+      - "log_testsuite.txt"
+      - "dmesg.txt"
+      - "pmbootstrap.cfg"
+    expire_in: 1 week

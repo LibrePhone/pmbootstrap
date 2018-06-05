@@ -1,0 +1,22 @@
+# 'qemu' gitlab runner configuration file
+# Author: Clayton Craft <clayton@craftyguy.net>
+concurrent = 4
+check_interval = 0
+log_level = "debug"
+
+[[runners]]
+  name = "corredor"
+  url = "https://gitlab.com/"
+  token = <REDACTED>
+  executor = "virtualbox"
+  builds_dir = "/home/pmos/builds"
+  [runners.ssh]
+    user = "pmos"
+    password = <REDACTED>
+    identity_file = "/home/pmos/.ssh/id_ecdsa"
+  [runners.virtualbox]
+    base_name = "pmbootstrap-vm"
+    base_snapshot = "ci-snapshot-python-3.6"
+    #disable_snapshots = false
+    disable_snapshots = true
+  [runners.cache]
