@@ -99,7 +99,7 @@ def init(args, suffix="native"):
     # Building chroots: create "pmos" user, add symlinks to /home/pmos
     if not suffix.startswith("rootfs_"):
         pmb.chroot.root(args, ["adduser", "-D", "pmos", "-u",
-                        pmb.config.chroot_uid_user], suffix, auto_init=False)
+                               pmb.config.chroot_uid_user], suffix, auto_init=False)
 
         # Create the links (with subfolders if necessary)
         for target, link_name in pmb.config.chroot_home_symlinks.items():

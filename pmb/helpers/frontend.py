@@ -188,6 +188,9 @@ def export(args):
 
 
 def menuconfig(args):
+    logging.warning("WARNING: 'pmbootstrap menuconfig' is deprecated and will"
+                    " soon be removed. Please use 'pmbootstrap kconfig edit'"
+                    " instead.")
     pmb.build.menuconfig(args, args.package)
 
 
@@ -233,23 +236,30 @@ def newapkbuild(args):
     pmb.build.newapkbuild(args, args.folder, pass_through, args.force)
 
 
-def kconfig_check(args):
-    # Default to all kernel packages
-    packages = args.packages
-    if not packages:
-        for aport in glob.glob(args.aports + "/*/linux-*"):
-            packages.append(os.path.basename(aport).split("linux-")[1])
+def kconfig(args):
+    if args.action_kconfig == "check":
+        # Default to all kernel packages
+        packages = []
+        if args.package == "" or args.package is None:
+            for aport in glob.glob(args.aports + "/*/linux-*"):
+                packages.append(os.path.basename(aport).split("linux-")[1])
+        else:
+            packages = [args.package]
 
-    # Iterate over all kernels
-    error = False
-    packages.sort()
-    for package in packages:
-        if not pmb.parse.kconfig.check(args, package, details=True):
-            error = True
+        # Iterate over all kernels
+        error = False
+        packages.sort()
+        for package in packages:
+            if not pmb.parse.kconfig.check(args, package, details=True):
+                error = True
 
-    # At least one failure
-    if error:
-        raise RuntimeError("kconfig_check failed!")
+        # At least one failure
+        if error:
+            raise RuntimeError("kconfig check failed!")
+        else:
+            logging.info("kconfig check succeded!")
+    elif args.action_kconfig == "edit":
+        pmb.build.menuconfig(args, args.package)
 
 
 def apkbuild_parse(args):

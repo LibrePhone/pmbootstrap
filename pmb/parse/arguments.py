@@ -185,6 +185,35 @@ def arguments_newapkbuild(subparser):
                      " download link to the source archive")
 
 
+def arguments_kconfig(subparser):
+    # Allowed architectures
+    arch_native = pmb.parse.arch.alpine_native()
+    arch_choices = set(pmb.config.build_device_architectures + [arch_native])
+
+    # Kconfig subparser
+    ret = subparser.add_parser("kconfig", help="change or edit kernel configs")
+    sub = ret.add_subparsers(dest="action_kconfig")
+    sub.required = True
+
+    # "pmbootstrap kconfig check"
+    check = sub.add_parser("check", help="check kernel aport config")
+    check.add_argument("--arch", choices=arch_choices, dest="arch")
+    check.add_argument("package", default="", nargs='?')
+
+    # "pmbootstrap kconfig edit" (legacy: "pmbootstrap menuconfig")
+    legacy_menuconfig = subparser.add_parser("menuconfig")
+    edit = sub.add_parser("edit", help="edit kernel aport config")
+    for parser in [edit, legacy_menuconfig]:
+        parser.add_argument("--arch", choices=arch_choices, dest="arch")
+        parser.add_argument("-x", dest="xconfig", action="store_true",
+                            help="use xconfig rather than ncurses for kernel"
+                                 " configuration")
+        parser.add_argument("-g", dest="gconfig", action="store_true",
+                            help="use gconfig rather than ncurses for kernel"
+                                 " configuration")
+        parser.add_argument("package")
+
+
 def arguments():
     parser = argparse.ArgumentParser(prog="pmbootstrap")
     arch_native = pmb.parse.arch.alpine_native()
@@ -243,6 +272,7 @@ def arguments():
     sub.add_parser("work_migrate", help="run this before using pmbootstrap"
                                         " non-interactively to migrate the"
                                         " work folder version on demand")
+    arguments_kconfig(sub)
     arguments_export(sub)
     arguments_flasher(sub)
     arguments_initfs(sub)
@@ -350,12 +380,6 @@ def arguments():
     install.add_argument("--recovery-no-kernel",
                          help="do not overwrite the existing kernel",
                          action="store_false", dest="recovery_flash_kernel")
-
-    # Action: menuconfig
-    menuconfig = sub.add_parser("menuconfig", help="run menuconfig on"
-                                " a kernel aport")
-    menuconfig.add_argument("--arch", choices=arch_choices)
-    menuconfig.add_argument("package")
 
     # Action: checksum / aportgen / build
     checksum = sub.add_parser("checksum", help="update aport checksums")

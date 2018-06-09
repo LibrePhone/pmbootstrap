@@ -43,7 +43,7 @@ def check(args, pkgname, details=False):
     # Pkgname: allow omitting "linux-" prefix
     if pkgname.startswith("linux-"):
         flavor = pkgname.split("linux-")[1]
-        logging.info("PROTIP: You can simply do 'pmbootstrap kconfig_check " +
+        logging.info("PROTIP: You can simply do 'pmbootstrap kconfig check " +
                      flavor + "'")
     else:
         flavor = pkgname
@@ -90,7 +90,7 @@ def check(args, pkgname, details=False):
                     else:
                         logging.warning("WARNING: " + path + " isn't configured"
                                         " properly for postmarketOS, run"
-                                        " 'pmbootstrap kconfig_check' for"
+                                        " 'pmbootstrap kconfig check' for"
                                         " details!")
                         break
     return ret

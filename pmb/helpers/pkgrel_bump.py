@@ -152,7 +152,7 @@ def auto(args, dry=False):
                 # Only increase once!
                 if origin in ret:
                     logging.verbose("{}: origin '{}' found again".format(pkgname,
-                                    origin))
+                                                                         origin))
                     continue
                 aport_path = pmb.build.other.find_aport(args, origin, False)
                 if not aport_path:

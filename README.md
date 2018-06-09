@@ -81,12 +81,12 @@ $ pmbootstrap bootimg_analyze ~/Downloads/twrp-3.2.1-0-fp2.img
 
 Check kernel configs:
 ```
-$ pmbootstrap kconfig_check
+$ pmbootstrap kconfig check
 ```
 
 Edit a kernel config:
 ```
-$ pmbootstrap menuconfig --arch=armhf postmarketos-mainline
+$ pmbootstrap kconfig edit --arch=armhf postmarketos-mainline
 ```
 
 ### System Image

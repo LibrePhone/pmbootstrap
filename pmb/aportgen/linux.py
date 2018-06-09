@@ -114,12 +114,6 @@ def generate_apkbuild(args, pkgname, deviceinfo):
             yes "" | make ARCH="$_carch" HOSTCC="$HOSTCC" oldconfig
         }
 
-        menuconfig() {
-            cd "$builddir"
-            make ARCH="$_carch" menuconfig
-            cp .config "$startdir"/$_config
-        }
-
         build() {""" + build + """
         }
 

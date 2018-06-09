@@ -172,7 +172,7 @@ def configure_apk(args):
 
     # Disable pmbootstrap repository
     pmb.helpers.run.root(args, ["sed", "-i", "/\/mnt\/pmbootstrap-packages/d",
-                         rootfs + "/etc/apk/repositories"])
+                                rootfs + "/etc/apk/repositories"])
     pmb.helpers.run.user(args, ["cat", rootfs + "/etc/apk/repositories"])
 
 
@@ -274,7 +274,7 @@ def setup_hostname(args):
     # Update /etc/hosts
     suffix = "rootfs_" + args.device
     pmb.chroot.root(args, ["sh", "-c", "echo " + shlex.quote(hostname) +
-                    " > /etc/hostname"], suffix)
+                           " > /etc/hostname"], suffix)
     regex = ("s/^127\.0\.0\.1.*/127.0.0.1\t" + re.escape(hostname) +
              " localhost.localdomain localhost/")
     pmb.chroot.root(args, ["sed", "-i", "-e", regex, "/etc/hosts"], suffix)
@@ -389,7 +389,7 @@ def install(args):
     # List all packages to be installed (including the ones specified by --add)
     # and upgrade the installed packages/apkindexes
     logging.info('*** (2/{0}) CREATE DEVICE ROOTFS ("{1}") ***'.format(steps,
-                 args.device))
+                                                                       args.device))
     install_packages = (pmb.config.install_device_packages +
                         ["device-" + args.device] +
                         get_kernel_package(args, args.device) +

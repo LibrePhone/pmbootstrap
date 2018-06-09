@@ -31,9 +31,8 @@ _pmbootstrap_targets()
 			find $PMBOOTSTRAP_DIR/aports/ -mindepth 2 -maxdepth 2 -type d \
 				-printf '%f\n' | sed "s|$PMBOOTSTRAP_DIR/aports/||g"
 			;;
-		kconfig_check|menuconfig)
-			ls -1 $PMBOOTSTRAP_DIR/aports/*/ | grep linux- \
-				| sed 's/linux-//g'
+		kconfig)
+			echo edit check
 			;;
 		flasher)
 			echo boot flash_kernel flash_rootfs sideload list_flavors \

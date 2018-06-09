@@ -28,8 +28,8 @@ yes "" | ./pmbootstrap.py init
 fold_end "init"
 
 # pmbootstrap kconfig_check
-fold_start "kconfig_check" "pmbootstrap kconfig_check"
-./pmbootstrap.py kconfig_check
+fold_start "kconfig_check" "pmbootstrap kconfig check"
+./pmbootstrap.py kconfig check
 fold_end "kconfig_check"
 
 # pmbootstrap build --strict

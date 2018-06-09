@@ -39,7 +39,7 @@ def test_chroot_interactive_shell_user():
     pmb_src = os.path.realpath(os.path.join(os.path.dirname(__file__) + "/.."))
     os.chdir(pmb_src)
     ret = subprocess.check_output(["./pmbootstrap.py", "-q", "chroot",
-                                  "--user"], timeout=300, input="id -un",
+                                   "--user"], timeout=300, input="id -un",
                                   universal_newlines=True,
                                   stderr=subprocess.STDOUT)
     assert ret == "pmos\n"
