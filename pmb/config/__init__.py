@@ -168,7 +168,6 @@ necessary_kconfig_options = {
     "all": {
         "ANDROID_PARANOID_NETWORK": False,
         "DEVTMPFS": True,
-        "DEVTMPFS_MOUNT": False,
         "DM_CRYPT": True,
         "EXT4_FS": True,
         "PFT": False,
