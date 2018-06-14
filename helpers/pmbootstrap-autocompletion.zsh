@@ -5,7 +5,7 @@
 # somewhere that makes sense to you). Then, insert the following line
 # in your ~/.zshrc (making sure to use the right folder name, if changed):
 #
-#	source ~/.zsh/pmbootstrap-auto-completion.zsh
+#	source ~/.zsh/pmbootstrap-autocompletion.zsh
 #
 # Then, set the variable PMBOOTSTRAP_DIR to your `pmbootstrap` root.
 # Example:
