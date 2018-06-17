@@ -128,7 +128,7 @@ def auto_apkindex_package(args, arch, aport, apk, dry=False):
             # (which means dynamic libraries that the package was linked
             # against) and packages for which no aport exists.
             if (depend.startswith("so:") or
-                    not pmb.build.other.find_aport(args, depend)):
+                    not pmb.build.other.find_aport(args, depend, False)):
                 missing.append(depend)
 
     # Increase pkgrel
