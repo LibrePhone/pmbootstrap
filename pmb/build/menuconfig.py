@@ -55,6 +55,38 @@ def get_arch(args, apkbuild):
                        apkbuild["arch"][0] + "' architecture.")
 
 
+def get_outputdir(args, pkgname):
+    """
+    Get the folder for the kernel compilation output.
+    For most APKBUILDs, this is $builddir. But some older ones still use
+    $srcdir/build (see the discussion in #1551).
+    """
+    # Old style ($srcdir/build)
+    ret = "/home/pmos/build/src/build"
+    chroot = args.work + "/chroot_native"
+    if os.path.exists(chroot + ret + "/.config"):
+        logging.warning("*****")
+        logging.warning("NOTE: The code in this linux APKBUILD is pretty old."
+                        " Consider making a backup and migrating to a modern"
+                        " version with: pmbootstrap aportgen " + pkgname)
+        logging.warning("*****")
+
+        return ret
+
+    # New style ($builddir)
+    cmd = "srcdir=/home/pmos/build/src source APKBUILD; echo $builddir"
+    ret = pmb.chroot.user(args, ["sh", "-c", cmd],
+                          "native", "/home/pmos/build",
+                          return_stdout=True).rstrip()
+    if os.path.exists(chroot + ret + "/.config"):
+        return ret
+
+    # Not found
+    raise RuntimeError("Could not find the kernel config. Consider making a"
+                       " backup of your APKBUILD and recreating it from the"
+                       " template with: pmbootstrap aportgen " + pkgname)
+
+
 def menuconfig(args, pkgname):
     # Pkgname: allow omitting "linux-" prefix
     if pkgname.startswith("linux-"):
@@ -100,16 +132,16 @@ def menuconfig(args, pkgname):
                     "/home/pmos/build", log=False, env={"CARCH": arch})
 
     # Run make menuconfig
-    srcdir = "/home/pmos/build/src"
+    outputdir = get_outputdir(args, pkgname)
     logging.info("(native) make " + kopt)
     pmb.chroot.user(args, ["make", kopt], "native",
-                    srcdir + "/build", log=False,
+                    outputdir, log=False,
                     env={"ARCH": pmb.parse.arch.alpine_to_kernel(arch),
                          "DISPLAY": os.environ.get("DISPLAY"),
                          "XAUTHORITY": "/home/pmos/.Xauthority"})
 
     # Find the updated config
-    source = args.work + "/chroot_native" + srcdir + "/build/.config"
+    source = args.work + "/chroot_native" + outputdir + "/.config"
     if not os.path.exists(source):
         raise RuntimeError("No kernel config generated: " + source)
 

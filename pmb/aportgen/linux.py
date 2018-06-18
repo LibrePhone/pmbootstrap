@@ -110,9 +110,8 @@ def generate_apkbuild(args, pkgname, deviceinfo):
             done
 
             # Prepare kernel config ('yes ""' for kernels lacking olddefconfig)
-            mkdir -p "$srcdir"/build
             cp "$srcdir"/$_config "$builddir"/.config
-            yes "" | make O="$srcdir"/build ARCH="$_carch" HOSTCC="$HOSTCC" oldconfig
+            yes "" | make ARCH="$_carch" HOSTCC="$HOSTCC" oldconfig
         }
 
         build() {""" + build + """
