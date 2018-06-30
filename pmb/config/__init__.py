@@ -66,7 +66,7 @@ defaults = {
     "hostname": "",
     # A higher value is typically desired, but this can lead to VERY long open
     # times on slower devices due to host systems being MUCH faster than the
-    # target device: <https://github.com/postmarketOS/pmbootstrap/issues/429>
+    # target device (see issue #429).
     "iter_time": "200",
     "jobs": str(multiprocessing.cpu_count() + 1),
     "kernel": "stable",

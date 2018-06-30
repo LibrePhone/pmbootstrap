@@ -1,5 +1,5 @@
 # pmbootstrap
-[**Introduction**](https://postmarketos.org/blog/2017/05/26/intro/) | [**Security Warning**](https://ollieparanoid.github.io/post/security-warning/) | [**Devices**](https://wiki.postmarketos.org/wiki/Devices) | [![travis badge](https://api.travis-ci.org/postmarketOS/pmbootstrap.png?branch=master)](https://travis-ci.org/postmarketOS/pmbootstrap) | [![Coverage Status](https://coveralls.io/repos/github/postmarketOS/pmbootstrap/badge.svg?branch=master)](https://coveralls.io/github/postmarketOS/pmbootstrap?branch=master)
+[**Introduction**](https://postmarketos.org/blog/2017/05/26/intro/) | [**Security Warning**](https://ollieparanoid.github.io/post/security-warning/) | [**Devices**](https://wiki.postmarketos.org/wiki/Devices)
 
 Sophisticated chroot/build/flash tool to develop and install [postmarketOS](https://postmarketos.org).
 

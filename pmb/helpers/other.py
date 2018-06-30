@@ -28,8 +28,7 @@ def folder_size(args, path):
     """
     Run `du` to calculate the size of a folder (this is less code and
     faster than doing the same task in pure Python). This result is only
-    approximatelly right, but good enough for pmbootstrap's use case:
-    <https://github.com/postmarketOS/pmbootstrap/pull/760>
+    approximatelly right, but good enough for pmbootstrap's use case (#760).
 
     :returns: folder size in bytes
     """
@@ -51,16 +50,8 @@ def check_grsec(args):
     if not os.path.exists(path):
         return
 
-    link = "https://github.com/postmarketOS/pmbootstrap/issues/107"
     raise RuntimeError("You're running a kernel based on the grsec"
-                       " patchset. At the moment, pmbootstrap is not"
-                       " compatible with grsec or a hardened kernel, sorry!"
-                       " To get pmbootstrap working, you will need to switch"
-                       " to a vanilla kernel (i.e. non-hardened and without grsec)."
-                       " Alternatively, it would be awesome if you want to add"
-                       " support for hardened/grsec kernels, please see this for"
-                       " more details: <" + link + ">")
-
+                       " patchset. This is not supported.")
 
 def check_binfmt_misc(args):
     """
@@ -105,8 +96,7 @@ def migrate_work_folder(args):
     if current == 0:
         # Ask for confirmation
         logging.info("Changelog:")
-        logging.info("* Building chroots have a different username: "
-                     "<https://github.com/postmarketOS/pmbootstrap/issues/709>")
+        logging.info("* Building chroots have a different username (#709)")
         logging.info("Migration will do the following:")
         logging.info("* Zap your chroots")
         logging.info("* Adjust '" + args.work + "/config_abuild/abuild.conf'")

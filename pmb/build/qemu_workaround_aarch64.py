@@ -26,7 +26,7 @@ def qemu_workaround_aarch64(args, suffix="buildroot_aarch64"):
     from the archives it generates in some cases. We build a patched abuild-tar,
     which avoids the bug.
 
-    https://github.com/postmarketOS/pmbootstrap/issues/546
+    https://gitlab.com/postmarketOS/pmbootstrap/issues/546
     """
     pkgname = "abuild-aarch64-qemu-workaround"
     pmb.build.package(args, pkgname, "aarch64", True,
