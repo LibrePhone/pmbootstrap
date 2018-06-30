@@ -53,6 +53,7 @@ def check_grsec(args):
     raise RuntimeError("You're running a kernel based on the grsec"
                        " patchset. This is not supported.")
 
+
 def check_binfmt_misc(args):
     """
     Check if the 'binfmt_misc' module is loaded by checking, if
