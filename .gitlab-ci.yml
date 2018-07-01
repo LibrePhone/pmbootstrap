@@ -51,6 +51,12 @@ pmbootstrap-tests:
 
 pmbootstrap-qemu-tests:
   stage: tests
+  only:
+    variables:
+      # This is configured in the gitlab project. Make sure there is a runner
+      # added to the project that is capable of running these tests before
+      # setting this variable in the project!
+      - $CI_RUN_QEMU
   tags:
     # This requires a specific runner, shared runners generally don't work.
     - qemu
