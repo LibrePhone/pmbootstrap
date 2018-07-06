@@ -67,8 +67,10 @@ pmbootstrap-qemu-tests:
     - "[[ ! -c /dev/loop0 ]] && sudo modprobe loop"
     # Init test (pipefail disabled so 'yes' doesn't fail test)
     - "set +o pipefail; yes ''| ./pmbootstrap.py init; set -o pipefail"
-    # qemu running process tests
-    - "python -m pytest -vv ./test/test_qemu_running_processes.py"
+    # Build/install QEMU (so it doesn't timeout in the testcase)
+    - "./pmbootstrap.py chroot --add=qemu -- true"
+    # qemu running process tests (-x: stop after first failure)
+    - "python -m pytest -vv -x ./test/test_qemu_running_processes.py"
   after_script:
     # Move logs so it can be saved as artifacts
     - "[[ -f ~/.local/var/pmbootstrap/log.txt ]] && mv ~/.local/var/pmbootstrap/log.txt $CI_PROJECT_DIR/log.txt"

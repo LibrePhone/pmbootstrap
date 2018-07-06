@@ -124,6 +124,10 @@ def arguments_qemu(subparser):
     display.add_argument("--display", dest="qemu_display", const="sdl,gl=on",
                          help="Qemu's display parameter (default: sdl,gl=on)",
                          default="sdl,gl=on", nargs="?")
+
+    ret.add_argument("--host-qemu", dest="host_qemu", action='store_true',
+                     help="Use the host system's qemu")
+
     return ret
 
 
