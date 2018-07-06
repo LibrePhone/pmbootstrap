@@ -437,6 +437,9 @@ def arguments():
     bootimg_analyze = sub.add_parser("bootimg_analyze", help="Extract all the"
                                      " information from an existing boot.img")
     bootimg_analyze.add_argument("path", help="path to the boot.img")
+    bootimg_analyze.add_argument("-f", dest="force", action="store_true",
+                                 help="force even if the file seems to be"
+                                      " invalid")
 
     # Use defaults from the user's config file
     args = parser.parse_args()

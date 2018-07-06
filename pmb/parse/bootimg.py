@@ -38,12 +38,22 @@ def bootimg(args, path):
     file_output = pmb.chroot.user(args, ["file", "-b", "boot.img"], working_dir=temp_path,
                                   return_stdout=True).rstrip()
     if "android bootimg" not in file_output.lower():
-        if "linux kernel" in file_output.lower():
-            raise RuntimeError("File is a Kernel image, you might need the 'heimdall-isorec'"
-                               " flash method. See also: "
-                               "<https://wiki.postmarketos.org/wiki/Deviceinfo_flash_methods>")
+        if "force" in args and args.force:
+            logging.warning("WARNING: boot.img file seems to be invalid, but"
+                            " proceeding anyway (-f specified)")
         else:
-            raise RuntimeError("File is not an Android bootimg. (" + file_output + ")")
+            logging.info("NOTE: If you are sure that your file is a valid"
+                         " boot.img file, you could force the analysis"
+                         " with: 'pmbootstrap bootimg_analyze " + path +
+                         " -f'")
+            if "linux kernel" in file_output.lower():
+                raise RuntimeError("File is a Kernel image, you might need the"
+                                   " 'heimdall-isorec' flash method. See also:"
+                                   " <https://wiki.postmarketos.org/wiki/"
+                                   "Deviceinfo_flash_methods>")
+            else:
+                raise RuntimeError("File is not an Android boot.img. (" +
+                                   file_output + ")")
 
     # Extract all the files
     pmb.chroot.user(args, ["unpackbootimg", "-i", "boot.img"], working_dir=temp_path)
