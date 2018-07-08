@@ -18,7 +18,7 @@ Please refer to the [postmarketOS wiki](https://wiki.postmarketos.org) for in-de
 ### Basics
 Initial setup:
 ```
-$ git clone https://github.com/postmarketOS/pmbootstrap
+$ git clone https://gitlab.com/postmarketOS/pmbootstrap
 $ cd pmbootstrap
 $ alias pmbootstrap=$PWD/pmbootstrap.py
 $ pmbootstrap init
