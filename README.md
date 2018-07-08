@@ -54,7 +54,7 @@ $ pmbootstrap checksum hello-world
 
 Generate a template for a new package:
 ```
-$ pmbootstrap newapkbuild "https://github.com/postmarketOS/osk-sdl/archive/0.51.tar.gz"
+$ pmbootstrap newapkbuild "https://gitlab.com/postmarketOS/osk-sdl/-/archive/0.51.tar.gz"
 ```
 
 ### Chroots
