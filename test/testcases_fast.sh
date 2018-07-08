@@ -1,8 +1,9 @@
 #!/bin/sh -e
 # usage: testcases_fast.sh [--all]
 
-# Disable slow testcases
-disabled="qemu_running_processes"
+# Disable QEMU and aports/upstream compatibility tests
+# (These run with different CI runners in parallel, see #1610)
+disabled="aports aportgen upstream_compatibility soname_bump qemu_running_processes"
 
 # Optionally enable all test cases
 if [ "$1" = "--all" ]; then

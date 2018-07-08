@@ -10,7 +10,6 @@
 
 # Return failure on any failure of commands below
 set -e
-set -x
 
 # Fail quickly if run as root, since other commands here will fail
 [[ "$(id -u)" != "0" ]]
@@ -28,14 +27,8 @@ set -o pipefail
 # kconfig_check
 ./pmbootstrap.py kconfig check
 
+# test_aports
+python -m pytest -vv --cov=pmb --tb=native ./test/test_aports.py
+
 # check_checksums
 ./test/check_checksums.py --build
-
-# this seems to be needed for some tests to pass
-set +o pipefail
-yes | ./pmbootstrap.py zap -m -p
-set -o pipefail
-
-# testcases_fast (qemu is omitted by not passing --all)
-./test/testcases_fast.sh
-

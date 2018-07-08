@@ -47,7 +47,9 @@ sh_files="
 	./helpers/envsetup.sh
 	./helpers/envkernel.sh
 	./.gitlab/setup-pmos-environment.sh
-	./.gitlab/shared-runner-tests.sh
+	./.gitlab/shared-runner_test-aports.sh
+	./.gitlab/shared-runner_test-pmbootstrap.sh
+	./.gitlab/shared-runner_test-upstream-compat.sh
 	$(find . -path './aports/main/postmarketos-ui-hildon/*.sh')
 	$(find . -name '*.trigger')
 	$(find . -path './aports/main/devicepkg-dev/*.sh')
