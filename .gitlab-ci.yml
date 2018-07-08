@@ -29,13 +29,54 @@ static-code-analysis:
   script:
     - "./test/static_code_analysis.sh"
 
-pmbootstrap-tests:
+test-aports:
   stage: tests
   script:
     # Note: This script uses CI_PROJECT_DIR
-    - su pmos -c "CI_PROJECT_DIR=$CI_PROJECT_DIR .gitlab/shared-runner-tests.sh"
+    - su pmos -c "CI_PROJECT_DIR=$CI_PROJECT_DIR .gitlab/shared-runner_test-aports.sh"
   after_script:
-    # Move logs so it can be saved as artifacts
+     # Move logs so it can be saved as artifacts
+    - "[[ -f /home/pmos/.local/var/pmbootstrap/log.txt ]] && mv /home/pmos/.local/var/pmbootstrap/log.txt $CI_PROJECT_DIR/log.txt"
+    - "[[ -f /home/pmos/.local/var/pmbootstrap/log_testsuite.txt ]] && mv /home/pmos/.local/var/pmbootstrap/log_testsuite.txt $CI_PROJECT_DIR/log_testsuite.txt"
+    - "[[ -f /home/pmos/.config/pmbootstrap.cfg ]] && cp /home/pmos/.config/pmbootstrap.cfg $CI_PROJECT_DIR/pmbootstrap.cfg"
+    - "sudo dmesg > $CI_PROJECT_DIR/dmesg.txt"
+  artifacts:
+    when: always
+    paths:
+      - "log.txt"
+      - "log_testsuite.txt"
+      - "dmesg.txt"
+      - "pmbootstrap.cfg"
+    expire_in: 1 week
+
+test-upstream-compat:
+  stage: tests
+  script:
+    # Note: This script uses CI_PROJECT_DIR
+    - su pmos -c "CI_PROJECT_DIR=$CI_PROJECT_DIR .gitlab/shared-runner_test-upstream-compat.sh"
+  after_script:
+     # Move logs so it can be saved as artifacts
+    - "[[ -f /home/pmos/.local/var/pmbootstrap/log.txt ]] && mv /home/pmos/.local/var/pmbootstrap/log.txt $CI_PROJECT_DIR/log.txt"
+    - "[[ -f /home/pmos/.local/var/pmbootstrap/log_testsuite.txt ]] && mv /home/pmos/.local/var/pmbootstrap/log_testsuite.txt $CI_PROJECT_DIR/log_testsuite.txt"
+    - "[[ -f /home/pmos/.config/pmbootstrap.cfg ]] && cp /home/pmos/.config/pmbootstrap.cfg $CI_PROJECT_DIR/pmbootstrap.cfg"
+    - "sudo dmesg > $CI_PROJECT_DIR/dmesg.txt"
+  artifacts:
+    when: always
+    paths:
+      - "log.txt"
+      - "log_testsuite.txt"
+      - "dmesg.txt"
+      - "pmbootstrap.cfg"
+    expire_in: 1 week
+
+
+test-pmbootstrap:
+  stage: tests
+  script:
+    # Note: This script uses CI_PROJECT_DIR
+    - su pmos -c "CI_PROJECT_DIR=$CI_PROJECT_DIR .gitlab/shared-runner_test-pmbootstrap.sh"
+  after_script:
+     # Move logs so it can be saved as artifacts
     - "[[ -f /home/pmos/.local/var/pmbootstrap/log.txt ]] && mv /home/pmos/.local/var/pmbootstrap/log.txt $CI_PROJECT_DIR/log.txt"
     - "[[ -f /home/pmos/.local/var/pmbootstrap/log_testsuite.txt ]] && mv /home/pmos/.local/var/pmbootstrap/log_testsuite.txt $CI_PROJECT_DIR/log_testsuite.txt"
     - "[[ -f /home/pmos/.config/pmbootstrap.cfg ]] && cp /home/pmos/.config/pmbootstrap.cfg $CI_PROJECT_DIR/pmbootstrap.cfg"
