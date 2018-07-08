@@ -18,7 +18,7 @@ Please refer to the [postmarketOS wiki](https://wiki.postmarketos.org) for in-de
 ### Basics
 Initial setup:
 ```
-$ git clone https://gitlab.com/postmarketOS/pmbootstrap
+$ git clone https://gitlab.com/postmarketOS/pmbootstrap.git
 $ cd pmbootstrap
 $ alias pmbootstrap=$PWD/pmbootstrap.py
 $ pmbootstrap init
@@ -54,7 +54,7 @@ $ pmbootstrap checksum hello-world
 
 Generate a template for a new package:
 ```
-$ pmbootstrap newapkbuild "https://gitlab.com/postmarketOS/osk-sdl/-/archive/0.51.tar.gz"
+$ pmbootstrap newapkbuild "https://gitlab.com/postmarketOS/osk-sdl/-/archive/0.52/osk-sdl-0.52.tar.bz2"
 ```
 
 ### Chroots
