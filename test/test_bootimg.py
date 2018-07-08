@@ -56,7 +56,7 @@ def test_bootimg_kernel(args):
 def test_bootimg_invalid_file(args):
     with pytest.raises(RuntimeError) as e:
         pmb.parse.bootimg(args, __file__)
-    assert "File is not an Android bootimg" in str(e.value)
+    assert "File is not an Android boot.img" in str(e.value)
 
 
 def test_bootimg_normal(args):
