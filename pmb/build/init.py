@@ -86,6 +86,12 @@ def init(args, suffix="native"):
     pmb.chroot.root(args, ["sed", "-i", "-e", "s/^CLEANUP=.*/CLEANUP=''/",
                            "/etc/abuild.conf"], suffix)
 
+    # abuild.conf: Don't clean up installed packages in strict mode, so
+    # abuild exits directly when pressing ^C in pmbootstrap.
+    pmb.chroot.root(args, ["sed", "-i", "-e",
+                           "s/^ERROR_CLEANUP=.*/ERROR_CLEANUP=''/",
+                           "/etc/abuild.conf"], suffix)
+
     # Qemu workaround (aarch64 only)
     arch = pmb.parse.arch.from_chroot_suffix(args, suffix)
     emulate = pmb.parse.arch.cpu_emulation_required(args, arch)
