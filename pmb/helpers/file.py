@@ -24,12 +24,12 @@ import pmb.helpers.run
 
 def replace(path, old, new):
     text = ""
-    with open(path, 'r') as handle:
+    with open(path, "r", encoding="utf-8") as handle:
         text = handle.read()
 
     text = text.replace(old, new)
 
-    with open(path, 'w') as handle:
+    with open(path, "w", encoding="utf-8") as handle:
         handle.write(text)
 
 
