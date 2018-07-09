@@ -67,10 +67,9 @@ done
 # E722: do not use bare except
 cd "$DIR"/..
 echo "Test with flake8: *.py"
-echo "NOTE: Run 'autopep8 -ria $PWD' to fix code style issues"
 # Note: omitting a virtualenv if it is here (e.g. gitlab CI)
 py_files="$(find . -not -path '*/venv/*' -name '*.py')"
-_ignores="E501,E402,E722"
+_ignores="E501,E402,E722,W504,W605"
 # shellcheck disable=SC2086
 flake8 --exclude=__init__.py --ignore "$_ignores" $py_files
 # shellcheck disable=SC2086

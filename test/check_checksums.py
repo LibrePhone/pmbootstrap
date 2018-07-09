@@ -42,7 +42,7 @@ def check_checksums(package):
     command = ['./pmbootstrap.py', 'checksum', package]
     try:
         subprocess.check_output(command)
-    except subprocess.CalledProcessError as e:
+    except subprocess.CalledProcessError:
         print("Something gone wrong in pmbootstrap. Log:")
         logfile = os.path.expanduser("~/.local/var/pmbootstrap/log.txt")
         with open(logfile) as log:
