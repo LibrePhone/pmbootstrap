@@ -337,9 +337,10 @@ def frontend(args):
     logging.info("Additional packages that will be installed to rootfs."
                  " Specify them in a comma separated list (e.g.: vim,file)"
                  " or \"none\"")
-    cfg["pmbootstrap"]["extra_packages"] = pmb.helpers.cli.ask(args, "Extra packages",
-                                                               None, args.extra_packages,
-                                                               validation_regex="^(|[-.+\w\s]+(?:,[-.+\w\s]*)*)$")
+    extra = pmb.helpers.cli.ask(args, "Extra packages", None,
+                                args.extra_packages,
+                                validation_regex="^([\w-]+)(,[\w-]+)*$")
+    cfg["pmbootstrap"]["extra_packages"] = extra
 
     # Configure timezone info
     cfg["pmbootstrap"]["timezone"] = ask_for_timezone(args)
