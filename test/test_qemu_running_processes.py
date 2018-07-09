@@ -148,6 +148,7 @@ def is_running(args, programs, tries=180, sleep_before_retry=1):
     """
     print("Looking for programs to appear in the VM (tries: " + str(tries) +
           "): " + ", ".join(programs))
+    ssh_works = False
     for i in range(0, tries):
         # Sleep
         if i > 0:
@@ -157,6 +158,7 @@ def is_running(args, programs, tries=180, sleep_before_retry=1):
         all = ssh_run(args, "ps ax")
         if not all:
             continue
+        ssh_works = True
 
         # Missing programs
         missing = []
@@ -167,7 +169,11 @@ def is_running(args, programs, tries=180, sleep_before_retry=1):
             return True
 
     # Not found
-    print("Programs not running: " + ", ".join(missing))
+    print("ERROR: Timeout reached!")
+    if ssh_works:
+        print("Programs not running: " + ", ".join(missing))
+    else:
+        print("Could not connect to the VM via SSH")
     return False
 
 
