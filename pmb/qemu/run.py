@@ -20,6 +20,7 @@ import logging
 import os
 import re
 import signal
+import shlex
 import shutil
 
 import pmb.build
@@ -137,7 +138,7 @@ def command_qemu(args, arch, device, img_path, spice_enabled):
 
     command += ["-kernel", rootfs + "/boot/vmlinuz-" + flavor]
     command += ["-initrd", rootfs + "/boot/initramfs-" + flavor]
-    command += ["-append", '"' + cmdline + '"']
+    command += ["-append", shlex.quote(cmdline)]
     command += ["-m", str(args.memory)]
     command += ["-netdev",
                 "user,id=net0,"
