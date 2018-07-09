@@ -26,6 +26,7 @@ from . import parse
 from .config import init as config_init
 from .helpers import frontend
 from .helpers import logging as pmb_logging
+from .helpers import mount
 from .helpers import other
 
 
@@ -62,7 +63,10 @@ def main():
         else:
             logging.info("Run pmbootstrap -h for usage information.")
 
-        # Print finish timestamp
+        # Still active notice
+        if mount.ismount(args.work + "/chroot_native/dev"):
+            logging.info("NOTE: chroot is still active (use 'pmbootstrap"
+                         " shutdown' as necessary)")
         logging.info("Done")
 
     except Exception as e:
