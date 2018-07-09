@@ -34,11 +34,13 @@ def replace_variables(apkbuild):
     # pkgname: $_flavor
     ret["pkgname"] = ret["pkgname"].replace("${_flavor}", ret["_flavor"])
 
-    # subpackages: $pkgname
-    replaced = []
-    for subpackage in ret["subpackages"]:
-        replaced.append(subpackage.replace("$pkgname", ret["pkgname"]))
-    ret["subpackages"] = replaced
+    # subpackages, *depends*: $pkgname
+    for key in ["subpackages", "depends", "makedepends", "makedepends_host",
+                "makedepends_build"]:
+        replaced = []
+        for subpackage in ret[key]:
+            replaced.append(subpackage.replace("$pkgname", ret["pkgname"]))
+        ret[key] = replaced
 
     # makedepends: $makedepends_host, $makedepends_build, $_llvmver
     replaced = []
