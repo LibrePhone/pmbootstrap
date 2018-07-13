@@ -63,7 +63,8 @@ def test_aports_device(args):
 
         # Depends: Must not have firmware packages
         for depend in apkbuild["depends"]:
-            if depend.startswith("firmware-") or depend == "linux-firmware":
+            if (depend.startswith("firmware-") or
+                    depend.startswith("linux-firmware")):
                 raise RuntimeError("Firmware package '" + depend + "' found in"
                                    " depends of " + path + ". These go into"
                                    " subpackages now, see"
@@ -112,7 +113,7 @@ def test_aports_device_kernel(args):
         if len(kernels_depends) > 1:
             raise RuntimeError("Please use kernel subpackages instead of"
                                " multiple kernels in depends (see"
-                               " <https://postmarketos.org/deviceinfo>): " +
+                               " <https://postmarketos.org/devicepkg>): " +
                                path)
 
         # Verify subpackages
