@@ -89,8 +89,13 @@ def shutdown(args, only_install_related=False):
         pmb.helpers.mount.umount_all(args, chroot_rootfs)
 
     if not only_install_related:
+        # Umount all folders inside args.work
+        # The folders are explicitly iterated over, so folders symlinked inside
+        # args.work get umounted as well (used in test_pkgrel_bump.py, #1595)
+        for path in glob.glob(args.work + "/*"):
+            pmb.helpers.mount.umount_all(args, path)
+
         # Clean up the rest
-        pmb.helpers.mount.umount_all(args, args.work)
         for arch in pmb.config.build_device_architectures:
             if pmb.parse.arch.cpu_emulation_required(args, arch):
                 pmb.chroot.binfmt.unregister(args, arch)

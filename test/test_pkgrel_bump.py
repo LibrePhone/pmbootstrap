@@ -107,7 +107,7 @@ def setup_work(args, tmpdir):
     pmb.helpers.run.user(args, ["mkdir", "-p", tmpdir + "/packages"])
     pmb.helpers.run.user(args, ["chmod", "777", tmpdir + "/packages"])
 
-    # Copy over the pmbootstrap config, disable timestamp based rebuilds
+    # Copy over the pmbootstrap config
     pmb.helpers.run.user(args, ["cp", args.config, tmpdir +
                                 "/_pmbootstrap.cfg"])
 

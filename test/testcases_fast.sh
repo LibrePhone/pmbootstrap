@@ -13,8 +13,13 @@ else
     echo "Use '$(basename "$0") --all' to enable all test cases."
 fi
 
-# Make sure we have a valid device (#1128)
+# Make sure that the work folder format is up to date, and that there are no
+# mounts from aborted test cases (#1595)
 cd "$(dirname "$0")/.."
+./pmbootstrap.py work_migrate
+./pmbootstrap.py -q shutdown
+
+# Make sure we have a valid device (#1128)
 device="$(./pmbootstrap.py config device)"
 deviceinfo="$PWD/aports/device/device-$device/deviceinfo"
 if ! [ -e "$deviceinfo" ]; then
