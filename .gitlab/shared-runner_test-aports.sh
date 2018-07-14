@@ -28,7 +28,7 @@ set -o pipefail
 ./pmbootstrap.py kconfig check
 
 # test_aports
-python -m pytest -vv --cov=pmb --tb=native ./test/test_aports.py
+python -m pytest -vv -x --cov=pmb --tb=native ./test/test_aports.py
 
 # check_checksums
 ./test/check_checksums.py --build
