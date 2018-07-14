@@ -46,8 +46,8 @@ def shutdown_cryptsetup_device(args, name):
     if not os.path.exists(args.work + "/chroot_native/dev/mapper/" + name):
         return
     pmb.chroot.apk.install(args, ["cryptsetup"])
-    status = pmb.chroot.root(args, ["cryptsetup", "status", name], check=False,
-                             return_stdout=True)
+    status = pmb.chroot.root(args, ["cryptsetup", "status", name],
+                             output_return=True, check=False)
     if not status:
         logging.warning("WARNING: Failed to run cryptsetup to get the status"
                         " for " + name + ", assuming it is not mounted"

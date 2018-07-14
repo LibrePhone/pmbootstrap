@@ -35,7 +35,7 @@ def folder_size(args, path):
     output = pmb.helpers.run.root(args, ["du", "--summarize",
                                          "--apparent-size",
                                          "--block-size=1",
-                                         path], return_stdout=True)
+                                         path], output_return=True)
     ret = int(output.split("\t")[0])
     return ret
 

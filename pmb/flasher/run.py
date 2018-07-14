@@ -51,4 +51,4 @@ def run(args, action, flavor=None):
                     command[i] = command[i].replace(key, value)
 
         # Run the action
-        pmb.chroot.root(args, command, log=False)
+        pmb.chroot.root(args, command, output="interactive")

@@ -77,7 +77,7 @@ def get_outputdir(args, pkgname):
     cmd = "srcdir=/home/pmos/build/src source APKBUILD; echo $builddir"
     ret = pmb.chroot.user(args, ["sh", "-c", cmd],
                           "native", "/home/pmos/build",
-                          return_stdout=True).rstrip()
+                          output_return=True).rstrip()
     if os.path.exists(chroot + ret + "/.config"):
         return ret
 
@@ -129,13 +129,14 @@ def menuconfig(args, pkgname):
     pmb.chroot.user(args, ["abuild", "unpack"], "native", "/home/pmos/build")
     logging.info("(native) apply patches")
     pmb.chroot.user(args, ["abuild", "prepare"], "native",
-                    "/home/pmos/build", log=False, env={"CARCH": arch})
+                    "/home/pmos/build", output="interactive",
+                    env={"CARCH": arch})
 
     # Run make menuconfig
     outputdir = get_outputdir(args, pkgname)
     logging.info("(native) make " + kopt)
     pmb.chroot.user(args, ["make", kopt], "native",
-                    outputdir, log=False,
+                    outputdir, output="interactive",
                     env={"ARCH": pmb.parse.arch.alpine_to_kernel(arch),
                          "DISPLAY": os.environ.get("DISPLAY"),
                          "XAUTHORITY": "/home/pmos/.Xauthority"})

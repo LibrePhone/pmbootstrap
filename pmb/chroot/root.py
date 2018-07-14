@@ -23,6 +23,7 @@ import pmb.config
 import pmb.chroot
 import pmb.chroot.binfmt
 import pmb.helpers.run
+import pmb.helpers.run_core
 
 
 def executables_absolute_path():
@@ -39,23 +40,17 @@ def executables_absolute_path():
     return ret
 
 
-def root(args, cmd, suffix="native", working_dir="/", log=True,
-         auto_init=True, return_stdout=False, check=True, env={}):
+def root(args, cmd, suffix="native", working_dir="/", output="log",
+         output_return=False, check=None, env={}, auto_init=True):
     """
     Run a command inside a chroot as root.
 
-    :param cmd: command as list, e.g. ["echo", "string with spaces"]
-    :param suffix: of the chroot to execute code in
-    :param working_dir: path inside chroot where the command should run
-    :param log: when set to true, redirect all output to the logfile
-    :param auto_init: automatically initialize the chroot
-    :param return_stdout: write stdout to a buffer and return it as string when
-                          the command is through
-    :param check: raise an exception, when the command fails
     :param env: dict of environment variables to be passed to the command, e.g.
                 {"JOBS": "5"}
-    :returns: * stdout when return_stdout is True
-              * None otherwise
+    :param auto_init: automatically initialize the chroot
+
+    See pmb.helpers.run_core.core() for a detailed description of all other
+    arguments and the return value.
     """
     # Initialize chroot
     chroot = args.work + "/chroot_" + suffix
@@ -90,4 +85,6 @@ def root(args, cmd, suffix="native", working_dir="/", log=True,
                   pmb.helpers.run.flat_cmd(cmd, working_dir)]
     cmd_sudo = ["sudo", "env", "-i", executables["sh"], "-c",
                 pmb.helpers.run.flat_cmd(cmd_chroot, env=env_all)]
-    return pmb.helpers.run.core(args, cmd_sudo, msg, log, return_stdout, check)
+    kill_as_root = output in ["log", "stdout"]
+    return pmb.helpers.run_core.core(args, msg, cmd_sudo, None, output,
+                                     output_return, check, kill_as_root)

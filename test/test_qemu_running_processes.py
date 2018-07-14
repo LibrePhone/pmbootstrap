@@ -60,11 +60,11 @@ def ssh_create_askpass_script(args):
     pmb.chroot.root(args, ["chmod", "+x", "/tmp/y.sh"])
 
 
-def pmbootstrap_run(args, config, parameters, background=False):
+def pmbootstrap_run(args, config, parameters, output="log"):
     """Execute pmbootstrap.py with a test pmbootstrap.conf."""
     return pmb.helpers.run.user(args, ["./pmbootstrap.py", "-c", config] +
                                 parameters, working_dir=pmb_src,
-                                background=background)
+                                output=output)
 
 
 def pmbootstrap_yes(args, config, parameters):
@@ -111,7 +111,7 @@ class Qemu(object):
         # Create and run system image
         pmbootstrap_yes(args, config, ["install", "--no-fde"])
         self.process = pmbootstrap_run(args, config, ["qemu", "--display",
-                                                      "none"], background=True)
+                                                      "none"], "background")
 
 
 @pytest.fixture
@@ -130,8 +130,7 @@ def ssh_run(args, command):
                                  "-o", "UserKnownHostsFile=/dev/null",
                                  "-o", "StrictHostKeyChecking=no",
                                  "-p", "2222", "testuser@localhost", "--",
-                                 command],
-                          check=False, return_stdout=True)
+                                 command], output_return=True, check=False)
     return ret
 
 

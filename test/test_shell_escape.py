@@ -50,23 +50,24 @@ def test_shell_escape(args):
             "hello world\n": ["printf", "%s world\n", "hello"]}
     for expected, cmd in cmds.items():
         copy = list(cmd)
-        core = pmb.helpers.run.core(args, cmd, str(cmd), True, True)
+        core = pmb.helpers.run_core.core(args, str(cmd), cmd,
+                                         output_return=True)
         assert expected == core
         assert cmd == copy
 
-        user = pmb.helpers.run.user(args, cmd, return_stdout=True)
+        user = pmb.helpers.run.user(args, cmd, output_return=True)
         assert expected == user
         assert cmd == copy
 
-        root = pmb.helpers.run.root(args, cmd, return_stdout=True)
+        root = pmb.helpers.run.root(args, cmd, output_return=True)
         assert expected == root
         assert cmd == copy
 
-        chroot_root = pmb.chroot.root(args, cmd, return_stdout=True)
+        chroot_root = pmb.chroot.root(args, cmd, output_return=True)
         assert expected == chroot_root
         assert cmd == copy
 
-        chroot_user = pmb.chroot.user(args, cmd, return_stdout=True)
+        chroot_user = pmb.chroot.user(args, cmd, output_return=True)
         assert expected == chroot_user
         assert cmd == copy
 
@@ -80,19 +81,19 @@ def test_shell_escape_env(args):
 
     copy = list(cmd)
     func = pmb.helpers.run.user
-    assert func(args, cmd, return_stdout=True, env=env) == ret
+    assert func(args, cmd, output_return=True, env=env) == ret
     assert cmd == copy
 
     func = pmb.helpers.run.root
-    assert func(args, cmd, return_stdout=True, env=env) == ret
+    assert func(args, cmd, output_return=True, env=env) == ret
     assert cmd == copy
 
     func = pmb.chroot.root
-    assert func(args, cmd, return_stdout=True, env=env) == ret
+    assert func(args, cmd, output_return=True, env=env) == ret
     assert cmd == copy
 
     func = pmb.chroot.user
-    assert func(args, cmd, return_stdout=True, env=env) == ret
+    assert func(args, cmd, output_return=True, env=env) == ret
     assert cmd == copy
 
 

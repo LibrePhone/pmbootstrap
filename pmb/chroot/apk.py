@@ -52,8 +52,7 @@ def update_repository_list(args, suffix="native", check=False):
             for line in handle:
                 lines_old.append(line[:-1])
     else:
-        pmb.helpers.run.root(args, ["mkdir", "-p", os.path.dirname(path)],
-                             suffix)
+        pmb.helpers.run.root(args, ["mkdir", "-p", os.path.dirname(path)])
 
     # Up to date: Save cache, return
     lines_new = pmb.helpers.repo.urls(args)

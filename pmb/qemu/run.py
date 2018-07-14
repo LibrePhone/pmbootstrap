@@ -295,8 +295,8 @@ def run(args):
     process = None
     try:
         signal.signal(signal.SIGTERM, sigterm_handler)
-        process = pmb.helpers.run.user(args, qemu,
-                                       background=spice_enabled, env=env)
+        output = "background" if spice_enabled else "interactive"
+        process = pmb.helpers.run.user(args, qemu, output=output, env=env)
         if spice:
             pmb.helpers.run.user(args, spice, env=env)
     except KeyboardInterrupt:

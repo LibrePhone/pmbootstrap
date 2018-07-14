@@ -60,7 +60,7 @@ def generate(args, pkgname):
     hashes = pmb.chroot.user(args, ["sha512sum",
                                     "musl-" + version + "-" + arch + ".apk",
                                     "musl-dev-" + version + "-" + arch + ".apk"], "buildroot_" + arch,
-                             working_dir="/var/cache/distfiles", return_stdout=True)
+                             "/var/cache/distfiles", output_return=True)
 
     # Write the APKBUILD
     pmb.helpers.run.user(args, ["mkdir", "-p", args.work + "/aportgen"])

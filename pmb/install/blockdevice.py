@@ -39,7 +39,7 @@ def previous_install(args):
         pmb.helpers.mount.bind_blockdevice(args, blockdevice_outside,
                                            args.work + "/chroot_native" + blockdevice_inside)
         label = pmb.chroot.root(args, ["blkid", "-s", "LABEL", "-o", "value",
-                                       blockdevice_inside], return_stdout=True)
+                                       blockdevice_inside], output_return=True)
         pmb.helpers.run.root(args, ["umount", args.work + "/chroot_native" + blockdevice_inside])
     return "pmOS_boot" in label
 

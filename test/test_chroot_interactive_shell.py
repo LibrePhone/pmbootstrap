@@ -26,8 +26,9 @@ def test_chroot_interactive_shell():
     """
     pmb_src = os.path.realpath(os.path.join(os.path.dirname(__file__) + "/.."))
     os.chdir(pmb_src)
-    ret = subprocess.check_output(["./pmbootstrap.py", "-q", "chroot"], timeout=300,
-                                  input="echo hello_world\n", universal_newlines=True,
+    ret = subprocess.check_output(["./pmbootstrap.py", "-q", "chroot", "sh"],
+                                  timeout=300, input="echo hello_world\n",
+                                  universal_newlines=True,
                                   stderr=subprocess.STDOUT)
     assert ret == "hello_world\n"
 
@@ -39,7 +40,7 @@ def test_chroot_interactive_shell_user():
     pmb_src = os.path.realpath(os.path.join(os.path.dirname(__file__) + "/.."))
     os.chdir(pmb_src)
     ret = subprocess.check_output(["./pmbootstrap.py", "-q", "chroot",
-                                   "--user"], timeout=300, input="id -un",
+                                   "--user", "sh"], timeout=300, input="id -un",
                                   universal_newlines=True,
                                   stderr=subprocess.STDOUT)
     assert ret == "pmos\n"
@@ -54,8 +55,8 @@ def test_chroot_arguments():
     os.chdir(pmb_src)
 
     for arch in ["armhf", "aarch64", "x86_64"]:
-        ret = subprocess.check_output(["./pmbootstrap.py", "-q", "chroot", "-b", arch],
-                                      timeout=300, input="uname -m\n",
+        ret = subprocess.check_output(["./pmbootstrap.py", "-q", "chroot", "-b", arch,
+                                       "sh"], timeout=300, input="uname -m\n",
                                       universal_newlines=True, stderr=subprocess.STDOUT)
         if arch == "armhf":
             assert ret == "armv7l\n"

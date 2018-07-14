@@ -33,14 +33,13 @@ def clone(args, repo_name):
         pmb.chroot.apk.install(args, ["git"])
         logging.info("(native) git clone " + pmb.config.git_repos[repo_name])
         pmb.chroot.user(args, ["git", "clone", "--depth=1",
-                               pmb.config.git_repos[repo_name], repo_name], working_dir="/home/pmos/git/")
+                               pmb.config.git_repos[repo_name], repo_name],
+                        working_dir="/home/pmos/git/")
 
 
 def rev_parse(args, revision="HEAD"):
     rev = pmb.helpers.run.user(args, ["git", "rev-parse", revision],
-                               working_dir=args.aports,
-                               return_stdout=True,
-                               check=False)
+                               args.aports, output_return=True, check=False)
     if rev is None:
         logging.warning("WARNING: Failed to determine revision of git repository at " + args.aports)
         return ""

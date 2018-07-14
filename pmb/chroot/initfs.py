@@ -88,7 +88,7 @@ def ls(args, flavor, suffix, extra=False):
     if extra:
         tmp = "/tmp/initfs-extra-extracted"
     extract(args, flavor, suffix, extra)
-    pmb.chroot.root(args, ["ls", "-lahR", "."], suffix, tmp, log=False)
+    pmb.chroot.root(args, ["ls", "-lahR", "."], suffix, tmp, "stdout")
     pmb.chroot.root(args, ["rm", "-r", tmp], suffix)
 
 

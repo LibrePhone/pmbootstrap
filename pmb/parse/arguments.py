@@ -242,6 +242,9 @@ def arguments():
     parser.add_argument("-s", "--skip-initfs", dest="skip_initfs",
                         help="do not re-generate the initramfs",
                         action="store_true")
+    parser.add_argument("-t", "--timeout", help="seconds after which processes"
+                        " get killed that stopped writing any output (default:"
+                        " 300)", default=300, type=float)
     parser.add_argument("-w", "--work", help="folder where all data"
                         " gets stored (chroots, caches, built packages)")
     parser.add_argument("-y", "--assume-yes", help="Assume 'yes' to all"
@@ -337,7 +340,13 @@ def arguments():
                         " packages in the chroot before entering it")
     chroot.add_argument("--user", help="run the command as user, not as root",
                         action="store_true")
-    chroot.add_argument("command", default=["sh"], help="command"
+    chroot.add_argument("--output", choices=["log", "stdout", "interactive",
+                        "tui", "background"], help="how the output of the"
+                        " program should be handled, choose from: 'log',"
+                        " 'stdout', 'interactive', 'tui' (default),"
+                        " 'background'. Details: pmb/helpers/run_core.py",
+                        default="tui")
+    chroot.add_argument("command", default=["sh", "-i"], help="command"
                         " to execute inside the chroot. default: sh", nargs='*')
     for action in [build_init, chroot]:
         suffix = action.add_mutually_exclusive_group()

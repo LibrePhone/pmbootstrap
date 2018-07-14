@@ -20,30 +20,24 @@ import pmb.chroot.root
 import pmb.helpers.run
 
 
-def user(args, cmd, suffix="native", working_dir="/", log=True,
-         auto_init=True, return_stdout=False, check=True, env={}):
+def user(args, cmd, suffix="native", working_dir="/", output="log",
+         output_return=False, check=None, env={}, auto_init=True):
     """
     Run a command inside a chroot as "user". We always use the BusyBox
     implementation of 'su', because other implementations may override the PATH
     environment variable (#1071).
 
-    :param cmd: command as list, e.g. ["echo", "string with spaces"]
-    :param suffix: of the chroot to execute code in
-    :param working_dir: path inside chroot where the command should run
-    :param log: when set to true, redirect all output to the logfile
-    :param auto_init: automatically initialize the chroot
-    :param return_stdout: write stdout to a buffer and return it as string when
-                          the command is through
-    :param check: raise an exception, when the command fails
     :param env: dict of environment variables to be passed to the command, e.g.
                 {"JOBS": "5"}
-    :returns: * stdout when return_stdout is True
-              * None otherwise
+    :param auto_init: automatically initialize the chroot
+
+    See pmb.helpers.run_core.core() for a detailed description of all other
+    arguments and the return value.
     """
     flat_cmd = pmb.helpers.run.flat_cmd(cmd, env=env)
     cmd = ["busybox", "su", "pmos", "-c", flat_cmd]
-    return pmb.chroot.root(args, cmd, suffix, working_dir, log,
-                           auto_init, return_stdout, check)
+    return pmb.chroot.root(args, cmd, suffix, working_dir, output,
+                           output_return, check, {}, auto_init)
 
 
 def exists(args, username, suffix="native"):
@@ -54,5 +48,5 @@ def exists(args, username, suffix="native"):
     :returns: bool
     """
     output = pmb.chroot.root(args, ["getent", "passwd", username],
-                             suffix, return_stdout=True, check=False)
-    return (output is not None)
+                             suffix, output_return=True, check=False)
+    return len(output) > 0

@@ -51,7 +51,7 @@ def device_by_back_file(args, back_file):
 
     # Get list from losetup
     losetup_output = pmb.chroot.root(args, ["losetup", "--json",
-                                            "--list"], return_stdout=True)
+                                            "--list"], output_return=True)
     if not losetup_output:
         return None
 

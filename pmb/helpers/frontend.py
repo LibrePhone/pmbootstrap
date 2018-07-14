@@ -134,10 +134,10 @@ def chroot(args):
     if args.user:
         logging.info("(" + suffix + ") % su pmos -c '" +
                      " ".join(args.command) + "'")
-        pmb.chroot.user(args, args.command, suffix, log=False)
+        pmb.chroot.user(args, args.command, suffix, output=args.output)
     else:
         logging.info("(" + suffix + ") % " + " ".join(args.command))
-        pmb.chroot.root(args, args.command, suffix, log=False)
+        pmb.chroot.root(args, args.command, suffix, output=args.output)
 
 
 def config(args):
@@ -324,7 +324,7 @@ def stats(args):
     # Install ccache and display stats
     pmb.chroot.apk.install(args, ["ccache"], suffix)
     logging.info("(" + suffix + ") % ccache -s")
-    pmb.chroot.user(args, ["ccache", "-s"], suffix, log=False)
+    pmb.chroot.user(args, ["ccache", "-s"], suffix, output="stdout")
 
 
 def work_migrate(args):
@@ -334,17 +334,17 @@ def work_migrate(args):
 
 def log(args):
     if args.clear_log:
-        pmb.helpers.run.user(args, ["truncate", "-s", "0", args.log],
-                             log=False)
+        pmb.helpers.run.user(args, ["truncate", "-s", "0", args.log])
     pmb.helpers.run.user(args, ["tail", "-f", args.log, "-n", args.lines],
-                         log=False)
+                         output="tui")
 
 
 def log_distccd(args):
     logpath = "/home/pmos/distccd.log"
     if args.clear_log:
-        pmb.chroot.user(args, ["truncate", "-s", "0", logpath], log=False)
-    pmb.chroot.user(args, ["tail", "-f", logpath, "-n", args.lines], log=False)
+        pmb.chroot.user(args, ["truncate", "-s", "0", logpath])
+    pmb.chroot.user(args, ["tail", "-f", logpath, "-n", args.lines],
+                    output="tui")
 
 
 def zap(args):

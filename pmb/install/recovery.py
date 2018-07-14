@@ -74,4 +74,4 @@ def create_zip(args, suffix):
         ["gzip", "-f1", "rootfs.tar"],
         ["build-recovery-zip", args.device]]
     for command in commands:
-        pmb.chroot.root(args, command, suffix, working_dir=zip_root)
+        pmb.chroot.root(args, command, suffix, zip_root)

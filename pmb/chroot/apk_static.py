@@ -102,7 +102,7 @@ def verify_signature(args, files, sigkey_path):
         pmb.helpers.run.user(args, ["openssl", "dgst", "-sha1", "-verify",
                                     sigkey_path, "-signature", files[
                                         "sig"]["temp_path"],
-                                    files["apk"]["temp_path"]], check=True)
+                                    files["apk"]["temp_path"]])
     except BaseException:
         os.unlink(files["sig"]["temp_path"])
         os.unlink(files["apk"]["temp_path"])
@@ -133,7 +133,7 @@ def extract(args, version, apk_path):
                   " (must match the package version " + version + ")")
     os.chmod(temp_path, os.stat(temp_path).st_mode | stat.S_IEXEC)
     version_bin = pmb.helpers.run.user(args, [temp_path, "--version"],
-                                       check=True, return_stdout=True)
+                                       output_return=True)
     version_bin = version_bin.split(" ")[1].split(",")[0]
     if not version.startswith(version_bin + "-r"):
         os.unlink(temp_path)
@@ -179,6 +179,5 @@ def init(args):
     extract(args, version, apk_static)
 
 
-def run(args, parameters, check=True):
-    pmb.helpers.run.root(
-        args, [args.work + "/apk.static"] + parameters, check=check)
+def run(args, parameters):
+    pmb.helpers.run.root(args, [args.work + "/apk.static"] + parameters)

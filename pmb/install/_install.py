@@ -199,7 +199,8 @@ def setup_login(args):
     suffix = "rootfs_" + args.device
     while True:
         try:
-            pmb.chroot.root(args, ["passwd", args.user], suffix, log=False)
+            pmb.chroot.root(args, ["passwd", args.user], suffix,
+                            output="interactive")
             break
         except RuntimeError:
             logging.info("WARNING: Failed to set the password. Try it"
@@ -254,7 +255,8 @@ def setup_keymap(args):
             args.keymap is not None and
             args.keymap in options):
         layout, variant = args.keymap.split("/")
-        pmb.chroot.root(args, ["setup-keymap", layout, variant], suffix, log=False)
+        pmb.chroot.root(args, ["setup-keymap", layout, variant], suffix,
+                        output="interactive")
     else:
         logging.info("NOTE: No valid keymap specified for device")
 
