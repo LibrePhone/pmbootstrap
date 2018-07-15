@@ -60,11 +60,11 @@ def list_flavors(args):
 
 
 def rootfs(args):
-    # Generate system image, install flasher
+    # Generate rootfs, install flasher
     img_path = "/home/pmos/rootfs/" + args.device + ".img"
     if not os.path.exists(args.work + "/chroot_native" + img_path):
-        raise RuntimeError("The system image has not been generated yet,"
-                           " please run 'pmbootstrap install' first.")
+        raise RuntimeError("The rootfs has not been generated yet, please run"
+                           " 'pmbootstrap install' first.")
 
     # Do not flash if using fastboot & image is too large
     method = args.flash_method or args.deviceinfo["flash_method"]
@@ -72,8 +72,8 @@ def rootfs(args):
         img_size = os.path.getsize(args.work + "/chroot_native" + img_path) / 1024**2
         max_size = int(args.deviceinfo["flash_fastboot_max_size"])
         if img_size > max_size:
-            raise RuntimeError("The system image is too large for fastboot"
-                               " to flash.")
+            raise RuntimeError("The rootfs is too large for fastboot to"
+                               " flash.")
 
     # Run the flasher
     logging.info("(native) flash rootfs image")

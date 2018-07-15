@@ -89,8 +89,8 @@ Edit a kernel config:
 $ pmbootstrap kconfig edit --arch=armhf postmarketos-mainline
 ```
 
-### System Image
-Build the system image:
+### Root File System
+Build the rootfs:
 ```
 $ pmbootstrap install
 ```

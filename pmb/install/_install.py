@@ -313,9 +313,9 @@ def install_system_image(args):
     copy_ssh_keys(args)
     pmb.chroot.shutdown(args, True)
 
-    # Convert system image to sparse using img2simg
+    # Convert rootfs to sparse using img2simg
     if args.deviceinfo["flash_sparse"] == "true" and not args.split:
-        logging.info("(native) make sparse system image")
+        logging.info("(native) make sparse rootfs")
         pmb.chroot.apk.install(args, ["libsparse"])
         sys_image = args.device + ".img"
         sys_image_sparse = args.device + "-sparse.img"

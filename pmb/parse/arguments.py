@@ -108,7 +108,7 @@ def arguments_qemu(subparser):
                      help="emulate a different architecture")
     ret.add_argument("--cmdline", help="override kernel commandline")
     ret.add_argument(
-        "--image-size", help="set system image size (e.g. 2048M or 2G)")
+        "--image-size", help="set rootfs size (e.g. 2048M or 2G)")
     ret.add_argument("-m", "--memory", type=int, default=1024,
                      help="guest RAM (default: 1024)")
     ret.add_argument("-p", "--port", type=int, default=2222,
@@ -375,7 +375,7 @@ def arguments():
     install.add_argument("--rsync", help="update the sdcard using rsync,"
                          " only works with --no-fde", action="store_true")
     install.add_argument("--cipher", help="cryptsetup cipher used to"
-                         " encrypt the system partition, eg. aes-xts-plain64")
+                         " encrypt the rootfs, eg. aes-xts-plain64")
     install.add_argument("--iter-time", help="cryptsetup iteration time (in"
                          " miliseconds) to use when encrypting the system"
                          " partiton")

@@ -108,7 +108,7 @@ class Qemu(object):
         pmb.chroot.apk.install(args, ["openssh-client"])
         ssh_create_askpass_script(args)
 
-        # Create and run system image
+        # Create and run rootfs
         pmbootstrap_yes(args, config, ["install", "--no-fde"])
         self.process = pmbootstrap_run(args, config, ["qemu", "--display",
                                                       "none"], "background")

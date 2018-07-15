@@ -311,8 +311,8 @@ Flasher abstraction. Allowed variables:
 
 $BOOT: Path to the /boot partition
 $FLAVOR: Kernel flavor
-$IMAGE: Path to the system partition image
-$PARTITION_SYSTEM: Partition to flash the system image
+$IMAGE: Path to the rootfs image
+$PARTITION_SYSTEM: Partition to flash the rootfs to
 
 Fastboot specific: $KERNEL_CMDLINE, $VENDOR_ID
 Heimdall specific: $PARTITION_KERNEL, $PARTITION_INITFS

@@ -29,7 +29,7 @@ import pmb.helpers.file
 
 def symlinks(args, flavor, folder):
     """
-    Create convenience symlinks to the system image and boot files.
+    Create convenience symlinks to the rootfs and boot files.
     """
 
     # File descriptions

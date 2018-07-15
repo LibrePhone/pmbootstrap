@@ -36,17 +36,17 @@ import pmb.parse.arch
 
 def system_image(args, device):
     """
-    Returns path to system image for specified device. In case that it doesn't
+    Returns path to rootfs for specified device. In case that it doesn't
     exist, raise and exception explaining how to generate it.
     """
     path = args.work + "/chroot_native/home/pmos/rootfs/" + device + ".img"
     if not os.path.exists(path):
-        logging.debug("Could not find system image: " + path)
+        logging.debug("Could not find rootfs: " + path)
         img_command = "pmbootstrap install"
         if device != args.device:
             img_command = ("pmbootstrap config device " + device +
                            "' and '" + img_command)
-        message = "The system image '{0}' has not been generated yet, please" \
+        message = "The rootfs '{0}' has not been generated yet, please" \
                   " run '{1}' first.".format(device, img_command)
         raise RuntimeError(message)
     return path
@@ -204,11 +204,11 @@ def command_qemu(args, arch, device, img_path, spice_enabled):
 
 def resize_image(args, img_size_new, img_path):
     """
-    Truncates the system image to a specific size. The value must be larger than the
+    Truncates the rootfs to a specific size. The value must be larger than the
     current image size, and it must be specified in MiB or GiB units (powers of 1024).
 
     :param img_size_new: new image size in M or G
-    :param img_path: the path to the system image
+    :param img_path: the path to the rootfs
     """
     # Current image size in bytes
     img_size = os.path.getsize(img_path)
@@ -216,7 +216,7 @@ def resize_image(args, img_size_new, img_path):
     # Make sure we have at least 1 integer followed by either M or G
     pattern = re.compile("^[0-9]+[M|G]$")
     if not pattern.match(img_size_new):
-        raise RuntimeError("You must specify the system image size in [M]iB or [G]iB, e.g. 2048M or 2G")
+        raise RuntimeError("You must specify the rootfs size in [M]iB or [G]iB, e.g. 2048M or 2G")
 
     # Remove M or G and convert to bytes
     img_size_new_bytes = int(img_size_new[:-1]) * 1024 * 1024
@@ -226,7 +226,7 @@ def resize_image(args, img_size_new, img_path):
         img_size_new_bytes = img_size_new_bytes * 1024
 
     if (img_size_new_bytes >= img_size):
-        logging.info("Setting the system image size to " + img_size_new)
+        logging.info("Setting the rootfs size to " + img_size_new)
         pmb.helpers.run.root(args, ["truncate", "-s", img_size_new, img_path])
     else:
         # Convert to human-readable format
@@ -236,7 +236,7 @@ def resize_image(args, img_size_new, img_path):
         # this example, they would need to use a size greater then 1280M instead.
         img_size_str = str(round(img_size / 1024 / 1024)) + "M"
 
-        raise RuntimeError("The system image size must be " + img_size_str + " or greater")
+        raise RuntimeError("The rootfs size must be " + img_size_str + " or greater")
 
 
 def sigterm_handler(number, frame):
@@ -274,16 +274,16 @@ def run(args):
     qemu, env = command_qemu(args, arch, device, img_path, spice_enabled)
 
     # Workaround: Qemu runs as local user and needs write permissions in the
-    # system image, which is owned by root
+    # rootfs, which is owned by root
     if not os.access(img_path, os.W_OK):
         pmb.helpers.run.root(args, ["chmod", "666", img_path])
 
-    # Resize the system image (or show hint)
+    # Resize the rootfs (or show hint)
     if args.image_size:
         resize_image(args, args.image_size, img_path)
     else:
         logging.info("NOTE: Run 'pmbootstrap qemu --image-size 2G' to set"
-                     " the system image size when you run out of space!")
+                     " the rootfs size when you run out of space!")
 
     # SSH/telnet hints
     logging.info("Connect to the VM (telnet requires 'pmbootstrap initfs"
