@@ -488,11 +488,8 @@ def arguments():
         arch = args.deviceinfo["arch"]
         if (arch != args.arch_native and
                 arch not in pmb.config.build_device_architectures):
-            raise ValueError("Arch '" + arch + "' is not officially enabled"
-                             " in postmarketOS yet. However, this should be straight"
-                             " forward. Simply enable it in pmb/config/__init__.py"
-                             " in build_device_architectures, zap your package cache"
-                             " (otherwise you will have issues with noarch packages)"
-                             " and try again.")
+            raise ValueError("Arch '" + arch + "' is not available in"
+                             " postmarketOS. If you would like to add it, see:"
+                             " <https://postmarketos.org/newarch>")
 
     return args
