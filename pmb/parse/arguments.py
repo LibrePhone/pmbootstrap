@@ -39,9 +39,10 @@ def arguments_export(subparser):
 def arguments_flasher(subparser):
     ret = subparser.add_parser("flasher", help="flash something to the"
                                " target device")
-    sub = ret.add_subparsers(dest="action_flasher")
     ret.add_argument("--method", help="override flash method",
                      dest="flash_method", default=None)
+    sub = ret.add_subparsers(dest="action_flasher")
+    sub.required = True
 
     # Boot, flash kernel
     boot = sub.add_parser("boot", help="boot a kernel once")
