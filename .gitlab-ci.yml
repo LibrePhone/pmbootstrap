@@ -22,7 +22,7 @@ stages:
 wiki-test:
   stage: checks
   script:
-    - "./test/check_devices_in_wiki.py"
+    - "./test/check_devices_in_wiki.py --booting"
 
 static-code-analysis:
   stage: checks

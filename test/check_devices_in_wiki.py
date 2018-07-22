@@ -68,8 +68,9 @@ def check_device(device, html, is_booting):
         return True
     if device in html["not_booting"]:
         if is_booting:
-            print(device + ": wrong section of the wiki, this should be in"
-                  " booting already")
+            print(device + ": still in 'not booting' section (if this is a"
+                  " merge request, your device should be in the booting"
+                  " section already)")
             return False
         return True
 
