@@ -136,7 +136,7 @@ def menuconfig(args, pkgname):
     outputdir = get_outputdir(args, pkgname)
     logging.info("(native) make " + kopt)
     pmb.chroot.user(args, ["make", kopt], "native",
-                    outputdir, output="interactive",
+                    outputdir, output="tui",
                     env={"ARCH": pmb.parse.arch.alpine_to_kernel(arch),
                          "DISPLAY": os.environ.get("DISPLAY"),
                          "XAUTHORITY": "/home/pmos/.Xauthority"})
