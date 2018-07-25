@@ -226,9 +226,6 @@ def arguments():
     # Other
     parser.add_argument("-V", "--version", action="version",
                         version=pmb.config.version)
-    parser.add_argument("--no-cross", action="store_false", dest="cross",
-                        help="disable crosscompiler, build only with qemu + gcc (slower!)")
-
     parser.add_argument("-a", "--alpine-version", dest="alpine_version",
                         help="examples: edge, latest-stable, v3.5")
     parser.add_argument("-c", "--config", dest="config",
@@ -256,6 +253,17 @@ def arguments():
                         " recommended, may screw up your work folders"
                         " directory permissions!)", dest="as_root",
                         action="store_true")
+
+    # Compiler
+    parser.add_argument("--ccache-disable", action="store_false",
+                        dest="ccache", help="do not cache the compiled output")
+    parser.add_argument("--distcc-nofallback", action="store_false",
+                        help="when using the cross compiler via distcc fails,"
+                             "do not fall back to compiling slowly with QEMU",
+                        dest="distcc_fallback")
+    parser.add_argument("--no-cross", action="store_false", dest="cross",
+                        help="disable cross compiler, build only with QEMU and"
+                             " gcc (slow!)")
 
     # Logging
     parser.add_argument("-l", "--log", dest="log", default=None,

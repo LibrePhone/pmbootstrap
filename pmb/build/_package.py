@@ -193,8 +193,6 @@ def init_buildenv(args, apkbuild, arch, strict=False, force=False, cross=None,
         pmb.chroot.apk.install(args, ["gcc-" + arch, "g++-" + arch,
                                       "ccache-cross-symlinks"])
     if cross == "distcc":
-        pmb.chroot.apk.install(args, ["distcc", "arch-bin-masquerade"],
-                               suffix=suffix)
         pmb.chroot.distccd.start(args, arch)
 
     # "native" cross-compile: build and install dependencies (#1061)
@@ -350,7 +348,16 @@ def run_abuild(args, apkbuild, arch, strict=False, force=False, cross=None,
         env["CCACHE_PREFIX"] = "distcc"
         env["CCACHE_PATH"] = "/usr/lib/arch-bin-masquerade/" + arch + ":/usr/bin"
         env["CCACHE_COMPILERCHECK"] = "string:" + get_gcc_version(args, arch)
-        env["DISTCC_HOSTS"] = "127.0.0.1:" + args.port_distccd
+        env["DISTCC_HOSTS"] = "@127.0.0.1:/home/pmos/.distcc-sshd/distccd"
+        env["DISTCC_SSH"] = ("ssh -o StrictHostKeyChecking=no -p" +
+                             args.port_distccd)
+        env["DISTCC_BACKOFF_PERIOD"] = "0"
+        if not args.distcc_fallback:
+            env["DISTCC_FALLBACK"] = "0"
+        if args.verbose:
+            env["DISTCC_VERBOSE"] = "1"
+    if not args.ccache:
+        env["CCACHE_DISABLE"] = "1"
 
     # Build the abuild command
     cmd = ["abuild", "-D", "postmarketOS"]

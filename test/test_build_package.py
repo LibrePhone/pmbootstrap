@@ -252,7 +252,8 @@ def test_run_abuild(args, monkeypatch):
     assert env["CCACHE_PREFIX"] == "distcc"
     assert env["CCACHE_PATH"] == "/usr/lib/arch-bin-masquerade/armhf:/usr/bin"
     assert env["CCACHE_COMPILERCHECK"].startswith("string:")
-    assert env["DISTCC_HOSTS"] == "127.0.0.1:33632"
+    assert env["DISTCC_HOSTS"] == "@127.0.0.1:/home/pmos/.distcc-sshd/distccd"
+    assert env["DISTCC_BACKOFF_PERIOD"] == "0"
 
 
 def test_finish(args, monkeypatch):
