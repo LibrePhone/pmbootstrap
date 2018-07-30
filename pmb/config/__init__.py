@@ -197,6 +197,7 @@ apkbuild_attributes = {
     "pkgver": {"array": False},
     "provides": {"array": True},
     "subpackages": {"array": True},
+    "url": {"array": False},
 
     # cross-compilers
     "makedepends_build": {"array": True},

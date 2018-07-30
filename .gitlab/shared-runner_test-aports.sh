@@ -30,5 +30,8 @@ set -o pipefail
 # test_aports
 python -m pytest -vv -x --cov=pmb --tb=native ./test/test_aports.py
 
+# test_aports_kde
+python -m pytest -vv -x --cov=pmb --tb=native ./test/test_aports_kde.py
+
 # check_checksums
 ./test/check_checksums.py --build

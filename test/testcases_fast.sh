@@ -3,7 +3,7 @@
 
 # Disable QEMU and aports/upstream compatibility tests
 # (These run with different CI runners in parallel, see #1610)
-disabled="aports aportgen upstream_compatibility soname_bump qemu_running_processes"
+disabled="aports aports_kde aportgen upstream_compatibility soname_bump qemu_running_processes"
 
 # Optionally enable all test cases
 if [ "$1" = "--all" ]; then
