@@ -33,8 +33,8 @@ def write_os_release(args, suffix):
                   'ID="postmarketos"\n'
                   'ID_LIKE="alpine"\n'
                   'HOME_URL="https://www.postmarketos.org/"\n'
-                  'SUPPORT_URL="https://github.com/postmarketOS/"\n'
-                  'BUG_REPORT_URL="https://github.com/postmarketOS/"\n'
+                  'SUPPORT_URL="https://gitlab.com/postmarketOS"\n'
+                  'BUG_REPORT_URL="https://gitlab.com/postmarketOS/pmbootstrap/issues"\n'
                   'PMOS_HASH="{hash}"\n'
                   ).format(version=pmb.config.version, hash=revision)
     with open(filepath, "w") as handle:
