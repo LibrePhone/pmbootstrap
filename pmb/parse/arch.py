@@ -49,10 +49,9 @@ def from_chroot_suffix(args, suffix):
                      " (wrong device chosen in 'init' step?)")
 
 
-def alpine_to_debian(arch):
+def alpine_to_qemu(arch):
     """
-    Convert the architecture to the string used in the binfmt info
-    (aka. the Debian architecture format).
+    Convert the architecture to the string used in the QEMU packaging.
     """
 
     mapping = {
@@ -61,9 +60,9 @@ def alpine_to_debian(arch):
         "armhf": "arm",
         "aarch64": "aarch64",
     }
-    for pattern, arch_debian in mapping.items():
+    for pattern, arch_qemu in mapping.items():
         if fnmatch.fnmatch(arch, pattern):
-            return arch_debian
+            return arch_qemu
     raise ValueError("Can not map Alpine architecture '" + arch + "'"
                      " to the right Debian architecture.")
 

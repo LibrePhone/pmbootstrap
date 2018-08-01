@@ -62,10 +62,8 @@ def init(args, suffix="native"):
     # Require apk-tools-static
     pmb.chroot.apk_static.init(args)
 
-    # Non-native chroot: require qemu-user-static
+    # Non-native chroot: set up QEMU with binfmt_misc
     if emulate:
-        pmb.chroot.apk.install(args, ["qemu-user-static-repack",
-                                      "qemu-user-static-repack-binfmt"])
         pmb.chroot.binfmt.register(args, arch)
 
     logging.info("(" + suffix + ") install alpine-base")
@@ -84,11 +82,11 @@ def init(args, suffix="native"):
 
     # Non-native chroot: install qemu-user-binary
     if emulate:
-        arch_debian = pmb.parse.arch.alpine_to_debian(arch)
+        arch_qemu = pmb.parse.arch.alpine_to_qemu(arch)
         pmb.helpers.run.root(args, ["mkdir", "-p", chroot + "/usr/bin"])
         pmb.helpers.run.root(args, ["cp", args.work +
-                                    "/chroot_native/usr/bin/qemu-" + arch_debian + "-static",
-                                    chroot + "/usr/bin/qemu-" + arch_debian + "-static"])
+                                    "/chroot_native/usr/bin/qemu-" + arch_qemu,
+                                    chroot + "/usr/bin/qemu-" + arch_qemu + "-static"])
 
     # Install alpine-base
     pmb.helpers.repo.update(args, arch)

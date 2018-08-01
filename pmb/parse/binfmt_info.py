@@ -17,16 +17,17 @@ You should have received a copy of the GNU General Public License
 along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
 import logging
+import pmb.config
 
 # Get magic and mask from binfmt info file
 # Return: {magic: ..., mask: ...}
 
 
-def binfmt_info(args, arch_debian):
+def binfmt_info(args, arch_qemu):
     # Parse the info file
     full = {}
-    info = args.work + "/chroot_native/usr/share/qemu-user-binfmt.txt"
-    logging.debug("parsing: " + info)
+    info = pmb.config.pmb_src + "/data/qemu-user-binfmt.txt"
+    logging.verbose("parsing: " + info)
     with open(info, "r") as handle:
         for line in handle:
             if line.startswith('#') or "=" not in line:
@@ -37,12 +38,12 @@ def binfmt_info(args, arch_debian):
             full[key] = value[1:-2]
 
     ret = {}
-    logging.debug("filtering by architecture: " + arch_debian)
+    logging.verbose("filtering by architecture: " + arch_qemu)
     for type in ["mask", "magic"]:
-        key = arch_debian + "_" + type
+        key = arch_qemu + "_" + type
         if key not in full:
             raise RuntimeError("Could not find key " + key + " in binfmt info file: " +
                                info)
         ret[type] = full[key]
-    logging.debug("=> " + str(ret))
+    logging.verbose("=> " + str(ret))
     return ret
