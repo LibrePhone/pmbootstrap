@@ -298,7 +298,7 @@ def run(args):
         output = "background" if spice_enabled else "interactive"
         process = pmb.helpers.run.user(args, qemu, output=output, env=env)
         if spice:
-            pmb.helpers.run.user(args, spice, env=env)
+            pmb.helpers.run.user(args, spice)
     except KeyboardInterrupt:
         # Don't show a trace when pressing ^C
         pass
