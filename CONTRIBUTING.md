@@ -8,18 +8,19 @@
 See pmbootstrap's [Development Guide](https://wiki.postmarketos.org/wiki/Development_guide).
 
 ### Contributing code changes
-* [Fork](https://guides.github.com/activities/forking/) this repository, commit your changes and then make a [pull-request](https://guides.github.com/activities/forking/#making-a-pull-request) (PR).
-* Please test your code before submitting a PR.
-* We squash all commits from one PR into one commit. Please make multiple PRs if you feel like your changes should appear as multiple commits in the git log ([more information](https://wiki.postmarketos.org/wiki/FAQ#Development:_Why_do_we_use_squash_.27n.27_merge_for_pull_requests.3F)).
+* [Fork](https://docs.gitlab.com/ee/gitlab-basics/fork-project.html) this repository, commit your changes and then make a [Merge Request](https://docs.gitlab.com/ee/workflow/merge_requests.html).
+* Please test your code before submitting a Merge Request.
+* We squash all commits from one Merge Request into one commit. Please make multiple Merge Requests if you feel like your changes should appear as multiple commits in the git log ([more information](https://wiki.postmarketos.org/wiki/Merge_Workflow)).
 
 ### Shell scripting
 * We don't write scripts for `bash`, but for `busybox`'s `ash` shell, which is POSIX compliant (plus very few features from `bash`).
 * Use `shellcheck` to test your changes for issues before submitting. There is even an [online](https://www.shellcheck.net) version.
-* We're looking into automatizing this more, some files already get checked automatically by the [static code analysis script](https://github.com/postmarketOS/pmbootstrap/blob/master/test/static_code_analysis.sh).
+* We're looking into automatizing this more, some files already get checked automatically by the [static code analysis script](test/static_code_analysis.sh).
 
 ### Python
-* We use the [PEP8](https://www.python.org/dev/peps/pep-0008/) standard for Python code. Don't worry, you don't need to read all that, just run the `autopep8` program on your changed code, and confirm with the [static code analyis script](https://github.com/postmarketOS/pmbootstrap/blob/master/test/static_code_analysis.sh) that everything is PEP8 compliant. *This script will run automatically on Travis CI when you make a change request, and it must pass for your code to get accepted.*
+* We use the [PEP8](https://www.python.org/dev/peps/pep-0008/) standard for Python code. Don't worry, you don't need to read all that, just run the `autopep8` program on your changed code, and confirm with the [static code analyis script](test/static_code_analysis.sh) that everything is PEP8 compliant. *This script will run automatically on Travis CI when you make a Merge Request, and it must pass for your code to get accepted.*
 * We use the `reST` style for `docstrings` below functions (to comment what individual functions are doing, you'll see those when browsing through the code). Please stick to this format, and try to describe the important parameters and return values at least. Example from [here](https://stackoverflow.com/a/24385103):
+
 ```Python
 """
 This is a reST style.
@@ -30,7 +31,8 @@ This is a reST style.
 :raises keyError: raises an exception
 """
 ```
-* If it is feasible for you, try to run the testsuite on code that you have changed. The `test/test_build.py` case will build full cross-compilers for `aarch64` and `armhf`, so it may take a long time. Testcases can be started with `pytest` and it's planned to run that automatically when making a new PR (see [#64](https://github.com/postmarketOS/pmbootstrap/issues/64)).
+
+* If it is feasible for you, try to run the testsuite on code that you have changed. The `test/test_build.py` case will build full cross-compilers for `aarch64` and `armhf`, so it may take a long time. Testcases can be started with `pytest` and it's planned to run that automatically when making a new Merge Request (see #64).
 
 
-**If you need any help, don't hesitate to open an [issue](https://github.com/postmarketOS/pmbootstrap/issues) and ask!**
+**If you need any help, don't hesitate to open an [issue](https://gitlab.com/postmarketOS/pmbootstrap/issues) and ask!**
