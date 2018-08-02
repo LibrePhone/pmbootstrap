@@ -42,7 +42,7 @@ apk_tools_static_min_version = "2.9.0-r0"
 # Version of the work folder (as asked during 'pmbootstrap init'). Increase
 # this number, whenever migration is required and provide the migration code,
 # see migrate_work_folder()).
-work_version = 2
+work_version = 3
 
 # Only save keys to the config file, which we ask for in 'pmbootstrap init'.
 config_keys = ["ccache_size", "device", "extra_packages", "hostname", "jobs",

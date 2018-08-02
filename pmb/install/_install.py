@@ -156,7 +156,7 @@ def create_home_from_skel(args):
     homedir = rootfs + "/home/" + args.user
     pmb.helpers.run.root(args, ["mkdir", rootfs + "/home"])
     pmb.helpers.run.root(args, ["cp", "-a", rootfs + "/etc/skel", homedir])
-    pmb.helpers.run.root(args, ["chown", "-R", "1000", homedir])
+    pmb.helpers.run.root(args, ["chown", "-R", "10000", homedir])
 
 
 def configure_apk(args):
@@ -177,11 +177,14 @@ def configure_apk(args):
 
 def set_user(args):
     """
-    Create user with UID 1000 if it doesn't exist
+    Create user with UID 10000 if it doesn't exist.
+    Usually the ID for the first user created is 1000, but higher ID is
+    chosen here to avoid conflict with Android UIDs/GIDs.
+
     """
     suffix = "rootfs_" + args.device
     if not pmb.chroot.user_exists(args, args.user, suffix):
-        pmb.chroot.root(args, ["adduser", "-D", "-u", "1000", args.user],
+        pmb.chroot.root(args, ["adduser", "-D", "-u", "10000", args.user],
                         suffix)
         for group in pmb.config.install_user_groups:
             pmb.chroot.root(args, ["addgroup", "-S", group], suffix,
@@ -238,7 +241,7 @@ def copy_ssh_keys(args):
     pmb.helpers.run.root(args, ["chmod", "700", target])
     pmb.helpers.run.root(args, ["cp", authorized_keys, target + "/authorized_keys"])
     pmb.helpers.run.root(args, ["rm", authorized_keys])
-    pmb.helpers.run.root(args, ["chown", "-R", "1000:1000", target])
+    pmb.helpers.run.root(args, ["chown", "-R", "10000:10000", target])
 
 
 def setup_keymap(args):

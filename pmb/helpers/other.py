@@ -134,6 +134,22 @@ def migrate_work_folder(args):
         migrate_success(args, 2)
         current = 2
 
+    if current == 2:
+        # Ask for confirmation
+        logging.info("Changelog:")
+        logging.info("* Device chroots have a different user UID (#1576)")
+        logging.info("Migration will do the following:")
+        logging.info("* Zap your chroots")
+        if not pmb.helpers.cli.confirm(args):
+            raise RuntimeError("Aborted.")
+
+        # Zap chroots
+        pmb.chroot.zap(args, False)
+
+        # Update version file
+        migrate_success(args, 3)
+        current = 3
+
     # Can't migrate, user must delete it
     if current != required:
         raise RuntimeError("Sorry, we can't migrate that automatically. Please"
