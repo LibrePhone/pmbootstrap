@@ -222,6 +222,11 @@ def ask_for_device(args):
         device_exists = os.path.exists(args.aports + "/device/device-" +
                                        device + "/deviceinfo")
         if not device_exists:
+            if device == args.device:
+                raise RuntimeError(
+                    "This device does not exist anymore, check"
+                    " <https://postmarketos.org/renamed>"
+                    " to see if it was renamed")
             logging.info("You are about to do a new device port for '" +
                          device + "'.")
             if not pmb.helpers.cli.confirm(args, default=True):

@@ -57,12 +57,10 @@ def deviceinfo(args, device=None):
 
     aport = args.aports + "/device/device-" + device
     if not os.path.exists(aport) or not os.path.exists(aport + "/deviceinfo"):
-        logging.fatal("You will need to create a device-specific package")
-        logging.fatal("before you can continue. Please create at least the")
-        logging.fatal("following files:")
-        logging.fatal(aport + "/APKBUILD")
-        logging.fatal(aport + "/deviceinfo")
-        raise RuntimeError("Incomplete device information")
+        raise RuntimeError(
+            "Device '" + device + "' not found. Run 'pmbootstrap init' to"
+            " start a new device port or to choose another device. It may have"
+            " been renamed, see <https://postmarketos.org/renamed>")
 
     ret = {}
     path = aport + "/deviceinfo"
