@@ -92,6 +92,10 @@ def build(args):
     if args.strict:
         pmb.chroot.zap(args, False)
 
+    if args.envkernel:
+        pmb.build.envkernel.package_kernel(args)
+        return
+
     # Set src and force
     src = os.path.realpath(os.path.expanduser(args.src[0])) if args.src else None
     force = True if src else args.force

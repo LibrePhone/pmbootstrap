@@ -493,6 +493,9 @@ def arguments():
                        " you don't need to build and install the kernel. But it"
                        " is incompatible with how Alpine's abuild handles it.",
                        dest="ignore_depends")
+    build.add_argument("--envkernel", action="store_true",
+                       help="Create an apk package from the build output of"
+                       " a kernel compiled with envkernel.sh.")
     for action in [checksum, build, aportgen]:
         argument_packages = action.add_argument("packages", nargs="+")
         if argcomplete:
