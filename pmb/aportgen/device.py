@@ -41,9 +41,15 @@ def ask_for_manufacturer(args):
     return pmb.helpers.cli.ask(args, "Manufacturer", None, None, False)
 
 
-def ask_for_name(args):
+def ask_for_name(args, manufacturer):
     logging.info("What is the official name (e.g. Google Nexus 5)?")
-    return pmb.helpers.cli.ask(args, "Name", None, None, False)
+    ret = pmb.helpers.cli.ask(args, "Name", None, None, False)
+
+    # Always add the manufacturer
+    if not ret.startswith(manufacturer) and \
+            not ret.startswith("Google"):
+        ret = manufacturer + " " + ret
+    return ret
 
 
 def ask_for_keyboard(args):
@@ -224,7 +230,7 @@ def generate_apkbuild(args, pkgname, name, arch, flash_method):
 def generate(args, pkgname):
     arch = ask_for_architecture(args)
     manufacturer = ask_for_manufacturer(args)
-    name = ask_for_name(args)
+    name = ask_for_name(args, manufacturer)
     has_keyboard = ask_for_keyboard(args)
     has_external_storage = ask_for_external_storage(args)
     flash_method = ask_for_flash_method(args)

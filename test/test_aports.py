@@ -41,12 +41,37 @@ def args(request):
 
 def test_deviceinfo(args):
     """
-    Parse all deviceinfo files. When no exception gets raised, we're good.
+    Parse all deviceinfo files successfully and run checks on the parsed data.
     """
+    # Iterate over all devices
+    last_exception = None
+    count = 0
     for folder in glob.glob(args.aports + "/device/device-*"):
         device = folder.split("-", 1)[1]
-        print(device)
-        pmb.parse.deviceinfo(args, device)
+
+        try:
+            # Check for successful deviceinfo parsing
+            info = pmb.parse.deviceinfo(args, device)
+
+            # deviceinfo_name must start with manufacturer
+            name = info["name"]
+            manufacturer = info["manufacturer"]
+            if not name.startswith(manufacturer) and \
+                    not name.startswith("Google"):
+                raise RuntimeError("Please add the manufacturer in front of"
+                                   " the deviceinfo_name, e.g.: '" +
+                                   manufacturer + " " + name + "'")
+
+        # Don't abort on first error
+        except Exception as e:
+            last_exception = e
+            count += 1
+            print(device + ": " + str(e))
+
+    # Raise the last exception
+    if last_exception:
+        print("deviceinfo error count: " + str(count))
+        raise last_exception
 
 
 def test_aports_device(args):
