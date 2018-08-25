@@ -50,8 +50,8 @@ set_alias_pmbootstrap() {
 
 
 export_chroot_device_deviceinfo() {
-	chroot="$(pmbootstrap config work)/chroot_native"
-	device="$(pmbootstrap config device)"
+	chroot="$($pmbootstrap config work)/chroot_native"
+	device="$($pmbootstrap config device)"
 	deviceinfo="$pmbootstrap_dir/aports/device/device-$device/deviceinfo"
 	export chroot device deviceinfo
 }
@@ -72,7 +72,7 @@ initialize_chroot() {
 	# Install needed packages
 	echo "Initializing Alpine chroot (details: 'pmbootstrap log')"
 	# shellcheck disable=SC2154
-	pmbootstrap -q chroot -- apk -q add \
+	$pmbootstrap -q chroot -- apk -q add \
 		abuild \
 		bc \
 		binutils-"$deviceinfo_arch" \
@@ -106,7 +106,7 @@ mount_kernel_source() {
 create_output_folder() {
 	[ -d "$chroot/mnt/linux/.output" ] && return
 	mkdir -p ".output"
-	pmbootstrap -q chroot -- chown -R pmos:pmos "/mnt/linux/.output"
+	$pmbootstrap -q chroot -- chown -R pmos:pmos "/mnt/linux/.output"
 }
 
 
