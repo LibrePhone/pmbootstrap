@@ -224,7 +224,9 @@ def arguments_kconfig(subparser):
     # "pmbootstrap kconfig check"
     check = sub.add_parser("check", help="check kernel aport config")
     check.add_argument("--arch", choices=arch_choices, dest="arch")
-    check.add_argument("package", default="", nargs='?')
+    check_package = check.add_argument("package", default="", nargs='?')
+    if argcomplete:
+            check_package.completer = kernel_completer
 
     # "pmbootstrap kconfig edit"
     edit = sub.add_parser("edit", help="edit kernel aport config")
@@ -235,7 +237,9 @@ def arguments_kconfig(subparser):
     edit.add_argument("-g", dest="gconfig", action="store_true",
                       help="use gconfig rather than ncurses for kernel"
                            " configuration")
-    edit.add_argument("package")
+    edit_package = edit.add_argument("package")
+    if argcomplete:
+        edit_package.completer = kernel_completer
 
 
 def arguments_repo_missing(subparser):
@@ -261,6 +265,11 @@ def package_completer(prefix, action, parser, parsed_args):
         package for package in pmb.helpers.pmaports.get_list(args)
         if package.startswith(prefix))
     return packages
+
+
+def kernel_completer(prefix, action, parser, parsed_args):
+    packages = package_completer("linux-" + prefix, action, parser, parsed_args)
+    return [package.replace("linux-", "", 1) for package in packages]
 
 
 def arguments():
