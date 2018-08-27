@@ -17,6 +17,14 @@ You should have received a copy of the GNU General Public License
 along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
 import argparse
+import glob
+import os
+
+try:
+    import argcomplete
+except ImportError:
+    argcomplete = False
+
 import pmb.config
 import pmb.parse.arch
 
@@ -217,6 +225,15 @@ def arguments_kconfig(subparser):
                             help="use gconfig rather than ncurses for kernel"
                                  " configuration")
         parser.add_argument("package")
+
+
+def packagecompleter(prefix, action, parser, parsed_args):
+    args = parsed_args
+    pmb.config.merge_with_args(args)
+    packages = set()
+    for apkbuild in glob.glob(args.aports + "/*/" + prefix + "*/APKBUILD"):
+        packages.add(os.path.basename(os.path.dirname(apkbuild)))
+    return packages
 
 
 def arguments():
@@ -430,7 +447,9 @@ def arguments():
                        " is incompatible with how Alpine's abuild handles it.",
                        dest="ignore_depends")
     for action in [checksum, build, aportgen]:
-        action.add_argument("packages", nargs="+")
+        argument_packages = action.add_argument("packages", nargs="+")
+        if argcomplete:
+            argument_packages.completer = packagecompleter
 
     # Action: kconfig_check / apkbuild_parse
     kconfig_check = sub.add_parser("kconfig_check", help="check, whether all"
@@ -458,6 +477,9 @@ def arguments():
     bootimg_analyze.add_argument("--force", "-f", action="store_true",
                                  help="force even if the file seems to be"
                                       " invalid")
+
+    if argcomplete:
+        argcomplete.autocomplete(parser, always_complete_options="long")
 
     # Use defaults from the user's config file
     args = parser.parse_args()

@@ -58,6 +58,9 @@ setup(
     packages=find_packages(exclude=['aports', 'keys', 'test']),
     tests_require=['pytest'],
     cmdclass={'test': PyTest},
+    extras_require={
+        'completion': ['argcomplete'],
+    },
     entry_points={
         'console_scripts': [
             'pmbootstrap=pmb:main',

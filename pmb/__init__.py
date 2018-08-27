@@ -1,3 +1,4 @@
+# PYTHON_ARGCOMPLETE_OK
 """
 Copyright 2018 Oliver Smith
 
