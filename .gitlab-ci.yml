@@ -102,10 +102,6 @@ pmbootstrap-qemu-tests:
     # This requires a specific runner, shared runners generally don't work.
     - qemu
   script:
-    # Note: this is a workaround for pmbootstrap's losetup failing
-    # due to loop devices not coming up fast enough when modprobe is
-    # called by pmbootstrap.
-    - "[[ ! -c /dev/loop0 ]] && sudo modprobe loop"
     # Init test (pipefail disabled so 'yes' doesn't fail test)
     - "set +o pipefail; yes ''| ./pmbootstrap.py init; set -o pipefail"
     # Build/install QEMU (so it doesn't timeout in the testcase)

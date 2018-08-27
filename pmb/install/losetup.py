@@ -20,6 +20,7 @@ import glob
 import json
 import logging
 import os
+import time
 
 import pmb.helpers.mount
 import pmb.helpers.run
@@ -40,8 +41,23 @@ def mount(args, img_path):
     :param img_path: Path to the img file inside native chroot.
     """
     logging.debug("(native) mount " + img_path + " (loop)")
-    init(args)
-    pmb.chroot.root(args, ["losetup", "-f", img_path])
+
+    # Try to mount multiple times (let the kernel module initialize #1594)
+    for i in range(0, 5):
+        # Retry
+        if i > 0:
+            logging.debug("loop module might not be initialized yet, retry in"
+                          " one second...")
+            time.sleep(1)
+
+        # Mount and return on success
+        init(args)
+        pmb.chroot.root(args, ["losetup", "-f", img_path], check=False)
+        if device_by_back_file(args, img_path):
+            return
+
+    # Failure: raise exception
+    raise RuntimeError("Failed to mount loop device: " + img_path)
 
 
 def device_by_back_file(args, back_file):
