@@ -265,7 +265,8 @@ def run(args):
         arch = pmb.parse.arch.uname_to_qemu(args.arch)
     device = pmb.parse.arch.qemu_to_pmos_device(arch)
     img_path = system_image(args, device)
-    install_depends(args, arch)
+    if not args.host_qemu:
+        install_depends(args, arch)
     logging.info("Running postmarketOS in QEMU VM (" + arch + ")")
 
     # Get the Qemu and spice commands
