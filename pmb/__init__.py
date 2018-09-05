@@ -32,13 +32,13 @@ from .helpers import other
 
 
 def main():
-    # Parse arguments, set up logging
-    args = parse.arguments()
-    pmb_logging.init(args)
-    os.umask(0o22)
-
     # Wrap everything to display nice error messages
+    args = None
     try:
+        # Parse arguments, set up logging
+        args = parse.arguments()
+        os.umask(0o22)
+
         # Sanity checks
         other.check_grsec(args)
         if not args.as_root and os.geteuid() == 0:
@@ -76,12 +76,12 @@ def main():
         logging.debug(traceback.format_exc())
 
         # Hints about the log file (print to stdout only)
-        if os.path.exists(args.log):
-            print("Run 'pmbootstrap log' for details.")
-        else:
-            print("Crashed before the log file was created.")
-            print("Running init again like the following gives more details:")
-            print("    pmbootstrap --details-to-stdout init")
+        log_hint = "Run 'pmbootstrap log' for details."
+        if not args or not os.path.exists(args.log):
+            log_hint += (" Alternatively you can use '--details-to-stdout' to"
+                         " get more output, e.g. 'pmbootstrap --details-to-stdout"
+                         " init'.")
+        print(log_hint)
         return 1
 
 

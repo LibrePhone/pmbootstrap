@@ -1,3 +1,0 @@
-#!/bin/sh
-# Removing wlan module loading
-rc-update del wlanarmani default || true

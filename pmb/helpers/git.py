@@ -25,16 +25,41 @@ import pmb.config
 import pmb.helpers.run
 
 
-def clone(args, repo_name):
-    if repo_name not in pmb.config.git_repos:
-        raise ValueError("No git repository configured for " + repo_name)
+def clone(args, name_repo, shallow=True, chown_to_user=False):
+    # Check for repo name in the config
+    if name_repo not in pmb.config.git_repos:
+        raise ValueError("No git repository configured for " + name_repo)
 
-    if not os.path.exists(args.work + "/cache_git/" + repo_name):
+    # Skip if already checked out
+    if os.path.exists(args.work + "/cache_git/" + name_repo):
+        return
+
+    # Check out to temp folder
+    name_temp = name_repo + ".temp"
+    if not os.path.exists(args.work + "/cache_git/" + name_temp):
+        # Set up chroot and install git
         pmb.chroot.apk.install(args, ["git"])
-        logging.info("(native) git clone " + pmb.config.git_repos[repo_name])
-        pmb.chroot.user(args, ["git", "clone", "--depth=1",
-                               pmb.config.git_repos[repo_name], repo_name],
+        logging.info("(native) git clone " + pmb.config.git_repos[name_repo])
+
+        # git options
+        options = []
+        if shallow:
+            options += ["--depth=1"]
+
+        # Run the command
+        pmb.chroot.user(args, ["git", "clone"] + options +
+                              [pmb.config.git_repos[name_repo], name_temp],
                         working_dir="/home/pmos/git/")
+
+    # Chown to user's UID and GID
+    if chown_to_user:
+        uid_gid = "{}:{}".format(os.getuid(), os.getgid())
+        pmb.helpers.run.root(args, ["chown", "-R", uid_gid, args.work +
+                                    "/cache_git/" + name_temp])
+
+    # Rename the temp folder
+    pmb.helpers.run.root(args, ["mv", name_temp, name_repo],
+                         args.work + "/cache_git")
 
 
 def rev_parse(args, revision="HEAD"):

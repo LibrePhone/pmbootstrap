@@ -20,39 +20,15 @@ set -e
 DIR="$(cd "$(dirname "$0")" && pwd -P)"
 cd "$DIR/.."
 
-# Find CHANGEMEs in APKBUILDs
-if grep -qr '(CHANGEME!)' aports/device; then
-	echo "ERROR: Please replace '(CHANGEME!)' in the following files:"
-	grep --color=always -r '(CHANGEME!)' aports/device
-	exit 1
-fi
-
 # Shell: shellcheck
 sh_files="
 	./test/static_code_analysis.sh
 	./test/testcases_fast.sh
-	./aports/main/postmarketos-base/firmwareload.sh
-	./aports/main/postmarketos-mkinitfs/init.sh.in
-	./aports/main/postmarketos-mkinitfs/init_functions.sh
-	./aports/main/postmarketos-mkinitfs-hook-debug-shell/20-debug-shell.sh
-	./aports/main/postmarketos-update-kernel/update-kernel.sh
-	./aports/main/postmarketos-android-recovery-installer/build_zip.sh
-	./aports/main/postmarketos-android-recovery-installer/pmos_chroot
-	./aports/main/postmarketos-android-recovery-installer/pmos_install
-	./aports/main/postmarketos-android-recovery-installer/pmos_install_functions
-	./aports/main/postmarketos-android-recovery-installer/pmos_setpw
-	./aports/main/postmarketos-android-recovery-installer/update-binary
-	./aports/main/mdss-fb-init-hack/mdss-fb-init-hack.sh
-	./aports/main/postmarketos-ui-hildon/postmarketos-ui-hildon.post-install
 	./helpers/envsetup.sh
 	./helpers/envkernel.sh
 	./.gitlab/setup-pmos-environment.sh
-	./.gitlab/shared-runner_test-aports.sh
 	./.gitlab/shared-runner_test-pmbootstrap.sh
-	./.gitlab/shared-runner_test-upstream-compat.sh
-	$(find . -path './aports/main/postmarketos-ui-hildon/*.sh')
 	$(find . -name '*.trigger')
-	$(find . -path './aports/main/devicepkg-dev/*.sh')
 "
 for file in ${sh_files}; do
 	echo "Test with shellcheck: $file"

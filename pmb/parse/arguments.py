@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
 import argparse
+import copy
 import glob
 import os
 
@@ -27,6 +28,15 @@ except ImportError:
 
 import pmb.config
 import pmb.parse.arch
+import pmb.helpers.args
+
+""" This file is about parsing command line arguments passed to pmbootstrap, as
+    well as generating the help pages (pmbootstrap -h). All this is done with
+    Python's argparse. The parsed arguments get extended and finally stored in
+    the "args" variable, which is prominently passed to most functions all
+    over the pmbootstrap code base.
+
+    See pmb/helpers/args.py for more information about the args variable. """
 
 
 def arguments_export(subparser):
@@ -253,7 +263,7 @@ def arguments():
     parser.add_argument("-m", "--mirror-alpine", dest="mirror_alpine")
     parser.add_argument("-j", "--jobs", help="parallel jobs when compiling")
     parser.add_argument("-p", "--aports",
-                        help="postmarketos aports paths")
+                        help="postmarketos aports (pmaports) path")
     parser.add_argument("-s", "--skip-initfs", dest="skip_initfs",
                         help="do not re-generate the initramfs",
                         action="store_true")
@@ -481,37 +491,9 @@ def arguments():
     if argcomplete:
         argcomplete.autocomplete(parser, always_complete_options="long")
 
-    # Use defaults from the user's config file
+    # Parse and extend arguments (also backup unmodified result from argparse)
     args = parser.parse_args()
-    pmb.config.merge_with_args(args)
-
-    # Replace $WORK in variables from any config
-    for key, value in pmb.config.defaults.items():
-        if key not in args:
-            continue
-        old = getattr(args, key)
-        if isinstance(old, str):
-            setattr(args, key, old.replace("$WORK", args.work))
-
-    # Add convenience shortcuts
-    setattr(args, "arch_native", arch_native)
-
-    # Add a caching dict (caches parsing of files etc. for the current session)
-    setattr(args, "cache", {"apkindex": {},
-                            "apkbuild": {},
-                            "apk_min_version_checked": [],
-                            "apk_repository_list_updated": [],
-                            "built": {},
-                            "find_aport": {}})
-
-    # Add and verify the deviceinfo (only after initialization)
-    if args.action not in ("init", "config", "bootimg_analyze"):
-        setattr(args, "deviceinfo", pmb.parse.deviceinfo(args))
-        arch = args.deviceinfo["arch"]
-        if (arch != args.arch_native and
-                arch not in pmb.config.build_device_architectures):
-            raise ValueError("Arch '" + arch + "' is not available in"
-                             " postmarketOS. If you would like to add it, see:"
-                             " <https://postmarketos.org/newarch>")
-
+    setattr(args, "from_argparse", copy.deepcopy(args))
+    setattr(args.from_argparse, "from_argparse", args.from_argparse)
+    pmb.helpers.args.init(args)
     return args

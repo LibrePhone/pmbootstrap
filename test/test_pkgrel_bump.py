@@ -103,6 +103,10 @@ def setup_work(args, tmpdir):
                                     "test/testdata/pkgrel_bump/aports/" + pkgname,
                                     tmpdir + "/_aports/main/" + pkgname])
 
+    # Copy pmaports.cfg
+    pmb.helpers.run.user(args, ["cp", args.aports + "/pmaports.cfg", tmpdir +
+                                "/_aports"])
+
     # Empty packages folder
     pmb.helpers.run.user(args, ["mkdir", "-p", tmpdir + "/packages"])
     pmb.helpers.run.user(args, ["chmod", "777", tmpdir + "/packages"])

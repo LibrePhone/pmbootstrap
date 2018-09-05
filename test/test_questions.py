@@ -234,10 +234,17 @@ def test_questions_ui(args, monkeypatch):
 
 
 def test_questions_work_path(args, monkeypatch, tmpdir):
+    # Existing paths (triggering various errors)
+    func = pmb.config.init.ask_for_work_path
     tmpdir = str(tmpdir)
     fake_answers(monkeypatch, ["/dev/null", os.path.dirname(__file__),
                                pmb.config.pmb_src, tmpdir])
-    assert pmb.config.init.ask_for_work_path(args) == tmpdir
+    assert func(args) == (tmpdir, True)
+
+    # Non-existing path
+    work = tmpdir + "/non_existing_subfolder"
+    fake_answers(monkeypatch, [work])
+    assert func(args) == (work, False)
 
 
 def test_questions_build_options(args, monkeypatch):

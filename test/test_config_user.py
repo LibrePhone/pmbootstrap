@@ -27,6 +27,7 @@ import pmb.aportgen
 import pmb.config
 import pmb.helpers.frontend
 import pmb.helpers.logging
+import pmb.helpers.run
 
 
 @pytest.fixture
@@ -58,9 +59,13 @@ def test_config_user(args, tmpdir, monkeypatch):
     path_config = tmpdir + "/pmbootstrap.cfg"
 
     # Generate default config (only uses tmpdir)
-    os.chdir(pmb.config.pmb_src)
-    pmb.helpers.run.user(args, ["sh", "-c", "yes '' | ./pmbootstrap.py -c '" +
-                                path_config + "' -w '" + path_work + "' init"])
+    cmd = pmb.helpers.run.flat_cmd(["./pmbootstrap.py",
+                                    "-c", path_config,
+                                    "-w", path_work,
+                                    "--aports", args.aports,
+                                    "init"])
+    pmb.helpers.run.user(args, ["sh", "-c", "yes '' | " + cmd],
+                         pmb.config.pmb_src)
 
     # Load and verify default config
     argv = ["pmbootstrap.py", "-c", path_config, "config"]
@@ -76,5 +81,6 @@ def test_config_user(args, tmpdir, monkeypatch):
     assert args_patched(monkeypatch, argv_jobs).jobs == "1000"
 
     # Override a config option with something that evaluates to false
-    argv_empty = ["pmbootstrap.py", "-c", path_config, "-w", "", "config"]
+    argv_empty = ["pmbootstrap.py", "-c", path_config, "-w", "",
+                  "--details-to-stdout", "config"]
     assert args_patched(monkeypatch, argv_empty).work == ""

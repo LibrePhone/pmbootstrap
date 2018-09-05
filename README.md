@@ -3,6 +3,8 @@
 
 Sophisticated chroot/build/flash tool to develop and install [postmarketOS](https://postmarketos.org).
 
+Package build scripts live in the [`pmaports`](https://gitlab.com/postmarketOS/pmaports) repository now.
+
 ## Requirements
 * 2 GB of RAM recommended for compiling
 * Linux distribution (`x86`, `x86_64`, or `aarch64`)

@@ -17,14 +17,17 @@ You should have received a copy of the GNU General Public License
 along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
 import os
+import shutil
 import sys
 import pytest
 import filecmp
 
 # Import from parent directory
-sys.path.append(os.path.realpath(
-    os.path.join(os.path.dirname(__file__) + "/..")))
+pmb_src = os.path.realpath(os.path.join(os.path.dirname(__file__) + "/.."))
+sys.path.append(pmb_src)
+
 import pmb.aportgen
+import pmb.aportgen.core
 import pmb.config
 import pmb.helpers.logging
 
@@ -40,11 +43,32 @@ def args(tmpdir, request):
     return args
 
 
+def test_aportgen_compare_output(args, tmpdir, monkeypatch):
+    # Copy pmaports testdata to tmpdir
+    tmpdir = str(tmpdir)
+    testdata = pmb_src + "/test/testdata/aportgen"
+    shutil.copytree(testdata + "/pmaports/cross", tmpdir + "/cross")
+    args.aports = tmpdir
+
+    # Override get_upstream_aport() to point to testdata
+    def func(args, upstream_path):
+        return testdata + "/aports/" + upstream_path
+    monkeypatch.setattr(pmb.aportgen.core, "get_upstream_aport", func)
+
+    # Run aportgen and compare output
+    pkgnames = ["binutils-armhf", "gcc-armhf"]
+    for pkgname in pkgnames:
+        pmb.aportgen.generate(args, pkgname)
+        path_new = args.aports + "/cross/" + pkgname + "/APKBUILD"
+        path_old = testdata + "/pmaports/cross/" + pkgname + "/APKBUILD"
+        assert os.path.exists(path_new)
+        assert filecmp.cmp(path_new, path_old, False)
+
+
 def test_aportgen(args, tmpdir):
     # Fake aports folder in tmpdir
-    aports_real = args.aports
     args.aports = str(tmpdir)
-    pmb.helpers.run.user(args, ["mkdir", "-p", str(tmpdir) + "/cross"])
+    os.mkdir(tmpdir + "/cross")
 
     # Create aportgen folder -> code path where it still exists
     pmb.helpers.run.user(args, ["mkdir", "-p", args.work + "/aportgen"])
@@ -54,10 +78,6 @@ def test_aportgen(args, tmpdir):
                 "gcc-armhf", "gcc-armhf"]
     for pkgname in pkgnames:
         pmb.aportgen.generate(args, pkgname)
-        path_new = args.aports + "/cross/" + pkgname + "/APKBUILD"
-        path_old = aports_real + "/cross/" + pkgname + "/APKBUILD"
-        assert os.path.exists(path_new)
-        assert filecmp.cmp(path_new, path_old, False)
 
 
 def test_aportgen_invalid_generator(args):
@@ -67,7 +87,6 @@ def test_aportgen_invalid_generator(args):
 
 
 def test_aportgen_get_upstream_aport(args, monkeypatch):
-
     # Fake pmb.parse.apkbuild()
     def fake_apkbuild(*args, **kwargs):
         return apkbuild

@@ -21,8 +21,10 @@ import glob
 import os
 
 import pmb.config
+import pmb.config.pmaports
 import pmb.helpers.cli
 import pmb.helpers.devices
+import pmb.helpers.logging
 import pmb.helpers.run
 import pmb.helpers.ui
 import pmb.chroot.zap
@@ -34,34 +36,38 @@ def ask_for_work_path(args):
     """
     Ask for the work path, until we can create it (when it does not exist) and
     write into it.
-    :returns: the work path
+    :returns: (path, exists)
+              * path: is the full path, with expanded ~ sign
+              * exists: is False when the folder did not exist before we tested
+                        whether we can create it
     """
     logging.info("Location of the 'work' path. Multiple chroots"
                  " (native, device arch, device rootfs) will be created"
                  " in there.")
     while True:
         try:
-            ret = os.path.expanduser(pmb.helpers.cli.ask(
+            work = os.path.expanduser(pmb.helpers.cli.ask(
                 args, "Work path", None, args.work, False))
-            ret = os.path.realpath(ret)
+            work = os.path.realpath(work)
+            exists = os.path.exists(work)
 
             # Work must not be inside the pmbootstrap path
-            if ret == pmb.config.pmb_src or ret.startswith(pmb.config.pmb_src +
-                                                           "/"):
+            if (work == pmb.config.pmb_src or
+                    work.startswith(pmb.config.pmb_src + "/")):
                 logging.fatal("ERROR: The work path must not be inside the"
                               " pmbootstrap path. Please specify another"
                               " location.")
                 continue
 
             # Create the folder with a version file
-            if not os.path.exists(ret):
-                os.makedirs(ret, 0o700, True)
-                with open(ret + "/version", "w") as handle:
+            if not exists:
+                os.makedirs(work, 0o700, True)
+                with open(work + "/version", "w") as handle:
                     handle.write(str(pmb.config.work_version) + "\n")
 
             # Make sure, that we can write into it
-            os.makedirs(ret + "/cache_http", 0o700, True)
-            return ret
+            os.makedirs(work + "/cache_http", 0o700, True)
+            return (work, exists)
         except OSError:
             logging.fatal("ERROR: Could not create this folder, or write"
                           " inside it! Please try again.")
@@ -308,10 +314,17 @@ def ask_for_ssh_keys(args):
 
 
 def frontend(args):
+    # Work folder (needs to be first, so we can create chroots early)
     cfg = pmb.config.load(args)
+    work, work_exists = ask_for_work_path(args)
+    cfg["pmbootstrap"]["work"] = work
 
-    # Work folder (needs to be first, so boot.img analyze works: #1066)
-    cfg["pmbootstrap"]["work"] = args.work = ask_for_work_path(args)
+    # Update args and save config (so chroots and 'pmbootstrap log' work)
+    pmb.helpers.args.update_work(args, work)
+    pmb.config.save(args, cfg)
+
+    # Clone pmaports
+    pmb.config.pmaports.init(args)
 
     # Device
     device, device_exists, kernel, nonfree = ask_for_device(args)
@@ -360,8 +373,7 @@ def frontend(args):
     pmb.config.save(args, cfg)
 
     # Zap existing chroots
-    setattr(args, "work", cfg["pmbootstrap"]["work"])
-    if (device_exists and
+    if (work_exists and device_exists and
             len(glob.glob(args.work + "/chroot_*")) and
             pmb.helpers.cli.confirm(args, "Zap existing chroots to apply configuration?", default=True)):
         setattr(args, "deviceinfo", pmb.parse.deviceinfo(args, device=device))

@@ -30,7 +30,7 @@ from pmb.config.merge_with_args import merge_with_args
 #
 # Exported variables (internal configuration)
 #
-version = "0.8.0"
+version = "0.9.0"
 pmb_src = os.path.normpath(os.path.realpath(__file__) + "/../../..")
 apk_keys_path = pmb_src + "/keys"
 
@@ -38,6 +38,9 @@ apk_keys_path = pmb_src + "/keys"
 # (which may contain a vulnerable apk/libressl, and allows an attacker to
 # exploit the system!)
 apk_tools_static_min_version = "2.9.0-r0"
+
+# postmarketOS aports compatibility (checked against "version" in pmaports.cfg)
+pmaports_min_version = "0"
 
 # Version of the work folder (as asked during 'pmbootstrap init'). Increase
 # this number, whenever migration is required and provide the migration code,
@@ -55,7 +58,7 @@ config_keys = ["ccache_size", "device", "extra_packages", "hostname", "jobs",
 # overriden on the commandline)
 defaults = {
     "alpine_version": "edge",  # alternatively: latest-stable
-    "aports": os.path.normpath(pmb_src + "/aports"),
+    "aports": "$WORK/cache_git/pmaports",
     "ccache_size": "5G",
     # aes-xts-plain64 would be better, but this is not supported on LineageOS
     # kernel configs
@@ -385,7 +388,7 @@ flashers = {
 #
 git_repos = {
     "aports_upstream": "https://github.com/alpinelinux/aports",
-    "apk-tools": "https://github.com/alpinelinux/apk-tools",
+    "pmaports": "https://gitlab.com/postmarketOS/pmaports.git",
 }
 
 
