@@ -132,5 +132,5 @@ def init(args):
     check_legacy_folder()
     if not os.path.exists(args.aports):
         clone(args)
-        symlink(args)
+    symlink(args)
     read_config_into_args(args)
