@@ -286,6 +286,24 @@ def setup_hostname(args):
     pmb.chroot.root(args, ["sed", "-i", "-e", regex, "/etc/hosts"], suffix)
 
 
+def write_uboot_spl(args):
+    if args.deviceinfo["write_uboot_spl"]:
+        logging.info("Writing the u-boot spl to the SD card with 8KB offset")
+
+        spl_file = os.path.join("/usr/share/u-boot/", args.deviceinfo["write_uboot_spl"])
+        spl_size = os.path.getsize(args.work + "/chroot_rootfs_" + args.device + spl_file)
+
+        # First partition is at 2048 sectors, spl offset is at 8K
+        spl_max_size = (2048 * 512) - (8 * 1024)
+
+        if spl_size > spl_max_size:
+            raise RuntimeError("U-boot SPL image is too big {}B > {}B".format(spl_size, spl_max_size))
+
+        device_rootfs = mount_device_rootfs(args)
+        filename = os.path.join(device_rootfs, spl_file.lstrip("/"))
+        pmb.chroot.root(args, ["dd", "if=" + filename, "of=/dev/install", "bs=1024", "seek=8"])
+
+
 def install_system_image(args):
     # Partition and fill image/sdcard
     logging.info("*** (3/5) PREPARE INSTALL BLOCKDEVICE ***")
@@ -314,6 +332,7 @@ def install_system_image(args):
     create_home_from_skel(args)
     configure_apk(args)
     copy_ssh_keys(args)
+    write_uboot_spl(args)
     pmb.chroot.shutdown(args, True)
 
     # Convert rootfs to sparse using img2simg

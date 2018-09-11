@@ -248,6 +248,7 @@ deviceinfo_attributes = [
     "flash_heimdall_partition_initfs",
     "flash_heimdall_partition_system",
     "generate_legacy_uboot_initfs",
+    "write_uboot_spl",
     "kernel_cmdline",
     "generate_bootimg",
     "bootimg_qcdt",
