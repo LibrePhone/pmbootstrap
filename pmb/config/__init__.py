@@ -37,7 +37,7 @@ apk_keys_path = pmb_src + "/keys"
 # Update this frequently to prevent a MITM attack with an outdated version
 # (which may contain a vulnerable apk/libressl, and allows an attacker to
 # exploit the system!)
-apk_tools_static_min_version = "2.9.0-r0"
+apk_tools_static_min_version = "2.10.1-r0"
 
 # postmarketOS aports compatibility (checked against "version" in pmaports.cfg)
 pmaports_min_version = "0"
