@@ -26,7 +26,7 @@ import pmb.config
 def binfmt_info(args, arch_qemu):
     # Parse the info file
     full = {}
-    info = pmb.config.pmb_src + "/data/qemu-user-binfmt.txt"
+    info = pmb.config.pmb_src + "/pmb/data/qemu-user-binfmt.txt"
     logging.verbose("parsing: " + info)
     with open(info, "r") as handle:
         for line in handle:

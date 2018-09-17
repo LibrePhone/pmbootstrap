@@ -27,6 +27,7 @@ sys.path.append(os.path.realpath(
     os.path.join(os.path.dirname(__file__) + "/..")))
 import pmb.parse.apkindex
 import pmb.helpers.logging
+import pmb.config
 
 
 @pytest.fixture
@@ -66,7 +67,7 @@ def test_keys(args):
     assert len(keys_upstream)
 
     # Check if the keys are mirrored correctly
-    mirror_path_keys = os.path.dirname(__file__) + "/../keys"
+    mirror_path_keys = pmb.config.apk_keys_path
     for key, original_path in keys_upstream.items():
         mirror_path = mirror_path_keys + "/" + key
         assert filecmp.cmp(mirror_path, original_path, False)

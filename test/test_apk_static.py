@@ -26,6 +26,7 @@ import pytest
 pmb_src = os.path.realpath(os.path.join(os.path.dirname(__file__) + "/.."))
 sys.path.append(pmb_src)
 import pmb.chroot.apk_static
+import pmb.config
 import pmb.parse.apkindex
 import pmb.helpers.logging
 
@@ -70,7 +71,7 @@ def test_read_signature_info(args):
         assert "Invalid signature key" in str(e.value)
 
     # Signature file with realistic name
-    path = glob.glob(pmb_src + "/keys/*.pub")[0]
+    path = glob.glob(pmb.config.apk_keys_path + "/*.pub")[0]
     name = os.path.basename(path)
     path_archive = "sbin/apk.static.SIGN.RSA." + name
     pmb.chroot.user(args, ["mv", tmp_path + "/sbin/apk.static.SIGN.RSA.invalid.pub",

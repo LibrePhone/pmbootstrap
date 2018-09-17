@@ -32,7 +32,7 @@ from pmb.config.merge_with_args import merge_with_args
 #
 version = "0.9.0"
 pmb_src = os.path.normpath(os.path.realpath(__file__) + "/../../..")
-apk_keys_path = pmb_src + "/keys"
+apk_keys_path = pmb_src + "/pmb/data/keys"
 
 # Update this frequently to prevent a MITM attack with an outdated version
 # (which may contain a vulnerable apk/libressl, and allows an attacker to

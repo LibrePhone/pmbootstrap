@@ -56,8 +56,9 @@ def read_signature_info(tar):
     logging.debug("sigkey: " + sigkey)
 
     # Get path to keyfile on disk
-    sigkey_path = pmb.config.pmb_src + "/keys/" + sigkey
+    sigkey_path = pmb.config.apk_keys_path + "/" + sigkey
     if "/" in sigkey or not os.path.exists(sigkey_path):
+        logging.debug("sigkey_path: " + sigkey_path)
         raise RuntimeError("Invalid signature key: " + sigkey)
 
     return (sigfilename, sigkey_path)
