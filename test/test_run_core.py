@@ -23,6 +23,7 @@ This file tests functions from pmb.helpers.run_core
 
 import os
 import sys
+import subprocess
 import pytest
 
 # Import from parent directory
@@ -107,6 +108,29 @@ def test_foreground_pipe(args):
     args.timeout = 0.2
     ret = func(args, cmd, output_return=True, output_timeout=True)
     assert ret == (0, "first\nsecond\nthird\nfourth\n")
+
+    # Check if all child processes are killed after timeout.
+    # The first command uses ps to get its process group id (pgid) and echo it
+    # to stdout. All of the test commmands will be running under that pgid.
+    cmd = ["sudo", "sh", "-c",
+           "pgid=$(ps -p ${1:-$$} -o pgid=);echo $pgid | tr -d '\n';" +
+           "sleep 10 | sleep 20 | sleep 30"]
+    args.timeout = 0.3
+    ret = func(args, cmd, output_return=True, output_timeout=True,
+               kill_as_root=True)
+    pgid = str(ret[1])
+
+    cmd = ["ps", "-e", "-o", "pgid=,comm=", "--noheaders"]
+    ret = subprocess.run(cmd, check=True, stdout=subprocess.PIPE)
+    procs = str(ret.stdout.decode("utf-8")).rstrip().split('\n')
+    child_procs = []
+    for process in procs:
+        items = process.split(maxsplit=1)
+        if len(items) != 2:
+            continue
+        if pgid == items[0] and "sleep" in items[1]:
+            child_procs.append(items)
+    assert len(child_procs) == 0
 
 
 def test_foreground_tui():

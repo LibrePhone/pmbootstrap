@@ -93,6 +93,46 @@ def pipe_read(args, process, output_to_stdout=False, output_return=False,
         return
 
 
+def kill_process_tree(args, pid, ppids, kill_as_root):
+    """
+    Recursively kill a pid and its child processes
+
+    :param pid: process id that will be killed
+    :param ppids: list of process id and parent process id tuples (pid, ppid)
+    :param kill_as_root: use sudo to kill the process
+    """
+    if kill_as_root:
+        pmb.helpers.run.root(args, ["kill", "-9", str(pid)],
+                             check=False)
+    else:
+        pmb.helpers.run.user(args, ["kill", "-9", str(pid)],
+                             check=False)
+
+    for (child_pid, child_ppid) in ppids:
+        if child_ppid == str(pid):
+            kill_process_tree(args, child_pid, ppids, kill_as_root)
+
+
+def kill_command(args, pid, kill_as_root):
+    """
+    Kill a command process and recursively kill its child processes
+
+    :param pid: process id that will be killed
+    :param kill_as_root: use sudo to kill the process
+    """
+    cmd = ["ps", "-e", "-o", "pid=,ppid=", "--noheaders"]
+    ret = subprocess.run(cmd, check=True, stdout=subprocess.PIPE)
+    ppids = []
+    proc_entries = ret.stdout.decode("utf-8").rstrip().split('\n')
+    for row in proc_entries:
+        items = row.split()
+        if len(items) != 2:
+            raise RuntimeError("Unexpected ps output: " + row)
+        ppids.append(items)
+
+    kill_process_tree(args, pid, ppids, kill_as_root)
+
+
 def foreground_pipe(args, cmd, working_dir=None, output_to_stdout=False,
                     output_return=False, output_timeout=True,
                     kill_as_root=False):
@@ -141,11 +181,7 @@ def foreground_pipe(args, cmd, working_dir=None, output_to_stdout=False,
                              str(args.timeout) + " seconds. Killing it.")
                 logging.info("NOTE: The timeout can be increased with"
                              " 'pmbootstrap -t'.")
-                if kill_as_root:
-                    pmb.helpers.run.root(args, ["kill", "-9",
-                                         str(process.pid)])
-                else:
-                    process.kill()
+                kill_command(args, process.pid, kill_as_root)
                 continue
 
         # Read all currently available output
