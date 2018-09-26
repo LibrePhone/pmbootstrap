@@ -49,7 +49,13 @@ def clone(args, name_repo, shallow=True, chown_to_user=False):
         # Run the command
         pmb.chroot.user(args, ["git", "clone"] + options +
                               [pmb.config.git_repos[name_repo], name_temp],
-                        working_dir="/home/pmos/git/")
+                        working_dir="/home/pmos/git/", check=False,
+                        output="stdout")
+        if not os.path.exists(args.work + "/cache_git/" + name_temp):
+            logging.info("NOTE: cloning from git is known to fail when the"
+                         " host linux kernel is older than 3.17:"
+                         " <https://postmarketos.org/oldkernel>")
+            raise RuntimeError("git clone failed!")
 
     # Chown to user's UID and GID
     if chown_to_user:
