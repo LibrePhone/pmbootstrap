@@ -49,7 +49,7 @@ def find_aport(args, package, must_exist=True):
 
         # Search in packages
         paths = glob.glob(args.aports + "/*/" + package)
-        if len(paths) > 2:
+        if len(paths) > 1:
             raise RuntimeError("Package " + package + " found in multiple"
                                " aports subfolders. Please put it only in one"
                                " folder.")
