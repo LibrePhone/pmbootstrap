@@ -229,6 +229,8 @@ def install(args, packages, suffix="native", build=True):
                     ["add"] + packages,
                     ["del", ".pmbootstrap"]]
     for command in commands:
+        if args.offline:
+            command = ["--no-network"] + command
         pmb.chroot.root(args, ["apk", "--no-progress"] + command, suffix)
 
 

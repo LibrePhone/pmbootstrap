@@ -181,4 +181,6 @@ def init(args):
 
 
 def run(args, parameters):
+    if args.offline:
+        parameters = ["--no-network"] + parameters
     pmb.helpers.run.root(args, [args.work + "/apk.static"] + parameters)

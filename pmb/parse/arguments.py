@@ -281,6 +281,8 @@ def arguments():
                         " recommended, may screw up your work folders"
                         " directory permissions!)", dest="as_root",
                         action="store_true")
+    parser.add_argument("-o", "--offline", help="Do not attempt to update"
+                        " the package index files", action="store_true")
 
     # Compiler
     parser.add_argument("--ccache-disable", action="store_false",

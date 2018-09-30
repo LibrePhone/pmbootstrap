@@ -118,6 +118,13 @@ def update(args, arch=None, force=False, existing_only=False):
 
     :returns: True when files have been downloaded, False otherwise
     """
+    # Skip in offline mode, only show once
+    if args.offline:
+        if not args.cache["offline_msg_shown"]:
+            logging.info("NOTE: skipping package index update (offline mode)")
+        args.cache["offline_msg_shown"] = True
+        return False
+
     # Architectures and retention time
     architectures = [arch] if arch else pmb.config.build_device_architectures
     retention_hours = pmb.config.apkindex_retention_time

@@ -115,7 +115,8 @@ def add_cache(args):
                             "apk_min_version_checked": [],
                             "apk_repository_list_updated": [],
                             "built": {},
-                            "find_aport": {}})
+                            "find_aport": {},
+                            "offline_msg_shown": False})
 
 
 def add_deviceinfo(args):
