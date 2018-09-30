@@ -190,8 +190,12 @@ def init_buildenv(args, apkbuild, arch, strict=False, force=False, cross=None,
 
     # Cross-compiler init
     if cross:
-        pmb.chroot.apk.install(args, ["gcc-" + arch, "g++-" + arch,
-                                      "ccache-cross-symlinks"])
+        cross_pkgs = ["ccache-cross-symlinks"]
+        if "gcc6" in depends:
+            cross_pkgs += ["gcc6-" + arch]
+        else:
+            cross_pkgs += ["gcc-" + arch, "g++-" + arch]
+        pmb.chroot.apk.install(args, cross_pkgs)
     if cross == "distcc":
         pmb.chroot.distccd.start(args, arch)
 

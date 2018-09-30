@@ -23,8 +23,17 @@ import pmb.helpers.run
 
 def generate(args, pkgname):
     # Copy original aport
+    prefix = pkgname.split("-")[0]
     arch = pkgname.split("-")[1]
-    upstream = pmb.aportgen.core.get_upstream_aport(args, "main/gcc")
+    if prefix == "gcc":
+        upstream = pmb.aportgen.core.get_upstream_aport(args, "main/gcc")
+        based_on = "main/gcc (from Alpine)"
+    elif prefix == "gcc6":
+        upstream = args.aports + "/main/gcc6"
+        based_on = "main/gcc6 (from postmarketOS)"
+    else:
+        raise ValueError("Invalid prefix '" + prefix + "', expected gcc or"
+                         " gcc6.")
     pmb.helpers.run.user(args, ["cp", "-r", upstream, args.work + "/aportgen"])
 
     # Architectures to build this package for
@@ -39,7 +48,11 @@ def generate(args, pkgname):
         "depends": "isl binutils-" + arch,
         "makedepends_build": "gcc g++ paxmark bison flex texinfo gawk zip gmp-dev mpfr-dev mpc1-dev zlib-dev",
         "makedepends_host": "linux-headers gmp-dev mpfr-dev mpc1-dev isl-dev zlib-dev musl-dev-" + arch + " binutils-" + arch,
-        "subpackages": "g++-" + arch + ":gpp",
+        "subpackages": "g++-" + arch + ":gpp" if prefix == "gcc" else "",
+
+        # gcc6: options is already there, so we need to replace it and not only
+        # set it below the header like done below.
+        "options": "!strip !tracedeps",
 
         "LIBGOMP": "false",
         "LIBGCC": "false",
@@ -80,6 +93,6 @@ def generate(args, pkgname):
         '*_cross_configure=*': None,
     }
 
-    pmb.aportgen.core.rewrite(args, pkgname, "main/gcc", fields,
+    pmb.aportgen.core.rewrite(args, pkgname, based_on, fields,
                               replace_simple=replace_simple,
                               below_header=below_header)
