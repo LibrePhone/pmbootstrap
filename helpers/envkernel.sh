@@ -13,6 +13,30 @@ check_kernel_folder() {
 }
 
 
+clean_kernel_src_dir() {
+
+	if [ -f ".config" ] || [ -d "include/config" ]; then
+		echo "Source directory is not clean, running 'make mrproper'."
+
+		tmp_dir=""
+		if [ -d ".output" ]; then
+			echo " * Preserving existing build output."
+			tmp_dir=$(mktemp -d)
+			sudo mv ".output" "$tmp_dir"
+		fi;
+
+		# backslash is prefixed to disable the alias
+		# shellcheck disable=SC1001
+		\make mrproper
+
+		if [ ! -z "$tmp_dir" ]; then
+			sudo mv "$tmp_dir/.output" ".output"
+			sudo rmdir "$tmp_dir"
+		fi;
+	fi;
+}
+
+
 export_pmbootstrap_dir() {
 	# Get pmbootstrap dir based on this script's location
 	# See also: <https://stackoverflow.com/a/29835459>
@@ -144,6 +168,7 @@ main() {
 	# Stop executing once a function fails
 	# shellcheck disable=SC1090
 	if check_kernel_folder \
+		&& clean_kernel_src_dir \
 		&& export_pmbootstrap_dir "$1" \
 		&& set_alias_pmbootstrap \
 		&& export_chroot_device_deviceinfo \
