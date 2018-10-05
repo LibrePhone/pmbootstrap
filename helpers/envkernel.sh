@@ -89,12 +89,18 @@ check_device() {
 
 
 initialize_chroot() {
+	gcc_pkgname="gcc"
+	if [ "$gcc6_arg" = "1" ]; then
+		gcc_pkgname="gcc6"
+	fi
+
 	# Don't initialize twice
-	flag="$chroot/tmp/envkernel/setup_done"
+	flag="$chroot/tmp/envkernel/${gcc_pkgname}_setup_done"
 	[ -e "$flag" ] && return
 
 	# Install needed packages
 	echo "Initializing Alpine chroot (details: 'pmbootstrap log')"
+
 	# shellcheck disable=SC2154
 	$pmbootstrap -q chroot -- apk -q add \
 		abuild \
@@ -103,8 +109,8 @@ initialize_chroot() {
 		binutils \
 		bison \
 		flex \
-		gcc-"$deviceinfo_arch" \
-		gcc \
+		"$gcc_pkgname"-"$deviceinfo_arch" \
+		"$gcc_pkgname" \
 		linux-headers \
 		libressl-dev \
 		make \
@@ -146,11 +152,17 @@ set_alias_make() {
 		arm*) arch="arm" ;;
 	esac
 
+	if [ "$gcc6_arg" = "1" ]; then
+		cross_compiler="/usr/bin/gcc6-$prefix-"
+	else
+		cross_compiler="/usr/bin/$prefix-"
+	fi
+
 	# Build make command
 	cmd="echo '*** pmbootstrap envkernel.sh active for $PWD! ***';"
 	cmd="$cmd pmbootstrap -q chroot --"
 	cmd="$cmd ARCH=$arch"
-	cmd="$cmd CROSS_COMPILE=/usr/bin/$prefix-"
+	cmd="$cmd CROSS_COMPILE=$cross_compiler"
 	cmd="$cmd make -C /mnt/linux O=/mnt/linux/.output"
 	# shellcheck disable=SC2139
 	alias make="$cmd"
@@ -165,6 +177,13 @@ set_alias_pmbroot_kernelroot() {
 }
 
 
+cross_compiler_version() {
+	pmbootstrap chroot --user -- "${cross_compiler}gcc"  --version \
+		2> /dev/null | grep "^.*gcc " | \
+		awk -F'[()]' '{ print $1 "("$2")" }'
+}
+
+
 print_usage() {
 	# shellcheck disable=SC2039
 	if [ -n "${BASH_SOURCE[0]}" ]; then
@@ -174,17 +193,23 @@ print_usage() {
 	fi
 	echo "optional arguments:"
 	echo "    --fish        Print fish alias syntax"
+	echo "    --gcc6        Use GCC6 cross compiler"
 	echo "    --help        Show this help message"
 }
 
 
 parse_args() {
 	unset fish_arg
+	unset gcc6_arg
 
 	while [ "${1:-}" != "" ]; do
 		case $1 in
 		--fish)
 			fish_arg="$1"
+			shift
+			;;
+		--gcc6)
+			gcc6_arg=1
 			shift
 			;;
 		--help)
@@ -224,6 +249,7 @@ main() {
 		echo " * kernel source:  $PWD"
 		echo " * output folder:  $PWD/.output"
 		echo " * architecture:   $arch ($device is $deviceinfo_arch)"
+		echo " * cross compile:  $(cross_compiler_version)"
 		echo " * aliases: make, kernelroot, pmbootstrap, pmbroot" \
 			"(see 'type make' etc.)"
 	else
