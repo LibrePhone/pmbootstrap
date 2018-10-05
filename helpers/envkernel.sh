@@ -164,6 +164,45 @@ set_alias_pmbroot_kernelroot() {
 	alias kernelroot="cd '$PWD'"
 }
 
+
+print_usage() {
+	# shellcheck disable=SC2039
+	if [ -n "${BASH_SOURCE[0]}" ]; then
+		echo "usage: $(basename "${BASH_SOURCE[0]}")"
+	else
+		echo "usage: $(basename "$1")"
+	fi
+	echo "optional arguments:"
+	echo "    --fish        Print fish alias syntax"
+	echo "    --help        Show this help message"
+}
+
+
+parse_args() {
+	unset fish_arg
+
+	while [ "${1:-}" != "" ]; do
+		case $1 in
+		--fish)
+			fish_arg="$1"
+			shift
+			;;
+		--help)
+			shift
+			return 0
+			;;
+		*)
+			echo "Invalid argument: $1"
+			shift
+			return 0
+			;;
+		esac
+	done
+
+	return 1
+}
+
+
 main() {
 	# Stop executing once a function fails
 	# shellcheck disable=SC1090
@@ -203,6 +242,11 @@ fish_compat() {
 	done
 }
 
+if parse_args "$@"; then
+	print_usage "$0"
+	return 1
+fi
+
 # Run main() with all output redirected to stderr
 # Afterwards print fish compatible syntax to stdout
-main "$0" >&2 && fish_compat "$1"
+main "$0" >&2 && fish_compat "$fish_arg"
