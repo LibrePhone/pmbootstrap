@@ -86,8 +86,8 @@ def copy_to_buildpath(args, package, suffix="native"):
     if os.path.exists(build):
         pmb.chroot.root(args, ["rm", "-rf", "/home/pmos/build"], suffix)
 
-    # Copy aport contents
-    pmb.helpers.run.root(args, ["cp", "-r", aport + "/", build])
+    # Copy aport contents with resolved symlinks
+    pmb.helpers.run.root(args, ["cp", "-rL", aport + "/", build])
     pmb.chroot.root(args, ["chown", "-R", "pmos:pmos",
                            "/home/pmos/build"], suffix)
 
