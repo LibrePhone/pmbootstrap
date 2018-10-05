@@ -22,7 +22,7 @@ import pmb.parse.apkindex
 import pmb.parse.arch
 
 
-def generate_apkbuild(args, pkgname, deviceinfo):
+def generate_apkbuild(args, pkgname, deviceinfo, patches):
     device = "-".join(pkgname.split("-")[1:])
     carch = pmb.parse.arch.alpine_to_kernel(deviceinfo["arch"])
 
@@ -65,6 +65,7 @@ def generate_apkbuild(args, pkgname, deviceinfo):
                 "$pkgdir/boot/dt.img\""""
 
     content = """\
+        # Reference: <https://postmarketos.org/vendorkernel>
         # Kernel config based on: arch/""" + carch + """/configs/(CHANGEME!)
 
         pkgname=\"""" + pkgname + """\"
@@ -75,9 +76,11 @@ def generate_apkbuild(args, pkgname, deviceinfo):
         _carch=\"""" + carch + """\"
         _flavor=\"""" + device + """\"
         url="https://kernel.org"
-        license="GPL2"
+        license="GPL-2.0-only"
         options="!strip !check !tracedeps"
         makedepends=\"""" + makedepends + """\"
+
+        # Compiler: latest GCC from Alpine
         HOSTCC="${CC:-gcc}"
         HOSTCC="${HOSTCC#${CROSS_COMPILE}}"
 
@@ -87,10 +90,7 @@ def generate_apkbuild(args, pkgname, deviceinfo):
         _config="config-${_flavor}.${arch}"
         source="
             $pkgname-$_commit.tar.gz::https://github.com/LineageOS/${_repository}/archive/${_commit}.tar.gz
-            $_config
-            compiler-gcc6.h
-            01_msm-fix-perf_trace_counters.patch
-            02_gpu-msm-fix-gcc5-compile.patch
+            $_config""" + ("\n" + " " * 12).join([""] + patches) + """
         "
         builddir="$srcdir/${_repository}-${_commit}"
 
@@ -105,8 +105,7 @@ def generate_apkbuild(args, pkgname, deviceinfo):
         package() {""" + package + """
         }
 
-        sha512sums="(run 'pmbootstrap checksum """ + pkgname + """' to fill)"
-        """
+        sha512sums="(run 'pmbootstrap checksum """ + pkgname + """' to fill)\""""
 
     # Write the file
     with open(args.work + "/aportgen/APKBUILD", "w", encoding="utf-8") as handle:
@@ -118,13 +117,13 @@ def generate(args, pkgname):
     device = "-".join(pkgname.split("-")[1:])
     deviceinfo = pmb.parse.deviceinfo(args, device)
 
-    # Copy gcc6 support header and the patches from lg-mako for now
-    # (automatically finding the right patches is planned in #688)
+    # Symlink commonly used patches
     pmb.helpers.run.user(args, ["mkdir", "-p", args.work + "/aportgen"])
-    for file in ["compiler-gcc6.h", "01_msm-fix-perf_trace_counters.patch",
-                 "02_gpu-msm-fix-gcc5-compile.patch"]:
-        pmb.helpers.run.user(args, ["cp", args.aports +
-                                    "/device/linux-lg-mako/" + file,
-                                    args.work + "/aportgen/"])
+    patches = ["gcc7-give-up-on-ilog2-const-optimizations.patch",
+               "gcc8-fix-put-user.patch"]
+    for patch in patches:
+        pmb.helpers.run.user(args, ["ln", "-s",
+                                    "../../.shared-patches/linux/" + patch,
+                                    args.work + "/aportgen/" + patch])
 
-    generate_apkbuild(args, pkgname, deviceinfo)
+    generate_apkbuild(args, pkgname, deviceinfo, patches)
