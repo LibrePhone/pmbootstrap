@@ -66,4 +66,5 @@ setup(
             'pmbootstrap=pmb:main',
         ],
     },
+    include_package_data=True,
 )
