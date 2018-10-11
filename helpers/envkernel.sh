@@ -187,12 +187,12 @@ cross_compiler_version() {
 print_usage() {
 	# shellcheck disable=SC2039
 	if [ -n "${BASH_SOURCE[0]}" ]; then
-		echo "usage: $(basename "${BASH_SOURCE[0]}")"
+		echo "usage: source $(basename "${BASH_SOURCE[0]}")"
 	else
-		echo "usage: $(basename "$1")"
+		echo "usage: source $(basename "$1")"
 	fi
 	echo "optional arguments:"
-	echo "    --fish        Print fish alias syntax"
+	echo "    --fish        Print fish alias syntax (internally used)"
 	echo "    --gcc6        Use GCC6 cross compiler"
 	echo "    --help        Show this help message"
 }
