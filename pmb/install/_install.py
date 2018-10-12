@@ -61,10 +61,10 @@ def get_subpartitions_size(args):
     # /dev/installp2
     full = root - home
 
-    # Add some free space, see also: #336
+    # Add some free space, see also: #336, #1671
     full *= 1.20
     full += 50 * 1024 * 1024
-    boot += 15 * 1024 * 1024
+    boot += 25 * 1024 * 1024
     return (boot, full - boot)
 
 
