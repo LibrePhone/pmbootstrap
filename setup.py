@@ -40,6 +40,7 @@ setup(
     version=version,
     description='A sophisticated chroot / build / flash tool to develop and install postmarketOS',
     long_description=long_description,
+    long_description_content_type='text/markdown',
     author='postmarketOS Developers',
     author_email='info@postmarketos.org',
     url='https://www.postmarketos.org',
