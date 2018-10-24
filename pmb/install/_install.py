@@ -391,15 +391,8 @@ def install_recovery_zip(args):
 
     # Flash information
     logging.info("*** (4/4) FLASHING TO DEVICE ***")
-    logging.info("Run the following to flash your installation to the"
-                 " target device:")
-    logging.info("* pmbootstrap flasher --method adb sideload")
-    logging.info("  Flashes the installer zip to your device.")
-
-    # Export information
-    logging.info("* If this does not work, you can also create a"
-                 " symlink to the generated zip with 'pmbootstrap"
-                 " export' and flash outside of pmbootstrap.")
+    logging.info("Flashing with the recovery zip is explained here:")
+    logging.info("<https://postmarketos.org/recoveryzip>")
 
 
 def install(args):
