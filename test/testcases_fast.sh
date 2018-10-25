@@ -44,4 +44,4 @@ done
 # Note: Pytest is called through python so that this is compatible with
 # running from a venv (e.g. in gitlab CI)
 # shellcheck disable=SC2086
-python -m pytest -vv -x --cov=pmb $enabled --tb=native
+python3 -m pytest -vv -x --cov=pmb $enabled --tb=native
