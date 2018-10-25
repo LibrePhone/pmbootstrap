@@ -34,6 +34,9 @@ def user(args, cmd, suffix="native", working_dir="/", output="log",
     See pmb.helpers.run_core.core() for a detailed description of all other
     arguments and the return value.
     """
+    if "HOME" not in env:
+        env["HOME"] = "/home/pmos"
+
     flat_cmd = pmb.helpers.run.flat_cmd(cmd, env=env)
     cmd = ["busybox", "su", "pmos", "-c", flat_cmd]
     return pmb.chroot.root(args, cmd, suffix, working_dir, output,
