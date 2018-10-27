@@ -21,7 +21,7 @@ import sys
 import pytest
 
 # Import from parent directory
-sys.path.append(os.path.abspath(
+sys.path.insert(0, os.path.abspath(
     os.path.join(os.path.dirname(__file__) + "/..")))
 import pmb.helpers.logging
 import pmb.helpers.other

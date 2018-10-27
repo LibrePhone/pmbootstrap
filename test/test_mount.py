@@ -20,7 +20,7 @@ import os
 import sys
 
 # Import from parent directory
-sys.path.append(os.path.realpath(
+sys.path.insert(0, os.path.realpath(
     os.path.join(os.path.dirname(__file__) + "/..")))
 import pmb.helpers.mount
 

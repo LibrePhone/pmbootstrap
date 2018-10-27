@@ -23,7 +23,7 @@ import sys
 
 # Import from parent directory
 pmb_src = os.path.realpath(os.path.join(os.path.dirname(__file__) + "/.."))
-sys.path.append(pmb_src)
+sys.path.insert(0, pmb_src)
 import pmb.parse._apkbuild
 
 
