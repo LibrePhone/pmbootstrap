@@ -30,6 +30,34 @@ import pmb.parse.apkindex
 import pmb.parse.version
 
 
+def find_aport_guess_main(args, subpkgname):
+    """
+    Find the main package by assuming it is a prefix of the subpkgname.
+    We do that, because in some APKBUILDs the subpkgname="" variable gets
+    filled with a shell loop and the APKBUILD parser in pmbootstrap can't
+    parse this right. (Intentionally, we don't want to implement a full shell
+    parser.)
+
+    :param subpkgname: subpackage name (e.g. "u-boot-some-device")
+    :returns: * full path to the aport, e.g.:
+                "/home/user/code/pmbootstrap/aports/main/u-boot"
+              * None when we couldn't find a main package
+    """
+    # Iterate until the cut up subpkgname is gone
+    words = subpkgname.split("-")
+    while len(words) > 1:
+        # Remove one dash-separated word at a time ("a-b-c" -> "a-b")
+        words.pop()
+        pkgname = "-".join(words)
+
+        # Look in pmaports
+        paths = glob.glob(args.aports + "/*/" + pkgname)
+        if paths:
+            logging.debug(subpkgname + ": guessed to be a subpackage of " +
+                          pkgname)
+            return paths[0]
+
+
 def find_aport(args, package, must_exist=True):
     """
     Find the aport, that provides a certain subpackage.
@@ -55,14 +83,19 @@ def find_aport(args, package, must_exist=True):
                                " folder.")
         elif len(paths) == 1:
             ret = paths[0]
-        else:
-            # Search in subpackages
+
+        # Search in subpackages
+        if not ret:
             for path_current in glob.glob(args.aports + "/*/*/APKBUILD"):
                 apkbuild = pmb.parse.apkbuild(args, path_current)
                 if (package in apkbuild["subpackages"] or
                         package in apkbuild["provides"]):
                     ret = os.path.dirname(path_current)
                     break
+
+        # Guess a main package
+        if not ret:
+            ret = find_aport_guess_main(args, package)
 
     # Crash when necessary
     if ret is None and must_exist:
