@@ -143,7 +143,12 @@ def is_necessary_warn_depends(args, apkbuild, arch, force, depends_built):
     :returns: True or False
     """
     pkgname = apkbuild["pkgname"]
-    ret = True if force else pmb.build.is_necessary(args, arch, apkbuild)
+
+    # Check if necessary (this warns about binary version > aport version, so
+    # call it even in force mode)
+    ret = pmb.build.is_necessary(args, arch, apkbuild)
+    if force:
+        ret = True
 
     if not ret and len(depends_built):
         # Warn of potentially outdated package

@@ -150,10 +150,12 @@ def is_necessary(args, arch, apkbuild, indexes=None):
     # a) Binary repo has a newer version
     version_old = index_data["version"]
     if pmb.parse.version.compare(version_old, version_new) == 1:
-        logging.warning("WARNING: Package '" + package + "' in your aports folder"
-                        " has version " + version_new + ", but the binary package"
-                        " repositories already have version " + version_old + "!"
-                        " See also: <https://postmarketos.org/warning-repo2>")
+        logging.warning("WARNING: package {}: aport version {} is lower than"
+                        " {} from the binary repository. {} will be used when"
+                        " installing {}. See also:"
+                        " <https://postmarketos.org/warning-repo2>"
+                        "".format(package, version_new, version_old,
+                                  version_old, package))
         return False
 
     # b) Aports folder has a newer version
