@@ -128,9 +128,7 @@ def copy_to_buildpath(args, package, suffix="native"):
 def is_necessary(args, arch, apkbuild, indexes=None):
     """
     Check if the package has already been built. Compared to abuild's check,
-    this check also works for different architectures, and it recognizes
-    changed files in an aport folder, even if the pkgver and pkgrel did not
-    change.
+    this check also works for different architectures.
 
     :param arch: package target architecture
     :param apkbuild: from pmb.parse.apkbuild()
