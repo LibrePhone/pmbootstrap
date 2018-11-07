@@ -135,7 +135,7 @@ def test_aportgen_device_wizard(args, monkeypatch):
     # Build the device package
     pkgname = "device-testsuite-testdevice"
     pmb.build.checksum(args, pkgname)
-    pmb.build.package(args, pkgname, "x86_64", force=True)
+    pmb.build.package(args, pkgname, "armhf", force=True)
 
     # Abort on overwrite confirmation
     answers["overwrite"] = "n"

@@ -203,8 +203,8 @@ def generate_apkbuild(args, pkgname, name, arch, flash_method):
         pkgrel=0
         url="https://postmarketos.org"
         license="MIT"
-        arch="noarch"
-        options="!check"
+        arch=\"""" + arch + """\"
+        options="!check !archcheck"
         depends=\"""" + depends + """\"
         makedepends="devicepkg-dev"
         source="deviceinfo"
