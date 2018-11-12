@@ -38,6 +38,7 @@ def symlinks(args, flavor, folder):
         " contains initramfs and kernel",
         "blob-" + flavor: "Asus boot blob for TF101",
         "initramfs-" + flavor: "Initramfs",
+        "initramfs-" + flavor + "-extra": "Extra initramfs files in /boot",
         "uInitrd-" + flavor: "Initramfs, legacy u-boot image format",
         "uImage-" + flavor: "Kernel, legacy u-boot image format",
         "vmlinuz-" + flavor: "Linux kernel",
@@ -52,6 +53,7 @@ def symlinks(args, flavor, folder):
     path_boot = args.work + "/chroot_rootfs_" + args.device + "/boot"
     path_buildroot = args.work + "/chroot_buildroot_" + args.deviceinfo["arch"]
     patterns = [path_boot + "/*-" + flavor,
+                path_boot + "/*-" + flavor + "-extra",
                 path_native + "/home/pmos/rootfs/" + args.device + ".img",
                 path_native + "/home/pmos/rootfs/" + args.device + "-boot.img",
                 path_native + "/home/pmos/rootfs/" + args.device + "-root.img",
