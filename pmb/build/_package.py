@@ -25,6 +25,7 @@ import pmb.build.autodetect
 import pmb.chroot
 import pmb.chroot.apk
 import pmb.chroot.distccd
+import pmb.helpers.pmaports
 import pmb.helpers.repo
 import pmb.parse
 import pmb.parse.arch
@@ -59,7 +60,7 @@ def get_apkbuild(args, pkgname, arch):
     pmb.helpers.repo.update(args, arch)
 
     # Get aport, skip upstream only packages
-    aport = pmb.build.find_aport(args, pkgname, False)
+    aport = pmb.helpers.pmaports.find(args, pkgname, False)
     if aport:
         return pmb.parse.apkbuild(args, aport + "/APKBUILD")
     if pmb.parse.apkindex.providers(args, pkgname, arch, False):

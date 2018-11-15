@@ -23,8 +23,8 @@ import pytest
 # Import from parent directory
 sys.path.insert(0, os.path.realpath(
     os.path.join(os.path.dirname(__file__) + "/..")))
-import pmb.build.other
 import pmb.helpers.logging
+import pmb.helpers.pmaports
 
 
 @pytest.fixture
@@ -59,7 +59,7 @@ def cache_apkindex(args, version):
 
 def test_build_is_necessary(args):
     # Prepare APKBUILD and APKINDEX data
-    aport = pmb.build.other.find_aport(args, "hello-world")
+    aport = pmb.helpers.pmaports.find(args, "hello-world")
     apkbuild = pmb.parse.apkbuild(args, aport + "/APKBUILD")
     apkbuild["pkgver"] = "1"
     apkbuild["pkgrel"] = "2"
@@ -88,6 +88,6 @@ def test_build_is_necessary_no_binary_available(args):
     hello-world package has not been built yet.
     """
     indexes = list(args.cache["apkindex"].keys())
-    aport = pmb.build.other.find_aport(args, "hello-world")
+    aport = pmb.helpers.pmaports.find(args, "hello-world")
     apkbuild = pmb.parse.apkbuild(args, aport + "/APKBUILD")
     assert pmb.build.is_necessary(args, None, apkbuild, indexes) is True

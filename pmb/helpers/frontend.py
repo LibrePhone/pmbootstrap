@@ -35,8 +35,8 @@ import pmb.chroot.other
 import pmb.export
 import pmb.flasher
 import pmb.helpers.logging
-import pmb.helpers.other
 import pmb.helpers.pkgrel_bump
+import pmb.helpers.pmaports
 import pmb.helpers.repo
 import pmb.helpers.run
 import pmb.install
@@ -266,7 +266,7 @@ def apkbuild_parse(args):
     packages.sort()
     for package in packages:
         print(package + ":")
-        aport = pmb.build.other.find_aport(args, package)
+        aport = pmb.helpers.pmaports.find(args, package)
         path = aport + "/APKBUILD"
         print(json.dumps(pmb.parse.apkbuild(args, path), indent=4,
                          sort_keys=True))
@@ -289,7 +289,7 @@ def pkgrel_bump(args):
     else:
         # Each package must exist
         for package in args.packages:
-            pmb.build.other.find_aport(args, package)
+            pmb.helpers.pmaports.find(args, package)
 
         # Increase pkgrel
         for package in args.packages:

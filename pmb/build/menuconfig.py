@@ -25,6 +25,7 @@ import pmb.build.checksum
 import pmb.chroot
 import pmb.chroot.apk
 import pmb.chroot.other
+import pmb.helpers.pmaports
 import pmb.helpers.run
 import pmb.parse
 
@@ -97,7 +98,7 @@ def menuconfig(args, pkgname):
         pkgname = "linux-" + pkgname
 
     # Read apkbuild
-    aport = pmb.build.find_aport(args, pkgname)
+    aport = pmb.helpers.pmaports.find(args, pkgname)
     apkbuild = pmb.parse.apkbuild(args, aport + "/APKBUILD")
     arch = get_arch(args, apkbuild)
     kopt = "menuconfig"

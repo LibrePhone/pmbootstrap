@@ -22,6 +22,7 @@ import os
 
 import pmb.config
 import pmb.chroot.apk
+import pmb.helpers.pmaports
 import pmb.parse.arch
 
 
@@ -59,7 +60,7 @@ def arch(args, pkgname):
               * device arch
               * first arch in the APKBUILD
     """
-    aport = pmb.build.find_aport(args, pkgname)
+    aport = pmb.helpers.pmaports.find(args, pkgname)
     ret = arch_from_deviceinfo(args, pkgname, aport)
     if ret:
         return ret

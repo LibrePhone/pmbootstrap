@@ -21,95 +21,18 @@ import logging
 import os
 import shlex
 
-import pmb.build.other
 import pmb.chroot
 import pmb.helpers.file
 import pmb.helpers.git
+import pmb.helpers.pmaports
 import pmb.helpers.run
 import pmb.parse.apkindex
 import pmb.parse.version
 
 
-def find_aport_guess_main(args, subpkgname):
-    """
-    Find the main package by assuming it is a prefix of the subpkgname.
-    We do that, because in some APKBUILDs the subpkgname="" variable gets
-    filled with a shell loop and the APKBUILD parser in pmbootstrap can't
-    parse this right. (Intentionally, we don't want to implement a full shell
-    parser.)
-
-    :param subpkgname: subpackage name (e.g. "u-boot-some-device")
-    :returns: * full path to the aport, e.g.:
-                "/home/user/code/pmbootstrap/aports/main/u-boot"
-              * None when we couldn't find a main package
-    """
-    # Iterate until the cut up subpkgname is gone
-    words = subpkgname.split("-")
-    while len(words) > 1:
-        # Remove one dash-separated word at a time ("a-b-c" -> "a-b")
-        words.pop()
-        pkgname = "-".join(words)
-
-        # Look in pmaports
-        paths = glob.glob(args.aports + "/*/" + pkgname)
-        if paths:
-            logging.debug(subpkgname + ": guessed to be a subpackage of " +
-                          pkgname)
-            return paths[0]
-
-
-def find_aport(args, package, must_exist=True):
-    """
-    Find the aport, that provides a certain subpackage.
-
-    :param must_exist: Raise an exception, when not found
-    :returns: the full path to the aport folder
-    """
-    # Try to get a cached result first (we assume, that the aports don't change
-    # in one pmbootstrap call)
-    ret = None
-    if package in args.cache["find_aport"]:
-        ret = args.cache["find_aport"][package]
-    else:
-        # Sanity check
-        if "*" in package:
-            raise RuntimeError("Invalid pkgname: " + package)
-
-        # Search in packages
-        paths = glob.glob(args.aports + "/*/" + package)
-        if len(paths) > 1:
-            raise RuntimeError("Package " + package + " found in multiple"
-                               " aports subfolders. Please put it only in one"
-                               " folder.")
-        elif len(paths) == 1:
-            ret = paths[0]
-
-        # Search in subpackages
-        if not ret:
-            for path_current in glob.glob(args.aports + "/*/*/APKBUILD"):
-                apkbuild = pmb.parse.apkbuild(args, path_current)
-                if (package in apkbuild["subpackages"] or
-                        package in apkbuild["provides"]):
-                    ret = os.path.dirname(path_current)
-                    break
-
-        # Guess a main package
-        if not ret:
-            ret = find_aport_guess_main(args, package)
-
-    # Crash when necessary
-    if ret is None and must_exist:
-        raise RuntimeError("Could not find aport for package: " +
-                           package)
-
-    # Save result in cache
-    args.cache["find_aport"][package] = ret
-    return ret
-
-
 def copy_to_buildpath(args, package, suffix="native"):
     # Sanity check
-    aport = find_aport(args, package)
+    aport = pmb.helpers.pmaports.find(args, package)
     if not os.path.exists(aport + "/APKBUILD"):
         raise ValueError("Path does not contain an APKBUILD file:" +
                          aport)

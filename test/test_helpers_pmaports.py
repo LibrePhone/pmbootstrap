@@ -38,14 +38,14 @@ def args(request):
     return args
 
 
-def test_find_aport_guess_main(args, tmpdir):
+def test_guess_main(args, tmpdir):
     # Fake pmaports folder
     tmpdir = str(tmpdir)
     args.aports = tmpdir
     for aport in ["temp/qemu", "main/some-pkg"]:
         os.makedirs(tmpdir + "/" + aport)
 
-    func = pmb.build.other.find_aport_guess_main
+    func = pmb.helpers.pmaports.guess_main
     assert func(args, "qemu-x86_64") == tmpdir + "/temp/qemu"
     assert func(args, "qemu-system-x86_64") == tmpdir + "/temp/qemu"
     assert func(args, "some-pkg-sub-pkg") == tmpdir + "/main/some-pkg"

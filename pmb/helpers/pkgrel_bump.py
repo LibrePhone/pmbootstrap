@@ -19,8 +19,8 @@ along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 import logging
 import os
 
-import pmb.build.other
 import pmb.helpers.file
+import pmb.helpers.pmaports
 import pmb.helpers.repo
 import pmb.parse
 
@@ -34,7 +34,7 @@ def package(args, pkgname, reason="", dry=False):
     :param dry: don't modify the APKBUILD, just print the message
     """
     # Current and new pkgrel
-    path = pmb.build.other.find_aport(args, pkgname) + "/APKBUILD"
+    path = pmb.helpers.pmaports.find(args, pkgname) + "/APKBUILD"
     apkbuild = pmb.parse.apkbuild(args, path)
     pkgrel = int(apkbuild["pkgrel"])
     pkgrel_new = pkgrel + 1
@@ -128,7 +128,7 @@ def auto_apkindex_package(args, arch, aport, apk, dry=False):
             # (which means dynamic libraries that the package was linked
             # against) and packages for which no aport exists.
             if (depend.startswith("so:") or
-                    not pmb.build.other.find_aport(args, depend, False)):
+                    not pmb.helpers.pmaports.find(args, depend, False)):
                 missing.append(depend)
 
     # Increase pkgrel
@@ -154,7 +154,7 @@ def auto(args, dry=False):
                     logging.verbose("{}: origin '{}' found again".format(pkgname,
                                                                          origin))
                     continue
-                aport_path = pmb.build.other.find_aport(args, origin, False)
+                aport_path = pmb.helpers.pmaports.find(args, origin, False)
                 if not aport_path:
                     logging.warning("{}: origin '{}' aport not found".format(
                                     pkgname, origin))

@@ -21,6 +21,7 @@ import os
 import re
 import pmb.chroot
 import pmb.config
+import pmb.helpers.pmaports
 import pmb.helpers.run
 
 

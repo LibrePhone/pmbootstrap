@@ -22,6 +22,7 @@ import shlex
 
 import pmb.chroot
 import pmb.config
+import pmb.helpers.pmaports
 import pmb.parse.apkindex
 import pmb.parse.arch
 import pmb.parse.depends
@@ -166,7 +167,7 @@ def replace_aports_packages_with_path(args, packages, suffix, arch):
     """
     ret = []
     for package in packages:
-        aport = pmb.build.find_aport(args, package, False)
+        aport = pmb.helpers.pmaports.find(args, package, False)
         if aport:
             data_repo = pmb.parse.apkindex.package(args, package, arch, False)
             apk_path = ("/mnt/pmbootstrap-packages/" + arch + "/" +

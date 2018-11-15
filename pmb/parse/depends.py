@@ -19,6 +19,7 @@ along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 import logging
 import pmb.chroot
 import pmb.chroot.apk
+import pmb.helpers.pmaports
 import pmb.parse.apkindex
 import pmb.parse.arch
 
@@ -29,7 +30,7 @@ def package_from_aports(args, pkgname_depend):
               depends, version. The version is the combined pkgver and pkgrel.
     """
     # Get the aport
-    aport = pmb.build.find_aport(args, pkgname_depend, False)
+    aport = pmb.helpers.pmaports.find(args, pkgname_depend, False)
     if not aport:
         return None
 

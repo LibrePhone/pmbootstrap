@@ -22,6 +22,7 @@ import math
 import os
 
 import pmb.chroot
+import pmb.helpers.pmaports
 import pmb.helpers.run
 import pmb.parse.apkindex
 
@@ -121,7 +122,7 @@ def zap_pkgs_local_mismatch(args, confirm=True, dry=False):
                 continue
 
             # Aport path
-            aport_path = pmb.build.other.find_aport(args, origin, False)
+            aport_path = pmb.helpers.pmaports.find(args, origin, False)
             if not aport_path:
                 logging.info("% rm " + apk_path_short + " (" + origin +
                              " aport not found)")

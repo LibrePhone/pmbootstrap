@@ -24,6 +24,7 @@ import os
 import pmb.build
 import pmb.config
 import pmb.parse
+import pmb.helpers.pmaports
 
 
 def is_set(config, option):
@@ -50,7 +51,7 @@ def check(args, pkgname, details=False):
 
     # Read all kernel configs in the aport
     ret = True
-    aport = pmb.build.find_aport(args, "linux-" + flavor)
+    aport = pmb.helpers.pmaports.find(args, "linux-" + flavor)
     for config_path in glob.glob(aport + "/config-*"):
         logging.debug("Check kconfig: " + config_path)
         with open(config_path) as handle:
