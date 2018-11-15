@@ -18,8 +18,6 @@ along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
 import argparse
 import copy
-import glob
-import os
 
 try:
     import argcomplete
@@ -29,6 +27,7 @@ except ImportError:
 import pmb.config
 import pmb.parse.arch
 import pmb.helpers.args
+import pmb.helpers.pmaports
 
 """ This file is about parsing command line arguments passed to pmbootstrap, as
     well as generating the help pages (pmbootstrap -h). All this is done with
@@ -235,12 +234,25 @@ def arguments_kconfig(subparser):
     edit.add_argument("package")
 
 
+def arguments_repo_missing(subparser):
+    ret = subparser.add_parser("repo_missing")
+    package = ret.add_argument("package", nargs="?", help="only look at a"
+                               " specific package and its dependencies")
+    if argcomplete:
+        package.completer = packagecompleter
+    ret.add_argument("--arch", choices=pmb.config.build_device_architectures,
+                     default=pmb.parse.arch.alpine_native())
+    ret.add_argument("--built", action="store_true",
+                     help="include packages which exist in the binary repos")
+    ret.add_argument("--overview", action="store_true",
+                     help="only print the pkgnames without any details")
+    return ret
+
+
 def packagecompleter(prefix, action, parser, parsed_args):
     args = parsed_args
     pmb.config.merge_with_args(args)
-    packages = set()
-    for apkbuild in glob.glob(args.aports + "/*/" + prefix + "*/APKBUILD"):
-        packages.add(os.path.basename(os.path.dirname(apkbuild)))
+    packages = set(pmb.helpers.pmaports.get_list(args))
     return packages
 
 
@@ -315,6 +327,7 @@ def arguments():
     sub.add_parser("work_migrate", help="run this before using pmbootstrap"
                                         " non-interactively to migrate the"
                                         " work folder version on demand")
+    arguments_repo_missing(sub)
     arguments_kconfig(sub)
     arguments_export(sub)
     arguments_flasher(sub)

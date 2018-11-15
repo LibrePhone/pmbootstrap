@@ -19,11 +19,26 @@ You should have received a copy of the GNU General Public License
 along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+"""
+Functions that work only on pmaports. See also:
+- pmb/helpers/repo.py (only work on binary package repos)
+- pmb/helpers/package.py (work on both)
+"""
+
 import glob
 import logging
 import os
 
 import pmb.parse
+
+
+def get_list(args):
+    """ :returns: list of all pmaport pkgnames (["hello-world", ...]) """
+    ret = []
+    for apkbuild in glob.glob(args.aports + "/*/*/APKBUILD"):
+        ret.append(os.path.basename(os.path.dirname(apkbuild)))
+    ret.sort()
+    return ret
 
 
 def guess_main(args, subpkgname):
@@ -56,7 +71,8 @@ def guess_main(args, subpkgname):
 
 def find(args, package, must_exist=True):
     """
-    Find the aport, that provides a certain subpackage.
+    Find the aport path, that provides a certain subpackage.
+    If you want the parsed APKBUILD instead, use pmb.helpers.pmaports.get().
 
     :param must_exist: Raise an exception, when not found
     :returns: the full path to the aport folder
@@ -101,3 +117,37 @@ def find(args, package, must_exist=True):
     # Save result in cache
     args.cache["find_aport"][package] = ret
     return ret
+
+
+def get(args, pkgname, must_exist=True):
+    """ Find and parse an APKBUILD file.
+        Run 'pmbootstrap apkbuild_parse hello-world' for a full output example.
+        Relevant variables are defined in pmb.config.apkbuild_attributes.
+
+        :param pkgname: the package name to find
+        :param must_exist: raise an exception when it can't be found
+        :returns: relevant variables from the APKBUILD as dictionary, e.g.:
+                  { "pkgname": "hello-world",
+                    "arch": ["all"],
+                    "pkgrel": "4",
+                    "pkgrel": "1",
+                    "options": [],
+                    ... }
+    """
+    aport = find(args, pkgname, must_exist)
+    if aport:
+        return pmb.parse.apkbuild(args, aport + "/APKBUILD")
+    return None
+
+
+def get_repo(args, pkgname, must_exist=True):
+    """ Get the repository folder of an aport.
+
+        :pkgname: package name
+        :must_exist: raise an exception when it can't be found
+        :returns: a string like "main", "device", "cross", ...
+                  or None when the aport could not be found """
+    aport = find(args, pkgname, must_exist)
+    if not aport:
+        return None
+    return os.path.basename(os.path.dirname(aport))

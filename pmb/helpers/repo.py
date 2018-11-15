@@ -16,6 +16,13 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
+
+"""
+Functions that work on both (binary package) repos. See also:
+- pmb/helpers/pmaports.py (work on pmaports)
+- pmb/helpers/package.py (work on both)
+"""
+
 import os
 import hashlib
 import logging

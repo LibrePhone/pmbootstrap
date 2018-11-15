@@ -102,22 +102,27 @@ def test_get_apkbuild(args):
     assert "Could not find" in str(e.value)
 
 
-def test_check_arch(args):
-    func = pmb.build._package.check_arch
-    apkbuild = {"pkgname": "test"}
+def test_check_arch_abort(monkeypatch, args):
+    # Fake APKBUILD data
+    apkbuild = {"pkgname": "testpkgname"}
+
+    def fake_helpers_pmaports_get(args, pkgname):
+        return apkbuild
+    monkeypatch.setattr(pmb.helpers.pmaports, "get", fake_helpers_pmaports_get)
 
     # Arch is right
+    func = pmb.build._package.check_arch_abort
     apkbuild["arch"] = ["armhf"]
-    func(args, apkbuild, "armhf")
+    func(args, "testpkgname", "armhf")
     apkbuild["arch"] = ["noarch"]
-    func(args, apkbuild, "armhf")
+    func(args, "testpkgname", "armhf")
     apkbuild["arch"] = ["all"]
-    func(args, apkbuild, "armhf")
+    func(args, "testpkgname", "armhf")
 
     # Arch is wrong
     apkbuild["arch"] = ["x86_64"]
     with pytest.raises(RuntimeError) as e:
-        func(args, apkbuild, "armhf")
+        func(args, "testpkgname", "armhf")
     assert "Can't build" in str(e.value)
 
 

@@ -89,6 +89,7 @@ def apkbuild(args, path, check_pkgver=True, check_pkgname=True):
     to be perfect and catch every edge case (for that, a full shell parser
     would be necessary!). Instead, it should just work with the use-cases
     covered by pmbootstrap and not take too long.
+    Run 'pmbootstrap apkbuild_parse hello-world' for a full output example.
 
     :param path: full path to the APKBUILD
     :param check_pkgver: verify that the pkgver is valid.

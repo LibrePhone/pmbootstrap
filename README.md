@@ -129,6 +129,11 @@ $ pmbootstrap flasher --method=adb sideload
 ```
 
 ### Repository Maintenance
+List pmaports that don't have a binary package:
+```
+$ pmbootstrap repo_missing --arch=armhf --overview
+```
+
 Increase the `pkgrel` for each aport where the binary package has outdated dependencies (e.g. after soname bumps):
 ```
 $ pmbootstrap pkgrel_bump --auto

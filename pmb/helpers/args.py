@@ -116,7 +116,9 @@ def add_cache(args):
                             "apk_repository_list_updated": [],
                             "built": {},
                             "find_aport": {},
-                            "offline_msg_shown": False})
+                            "offline_msg_shown": False,
+                            "pmb.helpers.package.depends_recurse": {},
+                            "pmb.helpers.package.get": {}})
 
 
 def add_deviceinfo(args):

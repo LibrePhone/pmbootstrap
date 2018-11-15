@@ -50,35 +50,33 @@ def skip_already_built(args, pkgname, arch):
 
 def get_apkbuild(args, pkgname, arch):
     """
-    Find the APKBUILD path for pkgname. When there is none, try to find it in
+    Parse the APKBUILD path for pkgname. When there is none, try to find it in
     the binary package APKINDEX files or raise an exception.
 
     :param pkgname: package name to be built, as specified in the APKBUILD
-    :returns: None or full path to APKBUILD
+    :returns: None or parsed APKBUILD
     """
     # Get existing binary package indexes
     pmb.helpers.repo.update(args, arch)
 
-    # Get aport, skip upstream only packages
-    aport = pmb.helpers.pmaports.find(args, pkgname, False)
-    if aport:
-        return pmb.parse.apkbuild(args, aport + "/APKBUILD")
+    # Get pmaport, skip upstream only packages
+    pmaport = pmb.helpers.pmaports.get(args, pkgname, False)
+    if pmaport:
+        return pmaport
     if pmb.parse.apkindex.providers(args, pkgname, arch, False):
         return None
     raise RuntimeError("Package '" + pkgname + "': Could not find aport, and"
                        " could not find this package in any APKINDEX!")
 
 
-def check_arch(args, apkbuild, arch):
+def check_arch_abort(args, pkgname, arch):
     """
     Check if the APKBUILD can be built for a specific architecture and abort
     with a helpful message if it is not the case.
     """
-    for value in [arch, "all", "noarch"]:
-        if value in apkbuild["arch"]:
-            return
+    if pmb.helpers.package.check_arch(args, pkgname, arch, False):
+        return
 
-    pkgname = apkbuild["pkgname"]
     logging.info("NOTE: You can edit the 'arch=' line inside the APKBUILD")
     if args.action == "build":
         logging.info("NOTE: Alternatively, use --arch to build for another"
@@ -435,7 +433,7 @@ def package(args, pkgname, arch=None, force=False, strict=False,
         return
 
     # Detect the build environment (skip unnecessary builds)
-    check_arch(args, apkbuild, arch)
+    check_arch_abort(args, pkgname, arch)
     suffix = pmb.build.autodetect.suffix(args, apkbuild, arch)
     cross = pmb.build.autodetect.crosscompile(args, apkbuild, arch, suffix)
     if not init_buildenv(args, apkbuild, arch, strict, force, cross, suffix,

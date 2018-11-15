@@ -38,6 +38,7 @@ import pmb.helpers.logging
 import pmb.helpers.pkgrel_bump
 import pmb.helpers.pmaports
 import pmb.helpers.repo
+import pmb.helpers.repo_missing
 import pmb.helpers.run
 import pmb.install
 import pmb.parse
@@ -161,6 +162,12 @@ def config(args):
     pmb.helpers.logging.disable()
 
 
+def repo_missing(args):
+    missing = pmb.helpers.repo_missing.generate(args, args.arch, args.overview,
+                                                args.package, args.built)
+    print(json.dumps(missing, indent=4))
+
+
 def index(args):
     pmb.build.index_repo(args)
 
@@ -259,11 +266,9 @@ def apkbuild_parse(args):
     # Default to all packages
     packages = args.packages
     if not packages:
-        for apkbuild in glob.glob(args.aports + "/*/*/APKBUILD"):
-            packages.append(os.path.basename(os.path.dirname(apkbuild)))
+        packages = pmb.helpers.pmaports.get_list(args)
 
     # Iterate over all packages
-    packages.sort()
     for package in packages:
         print(package + ":")
         aport = pmb.helpers.pmaports.find(args, package)
