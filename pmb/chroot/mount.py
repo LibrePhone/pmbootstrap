@@ -97,11 +97,6 @@ def mount(args, suffix="native"):
         source = source.replace("$ARCH", arch)
         mountpoints[source] = target
 
-    # Add the pmOS binary repo (in case it is set and points to a local folder)
-    mirror = args.mirror_postmarketos
-    if os.path.exists(mirror):
-        mountpoints[mirror] = "/mnt/postmarketos-mirror"
-
     # Mount if necessary
     for source, target in mountpoints.items():
         target_full = args.work + "/chroot_" + suffix + target

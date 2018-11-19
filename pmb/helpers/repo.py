@@ -68,10 +68,7 @@ def urls(args, user_repository=True, postmarketos_mirror=True):
 
     # Upstream postmarketOS binary repository
     if postmarketos_mirror and args.mirror_postmarketos:
-        if os.path.exists(args.mirror_postmarketos):
-            ret.append("/mnt/postmarketos-mirror")
-        else:
-            ret.append(args.mirror_postmarketos)
+        ret.append(args.mirror_postmarketos)
 
     # Upstream Alpine Linux repositories
     directories = ["main", "community"]
@@ -98,11 +95,7 @@ def apkindex_files(args, arch=None):
     urls_todo = []
     mirror = args.mirror_postmarketos
     if mirror:
-        if os.path.exists(mirror):
-            ret.append(mirror + "/" + arch + "/APKINDEX.tar.gz")
-        else:
-            # Non-local path: treat it like other URLs
-            urls_todo.append(mirror)
+        urls_todo.append(mirror)
 
     # Resolve the APKINDEX.$HASH.tar.gz files
     urls_todo += urls(args, False, False)
