@@ -67,8 +67,9 @@ def urls(args, user_repository=True, postmarketos_mirror=True):
         ret.append("/mnt/pmbootstrap-packages")
 
     # Upstream postmarketOS binary repository
-    if postmarketos_mirror and args.mirror_postmarketos:
-        ret.append(args.mirror_postmarketos)
+    if postmarketos_mirror:
+        for mirror in args.mirrors_postmarketos:
+            ret.append(mirror)
 
     # Upstream Alpine Linux repositories
     directories = ["main", "community"]
@@ -93,9 +94,9 @@ def apkindex_files(args, arch=None):
 
     # Upstream postmarketOS binary repository
     urls_todo = []
-    mirror = args.mirror_postmarketos
-    if mirror:
-        urls_todo.append(mirror)
+    for mirror in args.mirrors_postmarketos:
+        if mirror:
+            urls_todo.append(mirror)
 
     # Resolve the APKINDEX.$HASH.tar.gz files
     urls_todo += urls(args, False, False)

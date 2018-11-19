@@ -76,7 +76,7 @@ defaults = {
     "keymap": "",
     "log": "$WORK/log.txt",
     "mirror_alpine": "http://dl-cdn.alpinelinux.org/alpine/",
-    "mirror_postmarketos": "http://postmarketos.brixit.nl",
+    "mirrors_postmarketos": ["http://postmarketos.brixit.nl"],
     "nonfree_firmware": True,
     "nonfree_userland": False,
     "port_distccd": "33632",

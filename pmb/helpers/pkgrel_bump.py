@@ -76,9 +76,9 @@ def auto_apkindex_files(args):
         if os.path.exists(local):
             ret[arch].append(local)
 
-        if args.mirror_postmarketos:
+        for mirror in args.mirrors_postmarketos:
             path = (args.work + "/cache_apk_" + arch + "/APKINDEX." +
-                    pmb.helpers.repo.hash(args.mirror_postmarketos) + ".tar.gz")
+                    pmb.helpers.repo.hash(mirror) + ".tar.gz")
             ret[arch].append(path)
     return ret
 

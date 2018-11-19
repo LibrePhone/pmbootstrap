@@ -82,6 +82,26 @@ import pmb.config
 """
 
 
+def fix_mirrors_postmarketos(args):
+    """ Fix args.mirrors_postmarketos when it is supposed to be empty or the
+        default value.
+
+        In pmb/parse/arguments.py, we set the -mp/--mirror-pmOS argument to
+        action="append" and start off with an empty list. That way, users can
+        specify multiple custom mirrors by specifying -mp multiple times on the
+        command line. Here we fix the default and no mirrors case.
+
+        NOTE: we don't use nargs="+", because it does not play nicely with
+        subparsers: <https://bugs.python.org/issue9338> """
+    # -mp not specified: use default mirrors
+    if not args.mirrors_postmarketos:
+        args.mirrors_postmarketos = pmb.config.defaults["mirrors_postmarketos"]
+
+    # -mp="": use no postmarketOS mirrors (build everything locally)
+    if args.mirrors_postmarketos == [""]:
+        args.mirrors_postmarketos = []
+
+
 def check_pmaports_path(args):
     """ Make sure that args.aports exists when it was overridden by --aports.
         Without this check, 'pmbootstrap init' would start cloning the
@@ -134,6 +154,7 @@ def add_deviceinfo(args):
 
 def init(args):
     # Basic initialization
+    fix_mirrors_postmarketos(args)
     pmb.config.merge_with_args(args)
     replace_variables(args)
     add_shortcuts(args)
