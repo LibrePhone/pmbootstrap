@@ -168,10 +168,9 @@ def replace_aports_packages_with_path(args, packages, suffix, arch):
     for package in packages:
         aport = pmb.build.find_aport(args, package, False)
         if aport:
-            apkbuild = pmb.parse.apkbuild(args, aport + "/APKBUILD")
+            data_repo = pmb.parse.apkindex.package(args, package, arch, False)
             apk_path = ("/mnt/pmbootstrap-packages/" + arch + "/" +
-                        package + "-" + apkbuild["pkgver"] + "-r" +
-                        apkbuild["pkgrel"] + ".apk")
+                        package + "-" + data_repo["version"] + ".apk")
             if os.path.exists(args.work + "/chroot_" + suffix + apk_path):
                 package = apk_path
         ret.append(package)
