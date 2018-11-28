@@ -187,13 +187,6 @@ def export(args):
     pmb.export.frontend(args)
 
 
-def menuconfig(args):
-    logging.warning("WARNING: 'pmbootstrap menuconfig' is deprecated and will"
-                    " soon be removed. Please use 'pmbootstrap kconfig edit'"
-                    " instead.")
-    pmb.build.menuconfig(args, args.package)
-
-
 def update(args):
     existing_only = not args.non_existing
     if not pmb.helpers.repo.update(args, args.arch, True, existing_only):

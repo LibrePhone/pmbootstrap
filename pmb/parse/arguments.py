@@ -223,18 +223,16 @@ def arguments_kconfig(subparser):
     check.add_argument("--arch", choices=arch_choices, dest="arch")
     check.add_argument("package", default="", nargs='?')
 
-    # "pmbootstrap kconfig edit" (legacy: "pmbootstrap menuconfig")
-    legacy_menuconfig = subparser.add_parser("menuconfig")
+    # "pmbootstrap kconfig edit"
     edit = sub.add_parser("edit", help="edit kernel aport config")
-    for parser in [edit, legacy_menuconfig]:
-        parser.add_argument("--arch", choices=arch_choices, dest="arch")
-        parser.add_argument("-x", dest="xconfig", action="store_true",
-                            help="use xconfig rather than ncurses for kernel"
-                                 " configuration")
-        parser.add_argument("-g", dest="gconfig", action="store_true",
-                            help="use gconfig rather than ncurses for kernel"
-                                 " configuration")
-        parser.add_argument("package")
+    edit.add_argument("--arch", choices=arch_choices, dest="arch")
+    edit.add_argument("-x", dest="xconfig", action="store_true",
+                      help="use xconfig rather than ncurses for kernel"
+                           " configuration")
+    edit.add_argument("-g", dest="gconfig", action="store_true",
+                      help="use gconfig rather than ncurses for kernel"
+                           " configuration")
+    edit.add_argument("package")
 
 
 def packagecompleter(prefix, action, parser, parsed_args):
@@ -463,13 +461,9 @@ def arguments():
         if argcomplete:
             argument_packages.completer = packagecompleter
 
-    # Action: kconfig_check / apkbuild_parse
-    kconfig_check = sub.add_parser("kconfig_check", help="check, whether all"
-                                   " the necessary options are"
-                                   " enabled/disabled in the kernel config")
+    # Action: apkbuild_parse
     apkbuild_parse = sub.add_parser("apkbuild_parse")
-    for action in [kconfig_check, apkbuild_parse]:
-        action.add_argument("packages", nargs="*")
+    apkbuild_parse.add_argument("packages", nargs="*")
 
     # Action: apkindex_parse
     apkindex_parse = sub.add_parser("apkindex_parse")
