@@ -176,11 +176,16 @@ def init_buildenv(args, apkbuild, arch, strict=False, force=False, cross=None,
     :param src: override source used to build the package with a local folder
     :returns: True when the build is necessary (otherwise False)
     """
+
+    depends_arch = arch
+    if cross == "native":
+        depends_arch = args.arch_native
+
     # Build dependencies (package arch)
-    depends, built = build_depends(args, apkbuild, arch, strict)
+    depends, built = build_depends(args, apkbuild, depends_arch, strict)
 
     # Check if build is necessary
-    if not is_necessary_warn_depends(args, apkbuild, arch, force, built):
+    if not is_necessary_warn_depends(args, apkbuild, depends_arch, force, built):
         return False
 
     # Install and configure abuild, ccache, gcc, dependencies
@@ -203,12 +208,6 @@ def init_buildenv(args, apkbuild, arch, strict=False, force=False, cross=None,
         pmb.chroot.apk.install(args, cross_pkgs)
     if cross == "distcc":
         pmb.chroot.distccd.start(args, arch)
-
-    # "native" cross-compile: build and install dependencies (#1061)
-    if cross == "native":
-        depends, built = build_depends(args, apkbuild, args.arch_native, strict)
-        if not strict and len(depends):
-            pmb.chroot.apk.install(args, depends)
 
     return True
 
