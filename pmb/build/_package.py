@@ -181,11 +181,11 @@ def init_buildenv(args, apkbuild, arch, strict=False, force=False, cross=None,
     if cross == "native":
         depends_arch = args.arch_native
 
-    # Build dependencies (package arch)
+    # Build dependencies (host arch)
     depends, built = build_depends(args, apkbuild, depends_arch, strict)
 
-    # Check if build is necessary
-    if not is_necessary_warn_depends(args, apkbuild, depends_arch, force, built):
+    # Check if build is necessary (target arch)
+    if not is_necessary_warn_depends(args, apkbuild, arch, force, built):
         return False
 
     # Install and configure abuild, ccache, gcc, dependencies
