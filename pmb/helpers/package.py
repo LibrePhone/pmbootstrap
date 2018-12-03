@@ -29,6 +29,7 @@ import logging
 import copy
 
 import pmb.helpers.pmaports
+import pmb.helpers.repo
 
 
 def get(args, pkgname, arch):
@@ -69,6 +70,7 @@ def get(args, pkgname, arch):
 
     # Find in APKINDEX (other arches)
     if not ret:
+        pmb.helpers.repo.update(args)
         for arch_i in pmb.config.build_device_architectures:
             if arch_i != arch:
                 ret = pmb.parse.apkindex.package(args, pkgname, arch_i, False)
