@@ -175,7 +175,8 @@ necessary_kconfig_options = {
         "EXT4_FS": True,
         "PFT": False,
         "SYSVIPC": True,
-        "VT": True
+        "VT": True,
+        "USE_VFB": False,
     },
     "armhf x86": {
         "LBDAF": True
