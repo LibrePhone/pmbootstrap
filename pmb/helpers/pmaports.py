@@ -96,12 +96,27 @@ def find(args, package, must_exist=True):
         elif len(paths) == 1:
             ret = paths[0]
 
-        # Search in subpackages
+        # Search in subpackages and provides
         if not ret:
             for path_current in glob.glob(args.aports + "/*/*/APKBUILD"):
                 apkbuild = pmb.parse.apkbuild(args, path_current)
-                if (package in apkbuild["subpackages"] or
-                        package in apkbuild["provides"]):
+                found = False
+
+                # Subpackages
+                for subpackage_i in apkbuild["subpackages"]:
+                    if package == subpackage_i.split(":", 1)[0]:
+                        found = True
+                        break
+
+                # Provides (cut off before equals sign for entries like
+                # "mkbootimg=0.0.1")
+                if not found:
+                    for provides_i in apkbuild["provides"]:
+                        if package == provides_i.split("=", 1)[0]:
+                            found = True
+                            break
+
+                if found:
                     ret = os.path.dirname(path_current)
                     break
 
