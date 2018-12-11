@@ -25,9 +25,16 @@ import pmb.helpers.run
 
 
 def download(args, url, prefix, cache=True, loglevel=logging.INFO):
-    """
-    Download a file to disk.
-    """
+    """ Download a file to disk.
+
+        :param url: the http(s) address of to the file to download
+        :param prefix: for the cache, to make it easier to find (cache files
+                       get a hash of the URL after the prefix)
+        :param loglevel: change to logging.DEBUG to only display the download
+                         message in 'pmbootstrap log', not in stdout. We use
+                         this when downloading many APKINDEX files at once, no
+                         point in showing a dozen messages.
+        :returns: path to the downloaded file in the cache or None on 404 """
     # Create cache folder
     if not os.path.exists(args.work + "/cache_http"):
         pmb.helpers.run.user(args, ["mkdir", "-p", args.work + "/cache_http"])
