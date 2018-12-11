@@ -114,7 +114,7 @@ def update(args, arch=None, force=False, existing_only=False):
     :param arch: * one Alpine architecture name ("x86_64", "armhf", ...)
                  * None for all architectures
     :param force: even update when the APKINDEX file is fairly recent
-    :param existing_only: only update the APKBUILD files that already exist,
+    :param existing_only: only update the APKINDEX files that already exist,
                           this is used by "pmbootstrap update"
 
     :returns: True when files have been downloaded, False otherwise
