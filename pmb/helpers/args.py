@@ -130,15 +130,16 @@ def add_shortcuts(args):
 def add_cache(args):
     """ Add a caching dict (caches parsing of files etc. for the current
         session) """
+    repo_update = {"offline_msg_shown": False}
     setattr(args, "cache", {"apkindex": {},
                             "apkbuild": {},
                             "apk_min_version_checked": [],
                             "apk_repository_list_updated": [],
                             "built": {},
                             "find_aport": {},
-                            "offline_msg_shown": False,
                             "pmb.helpers.package.depends_recurse": {},
-                            "pmb.helpers.package.get": {}})
+                            "pmb.helpers.package.get": {},
+                            "pmb.helpers.repo.update": repo_update})
 
 
 def add_deviceinfo(args):
