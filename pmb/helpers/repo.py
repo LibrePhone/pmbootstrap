@@ -144,9 +144,13 @@ def update(args, arch=None, force=False, existing_only=False):
             cache_apk_outside = args.work + "/cache_apk_" + arch
             apkindex = cache_apk_outside + "/APKINDEX." + hash(url) + ".tar.gz"
 
-            # Find update reason, possibly skip non-existing files
+            # Find update reason, possibly skip non-existing or known 404 files
             reason = None
-            if not os.path.exists(apkindex):
+            if url_full in args.cache[cache_key]["404"]:
+                # We already attempted to download this file once in this
+                # session
+                continue
+            elif not os.path.exists(apkindex):
                 if existing_only:
                     continue
                 reason = "file does not exist yet"
@@ -172,7 +176,10 @@ def update(args, arch=None, force=False, existing_only=False):
     # Download and move to right location
     for url, target in outdated.items():
         temp = pmb.helpers.http.download(args, url, "APKINDEX", False,
-                                         logging.DEBUG)
+                                         logging.DEBUG, True)
+        if not temp:
+            args.cache[cache_key]["404"].append(url)
+            continue
         target_folder = os.path.dirname(target)
         if not os.path.exists(target_folder):
             pmb.helpers.run.root(args, ["mkdir", "-p", target_folder])

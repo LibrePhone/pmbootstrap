@@ -130,7 +130,7 @@ def add_shortcuts(args):
 def add_cache(args):
     """ Add a caching dict (caches parsing of files etc. for the current
         session) """
-    repo_update = {"offline_msg_shown": False}
+    repo_update = {"404": [], "offline_msg_shown": False}
     setattr(args, "cache", {"apkindex": {},
                             "apkbuild": {},
                             "apk_min_version_checked": [],

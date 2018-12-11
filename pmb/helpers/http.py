@@ -24,7 +24,8 @@ import urllib.request
 import pmb.helpers.run
 
 
-def download(args, url, prefix, cache=True, loglevel=logging.INFO):
+def download(args, url, prefix, cache=True, loglevel=logging.INFO,
+             allow_404=False):
     """ Download a file to disk.
 
         :param url: the http(s) address of to the file to download
@@ -34,6 +35,9 @@ def download(args, url, prefix, cache=True, loglevel=logging.INFO):
                          message in 'pmbootstrap log', not in stdout. We use
                          this when downloading many APKINDEX files at once, no
                          point in showing a dozen messages.
+        :param allow_404: do not raise an exception when the server responds
+                          with a 404 Not Found error. Only display a warning on
+                          stdout (no matter if loglevel is changed).
         :returns: path to the downloaded file in the cache or None on 404 """
     # Create cache folder
     if not os.path.exists(args.work + "/cache_http"):
@@ -50,7 +54,16 @@ def download(args, url, prefix, cache=True, loglevel=logging.INFO):
 
     # Download the file
     logging.log(loglevel, "Download " + url)
-    with urllib.request.urlopen(url) as response:
-        with open(path, "wb") as handle:
-            shutil.copyfileobj(response, handle)
+    try:
+        with urllib.request.urlopen(url) as response:
+            with open(path, "wb") as handle:
+                shutil.copyfileobj(response, handle)
+    # Handle 404
+    except urllib.error.HTTPError as e:
+        if e.code == 404 and allow_404:
+            logging.warning("WARNING: file not found: " + url)
+            return None
+        raise
+
+    # Return path in cache
     return path
