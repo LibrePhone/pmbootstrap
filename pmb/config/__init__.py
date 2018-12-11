@@ -262,6 +262,7 @@ deviceinfo_attributes = [
     "flash_fastboot_max_size",
     "flash_fastboot_vendor_id",
     "flash_sparse",
+    "rootfs_image_sector_size",
 
     # weston
     "weston_pixman_type",

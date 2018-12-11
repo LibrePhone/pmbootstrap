@@ -52,7 +52,13 @@ def mount(args, img_path):
 
         # Mount and return on success
         init(args)
-        pmb.chroot.root(args, ["losetup", "-f", img_path], check=False)
+
+        losetup_cmd = ["losetup", "-f", img_path]
+        sector_size = args.deviceinfo["rootfs_image_sector_size"]
+        if sector_size:
+            losetup_cmd += ["-b", str(int(sector_size))]
+
+        pmb.chroot.root(args, losetup_cmd, check=False)
         if device_by_back_file(args, img_path):
             return
 
