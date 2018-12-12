@@ -156,7 +156,7 @@ apkindex_retention_time = 4
 # specify architectures supported by Alpine here. Fro cross-compiling,
 # we need to generate the "musl-$ARCH", "binutils-$ARCH" and "gcc-$ARCH"
 # packages (use "pmbootstrap aportgen musl-armhf" etc.).
-build_device_architectures = ["armhf", "aarch64", "x86_64", "x86"]
+build_device_architectures = ["armhf", "armv7", "aarch64", "x86_64", "x86"]
 
 # Packages, that will be installed in a chroot before it builds packages
 # for the first time
@@ -178,7 +178,7 @@ necessary_kconfig_options = {
         "VT": True,
         "USE_VFB": False,
     },
-    "armhf x86": {
+    "armhf armv7 x86": {
         "LBDAF": True
     }
 }

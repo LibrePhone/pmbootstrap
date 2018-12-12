@@ -28,7 +28,7 @@ def alpine_native():
         "i686": "x86",
         "x86_64": "x86_64",
         "aarch64": "aarch64",
-        "armv7l": "armhf"
+        "armv7l": "armv7"
     }
     if machine in mapping:
         return mapping[machine]
@@ -58,6 +58,7 @@ def alpine_to_qemu(arch):
         "x86": "i386",
         "x86_64": "x86_64",
         "armhf": "arm",
+        "armv7": "arm",
         "aarch64": "aarch64",
     }
     for pattern, arch_qemu in mapping.items():
@@ -135,6 +136,7 @@ def uname_to_qemu(arch):
         "armeb": "arm",
         "armel": "arm",
         "armhf": "arm",
+        "armv7l": "arm",
         "x86_64": "x86_64",
         "amd64": "x86_64",
     }
