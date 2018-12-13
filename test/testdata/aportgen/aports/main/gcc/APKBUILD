@@ -1,44 +1,21 @@
-# Automatically generated aport, do not edit!
-# Generator: pmbootstrap aportgen gcc-armhf
-# Based on: main/gcc (from Alpine)
-
-CTARGET_ARCH=armhf
-CTARGET="$(arch_to_hostspec ${CTARGET_ARCH})"
-LANG_OBJC=false
-LANG_JAVA=false
-LANG_GO=false
-LANG_FORTRAN=false
-LANG_ADA=false
-options="!strip !tracedeps"
-
-# abuild doesn't try to tries to install "build-base-$CTARGET_ARCH"
-# when this variable matches "no*"
-BOOTSTRAP="nobuildbase"
-
-# abuild will only cross compile when this variable is set, but it
-# needs to find a valid package database in there for dependency
-# resolving, so we set it to /.
-CBUILDROOT="/"
-
-_cross_configure="--disable-bootstrap --with-sysroot=/usr/$CTARGET"
-
-pkgname="gcc-armhf"
+# Maintainer: Natanael Copa <ncopa@alpinelinux.org>
+pkgname=gcc
 pkgver=8.2.0
 [ "$BOOTSTRAP" = "nolibc" ] && pkgname="gcc-pass2"
 [ "$CBUILD" != "$CHOST" ] && _cross="-$CARCH" || _cross=""
 [ "$CHOST" != "$CTARGET" ] && _target="-$CTARGET_ARCH" || _target=""
 
-pkgname="gcc-armhf"
+pkgname="$pkgname$_target"
 pkgrel=1
-pkgdesc="Stage2 cross-compiler for armhf"
+pkgdesc="The GNU Compiler Collection"
 url="http://gcc.gnu.org"
-arch="x86_64"
+arch="all"
 license="GPL LGPL"
 _gccrel=$pkgver-r$pkgrel
-depends="isl binutils-armhf"
-makedepends_build="gcc g++ paxmark bison flex texinfo gawk zip gmp-dev mpfr-dev mpc1-dev zlib-dev"
-makedepends_host="linux-headers gmp-dev mpfr-dev mpc1-dev isl-dev zlib-dev musl-dev-armhf binutils-armhf"
-subpackages="g++-armhf:gpp"
+depends="binutils$_target isl"
+makedepends_build="gcc$_cross g++$_cross paxmark bison flex texinfo gawk zip gmp-dev mpfr-dev mpc1-dev zlib-dev"
+makedepends_host="linux-headers gmp-dev mpfr-dev mpc1-dev isl-dev zlib-dev !gettext-dev"
+subpackages=" "
 [ "$CHOST" = "$CTARGET" ] && subpackages="gcc-doc$_target"
 replaces="libstdc++ binutils"
 
@@ -48,10 +25,10 @@ replaces="libstdc++ binutils"
 : ${LANG_FORTRAN:=true}
 : ${LANG_ADA:=true}
 
-LIBGOMP="false"
-LIBGCC="false"
-LIBATOMIC="false"
-LIBITM="false"
+LIBGOMP=true
+LIBGCC=true
+LIBATOMIC=true
+LIBITM=true
 
 if [ "$CHOST" != "$CTARGET" ]; then
 	if [ "$BOOTSTRAP" = nolibc ]; then
@@ -137,6 +114,7 @@ fi
 
 _languages=c
 if $LANG_CXX; then
+	subpackages="$subpackages libstdc++:libcxx:$CTARGET_ARCH g++$_target:gpp"
 	_languages="$_languages,c++"
 fi
 if $LANG_OBJC; then
@@ -230,6 +208,7 @@ prepare() {
 build() {
 	local _arch_configure=
 	local _libc_configure=
+	local _cross_configure=
 	local _bootstrap_configure=
 	local _symvers=
 
@@ -267,6 +246,8 @@ build() {
 		;;
 	esac
 
+	[ "$CBUILD" != "$CHOST"   ] && _cross_configure="--disable-bootstrap"
+	[ "$CHOST"  != "$CTARGET" ] && _cross_configure="--disable-bootstrap --with-sysroot=$CBUILDROOT"
 
 	case "$BOOTSTRAP" in
 	nolibc)	_bootstrap_configure="--with-newlib --disable-shared --enable-threads=no" ;;

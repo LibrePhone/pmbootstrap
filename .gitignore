@@ -1,6 +1,6 @@
 # pmbootstrap will clone "pmaports" and (if pmbootstrap is not installed system
 # wide) create a symlink in the aports folder
-aports
+/aports
 
 # The rest below is more or less from a default Python .gitignore
 .*.swp
