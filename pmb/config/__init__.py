@@ -47,11 +47,11 @@ pmaports_min_version = "1"
 # see migrate_work_folder()).
 work_version = 3
 
-# Only save keys to the config file, which we ask for in 'pmbootstrap init'.
+# Keys saved in the config file (mostly what we ask in 'pmbootstrap init')
 config_keys = ["ccache_size", "device", "extra_packages", "hostname", "jobs",
                "kernel", "keymap", "nonfree_firmware", "nonfree_userland",
                "qemu_native_mesa_driver", "ssh_keys", "timezone", "ui", "user",
-               "work"]
+               "work", "aports"]
 
 # Config file/commandline default values
 # $WORK gets replaced with the actual value for args.work (which may be

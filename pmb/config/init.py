@@ -369,6 +369,9 @@ def frontend(args):
     # SSH keys
     cfg["pmbootstrap"]["ssh_keys"] = str(ask_for_ssh_keys(args))
 
+    # pmaports path (if users change it with: 'pmbootstrap --aports=... init')
+    cfg["pmbootstrap"]["aports"] = args.aports
+
     # Save config
     pmb.config.save(args, cfg)
 
