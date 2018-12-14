@@ -494,7 +494,9 @@ def arguments():
     # Action: config
     config = sub.add_parser("config",
                             help="get and set pmbootstrap options")
-    config.add_argument("name", nargs="?", help="variable name")
+    config.add_argument("name", nargs="?", help="variable name, one of: " +
+                        ", ".join(sorted(pmb.config.config_keys)),
+                        choices=pmb.config.config_keys, metavar="name")
     config.add_argument("value", nargs="?", help="set variable to value")
 
     # Action: bootimg_analyze
