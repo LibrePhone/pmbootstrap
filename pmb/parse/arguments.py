@@ -252,6 +252,7 @@ def arguments_repo_missing(subparser):
 def packagecompleter(prefix, action, parser, parsed_args):
     args = parsed_args
     pmb.config.merge_with_args(args)
+    pmb.helpers.args.replace_variables(args)
     packages = set(pmb.helpers.pmaports.get_list(args))
     return packages
 
