@@ -111,15 +111,23 @@ def check_pmaports_path(args):
                          " not exist: " + args.aports)
 
 
-def replace_variables(args):
-    """ Replace $WORK in variables from any config (user's config file, default
-        config settings or config parameters specified on commandline) """
+def replace_placeholders(args):
+    """ Replace $WORK and ~ (for path variables) in variables from any config
+        (user's config file, default config settings or config parameters
+        specified on commandline) """
+
+    # Replace $WORK
     for key, value in pmb.config.defaults.items():
         if key not in args:
             continue
         old = getattr(args, key)
         if isinstance(old, str):
             setattr(args, key, old.replace("$WORK", args.work))
+
+    # Replace ~ (path variables only)
+    for key in ["aports", "config", "log", "work"]:
+        if key in args:
+            setattr(args, key, os.path.expanduser(getattr(args, key)))
 
 
 def add_shortcuts(args):
@@ -157,7 +165,7 @@ def init(args):
     # Basic initialization
     fix_mirrors_postmarketos(args)
     pmb.config.merge_with_args(args)
-    replace_variables(args)
+    replace_placeholders(args)
     add_shortcuts(args)
     add_cache(args)
 
