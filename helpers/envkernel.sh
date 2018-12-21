@@ -188,6 +188,25 @@ set_alias_make() {
 	cmd="$cmd CC=$cc HOSTCC=$hostcc"
 	# shellcheck disable=SC2139
 	alias make="$cmd"
+	unset cmd
+
+	# Build run-script command
+	cmd="_run_script() {"
+	cmd="$cmd echo '*** pmbootstrap envkernel.sh active for $PWD! ***';"
+	cmd="$cmd _script=\"\$1\";"
+	cmd="$cmd if [ -e \"\$_script\" ]; then"
+	cmd="$cmd 	echo \"Running \$_script in the chroot native /mnt/linux/\";"
+	cmd="$cmd 	pmbootstrap -q chroot --user -- sh -c \"cd /mnt/linux;"
+	cmd="$cmd 	srcdir=/mnt/linux/ builddir=/mnt/linux/.output"
+	cmd="$cmd 	./\"\$_script\"\";"
+	cmd="$cmd else"
+	cmd="$cmd 	echo \"Error: \$_script not found.\";"
+	cmd="$cmd fi;"
+	cmd="$cmd };"
+	cmd="$cmd _run_script \"\$@\""
+	# shellcheck disable=SC2139
+	alias run-script="$cmd"
+	unset cmd
 }
 
 
@@ -272,8 +291,8 @@ main() {
 		echo " * output folder:  $PWD/.output"
 		echo " * architecture:   $arch ($device is $deviceinfo_arch)"
 		echo " * cross compile:  $(cross_compiler_version)"
-		echo " * aliases: make, kernelroot, pmbootstrap, pmbroot" \
-			"(see 'type make' etc.)"
+		echo " * aliases: make, kernelroot, pmbootstrap, pmbroot," \
+			"run-script (see 'type make' etc.)"
 	else
 		# Failure
 		echo "See also: <https://postmarketos.org/troubleshooting>"
