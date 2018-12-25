@@ -42,6 +42,12 @@ def sanity_check(info, path):
                            " delete the deviceinfo_msm_refresher line in: " +
                            path)
 
+    # "codename" is required
+    codename = os.path.basename(os.path.dirname(path)).replace("device-", "")
+    if "codename" not in info or info["codename"] != codename:
+        raise RuntimeError("Please add 'deviceinfo_codename=\"" + codename +
+                           "\"' to: " + path)
+
 
 def deviceinfo(args, device=None):
     """

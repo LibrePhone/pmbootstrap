@@ -225,6 +225,7 @@ deviceinfo_attributes = [
     "format_version",
     "name",
     "manufacturer",
+    "codename",
     "date",
     "dtb",
     "modules_initfs",

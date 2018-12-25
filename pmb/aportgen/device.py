@@ -127,6 +127,7 @@ def generate_deviceinfo_fastboot_content(args, bootimg=None):
 
 def generate_deviceinfo(args, pkgname, name, manufacturer, arch, has_keyboard,
                         has_external_storage, flash_method, bootimg=None):
+    codename = "-".join(pkgname.split("-")[1:])
     # Note: New variables must be added to pmb/config/__init__.py as well
     content = """\
         # Reference: <https://postmarketos.org/deviceinfo>
@@ -135,6 +136,7 @@ def generate_deviceinfo(args, pkgname, name, manufacturer, arch, has_keyboard,
         deviceinfo_format_version="0"
         deviceinfo_name=\"""" + name + """\"
         deviceinfo_manufacturer=\"""" + manufacturer + """\"
+        deviceinfo_codename=\"""" + codename + """\"
         deviceinfo_date=""
         deviceinfo_dtb=""
         deviceinfo_modules_initfs=""
