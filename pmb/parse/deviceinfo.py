@@ -22,6 +22,9 @@ import pmb.config
 
 
 def sanity_check(info, path):
+    # Resolve path for more readable error messages
+    path = os.path.realpath(path)
+
     # "flash_methods" is legacy
     if "flash_methods" in info:
         raise RuntimeError("deviceinfo_flash_methods has been renamed to"
