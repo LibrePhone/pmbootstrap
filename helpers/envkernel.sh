@@ -155,8 +155,12 @@ set_alias_make() {
 	esac
 
 	if [ "$gcc6_arg" = "1" ]; then
+		cc="gcc6-${prefix}-gcc"
+		hostcc="gcc6-gcc"
 		cross_compiler="/usr/bin/gcc6-$prefix-"
 	else
+		cc="${prefix}-gcc"
+		hostcc="gcc"
 		cross_compiler="/usr/bin/$prefix-"
 	fi
 
@@ -166,6 +170,7 @@ set_alias_make() {
 	cmd="$cmd ARCH=$arch"
 	cmd="$cmd CROSS_COMPILE=$cross_compiler"
 	cmd="$cmd make -C /mnt/linux O=/mnt/linux/.output"
+	cmd="$cmd CC=$cc HOSTCC=$hostcc"
 	# shellcheck disable=SC2139
 	alias make="$cmd"
 }
