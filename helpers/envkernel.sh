@@ -154,6 +154,17 @@ set_alias_make() {
 		arm*) arch="arm" ;;
 	esac
 
+	# Check if it's a cross compile
+	host_arch="$(uname -m)"
+	is_cc=1
+	# Match arm* architectures
+	# shellcheck disable=SC2039
+	arch_substr="${host_arch:0:3}"
+	if [ "$arch" = "$host_arch" ] || \
+		([ "$arch_substr" = "arm" ] && [ "$arch_substr" = "$arch" ]); then
+		is_cc=0
+	fi
+
 	if [ "$gcc6_arg" = "1" ]; then
 		cc="gcc6-${prefix}-gcc"
 		hostcc="gcc6-gcc"
@@ -168,7 +179,9 @@ set_alias_make() {
 	cmd="echo '*** pmbootstrap envkernel.sh active for $PWD! ***';"
 	cmd="$cmd pmbootstrap -q chroot --user --"
 	cmd="$cmd ARCH=$arch"
-	cmd="$cmd CROSS_COMPILE=$cross_compiler"
+	if [ "$is_cc" = 1 ]; then
+		cmd="$cmd CROSS_COMPILE=$cross_compiler"
+	fi
 	cmd="$cmd make -C /mnt/linux O=/mnt/linux/.output"
 	cmd="$cmd CC=$cc HOSTCC=$hostcc"
 	# shellcheck disable=SC2139
