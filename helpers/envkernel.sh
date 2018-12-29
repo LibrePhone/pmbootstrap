@@ -160,7 +160,7 @@ set_alias_make() {
 
 	# Build make command
 	cmd="echo '*** pmbootstrap envkernel.sh active for $PWD! ***';"
-	cmd="$cmd pmbootstrap -q chroot --"
+	cmd="$cmd pmbootstrap -q chroot --user --"
 	cmd="$cmd ARCH=$arch"
 	cmd="$cmd CROSS_COMPILE=$cross_compiler"
 	cmd="$cmd make -C /mnt/linux O=/mnt/linux/.output"
