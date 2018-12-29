@@ -152,6 +152,8 @@ set_alias_make() {
 	case "$deviceinfo_arch" in
 		aarch64*) arch="arm64" ;;
 		arm*) arch="arm" ;;
+		x86_64) arch="x86_64" ;;
+		x86) arch="x86" ;;
 	esac
 
 	# Check if it's a cross compile
