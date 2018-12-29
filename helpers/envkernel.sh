@@ -128,7 +128,9 @@ initialize_chroot() {
 
 
 mount_kernel_source() {
-	[ -e "$chroot/mnt/linux/Kbuild" ] && return
+	if [ -e "$chroot/mnt/linux/Kbuild" ]; then
+		sudo umount "$chroot/mnt/linux"
+	fi
 	sudo mount --bind "$PWD" "$chroot/mnt/linux"
 }
 
