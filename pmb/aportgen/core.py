@@ -18,14 +18,28 @@ along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
 import fnmatch
 import logging
+import re
 import pmb.helpers.git
+
+
+def indent_size(line):
+    """
+    Number of spaces at the beginning of a string.
+    """
+    matches = re.findall("^[ ]*", line)
+    if len(matches) == 1:
+        return len(matches[0])
+    return 0
 
 
 def format_function(name, body, remove_indent=4):
     """
     Format the body of a shell function passed to rewrite() below, so it fits
     the format of the original APKBUILD.
+    :param remove_indent: Maximum number of spaces to remove from the
+        beginning of each line of the function body.
     """
+    tab_width = 4
     ret = ""
     lines = body.split("\n")
     for i in range(len(lines)):
@@ -33,12 +47,23 @@ def format_function(name, body, remove_indent=4):
         if not line.strip():
             if not ret or i == len(lines) - 1:
                 continue
-        ret += line[remove_indent:] + "\n"
+
+        # Remove indent
+        spaces = min(indent_size(line), remove_indent)
+        line = line[spaces:]
+
+        # Convert spaces to tabs
+        spaces = indent_size(line)
+        tabs = int(spaces / tab_width)
+        line = ("\t" * tabs) + line[spaces:]
+
+        ret += line + "\n"
     return name + "() {\n" + ret + "}\n"
 
 
 def rewrite(args, pkgname, path_original, fields={}, replace_pkgname=None,
-            replace_functions={}, replace_simple={}, below_header=""):
+            replace_functions={}, replace_simple={}, below_header="",
+            remove_indent=4):
     """
     Append a header to $WORK/aportgen/APKBUILD, delete maintainer/contributor
     lines (so they won't be bugged with issues regarding our generated aports),
@@ -54,6 +79,8 @@ def rewrite(args, pkgname, path_original, fields={}, replace_pkgname=None,
     :param replace_simple: Lines, that fnmatch the pattern, get
         replaced/deleted. Example: {"*test*": "# test", "*mv test.bin*": None}
     :param below_header: String, that gets directly placed below the header.
+    :param remove_indent: Number of spaces to remove from function body provided
+        to replace_functions.
 
     """
     # Header
@@ -88,7 +115,8 @@ def rewrite(args, pkgname, path_original, fields={}, replace_pkgname=None,
                     if line.startswith(func + "() {"):
                         skip_in_func = True
                         if body:
-                            lines_new += format_function(func, body)
+                            lines_new += format_function(func, body,
+                                                         remove_indent=remove_indent)
                         break
                 if skip_in_func:
                     continue

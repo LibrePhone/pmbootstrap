@@ -73,4 +73,4 @@ def generate(args, pkgname):
     }
 
     pmb.aportgen.core.rewrite(args, pkgname, "main/binutils", fields,
-                              "binutils", replace_functions)
+                              "binutils", replace_functions, remove_indent=8)
