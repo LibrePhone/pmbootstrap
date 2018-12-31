@@ -16,6 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
+import collections
 
 """
 In order to stay as compatible to Alpine's apk as possible, this code
@@ -122,10 +123,11 @@ def parse_suffix(rest):
 
     C equivalent: get_token(), case TOKEN_SUFFIX
     """
-    suffixes = {
-        "pre": ["alpha", "beta", "pre", "rc"],
-        "post": ["cvs", "svn", "git", "hg", "p"]
-    }
+
+    suffixes = collections.OrderedDict([
+        ("pre", ["alpha", "beta", "pre", "rc"]),
+        ("post", ["cvs", "svn", "git", "hg", "p"]),
+    ])
 
     for name, suffixes in suffixes.items():
         for i, suffix in enumerate(suffixes):
