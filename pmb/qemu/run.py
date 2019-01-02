@@ -125,7 +125,7 @@ def command_qemu(args, arch, device, img_path, spice_enabled):
         command = [qemu_bin]
     else:
         rootfs_native = args.work + "/chroot_native"
-        env = {"QEMU_MODULE_PATH": rootfs_native + "/usr/lib/qemu",
+        env = {"QEMU_MODULE_DIR": rootfs_native + "/usr/lib/qemu",
                "GBM_DRIVERS_PATH": rootfs_native + "/usr/lib/xorg/modules/dri",
                "LIBGL_DRIVERS_PATH": rootfs_native + "/usr/lib/xorg/modules/dri"}
 
