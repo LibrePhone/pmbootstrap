@@ -2,7 +2,7 @@
 # PYTHON_ARGCOMPLETE_OK
 
 """
-Copyright 2018 Oliver Smith
+Copyright 2019 Oliver Smith
 
 This file is part of pmbootstrap.
 
