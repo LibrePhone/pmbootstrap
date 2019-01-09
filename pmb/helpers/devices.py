@@ -39,6 +39,16 @@ def list_apkbuilds(args):
     """
     ret = {}
     for device in list(args):
-        apkbuild_path = args.aports + "/device-" + device + "/APKBUILD"
+        apkbuild_path = args.aports + "/device/device-" + device + "/APKBUILD"
         ret[device] = pmb.parse.apkbuild(args, apkbuild_path)
+    return ret
+
+
+def list_deviceinfos(args):
+    """
+    :returns: { "first-device": {"name": ..., "screen_width": ...}, ... }
+    """
+    ret = {}
+    for device in list(args):
+        ret[device] = pmb.parse.deviceinfo(args, device)
     return ret
