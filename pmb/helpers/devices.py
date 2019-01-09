@@ -21,7 +21,7 @@ import glob
 import pmb.parse
 
 
-def list(args):
+def list_codenames(args):
     """
     Get all devices, for which aports are available
     :returns: ["first-device", "second-device", ...]
@@ -38,7 +38,7 @@ def list_apkbuilds(args):
     :returns: { "first-device": {"pkgname": ..., "pkgver": ...}, ... }
     """
     ret = {}
-    for device in list(args):
+    for device in list_codenames(args):
         apkbuild_path = args.aports + "/device/device-" + device + "/APKBUILD"
         ret[device] = pmb.parse.apkbuild(args, apkbuild_path)
     return ret
@@ -49,6 +49,6 @@ def list_deviceinfos(args):
     :returns: { "first-device": {"name": ..., "screen_width": ...}, ... }
     """
     ret = {}
-    for device in list(args):
+    for device in list_codenames(args):
         ret[device] = pmb.parse.deviceinfo(args, device)
     return ret

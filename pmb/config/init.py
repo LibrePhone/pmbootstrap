@@ -217,7 +217,7 @@ def ask_for_device_nonfree(args, device):
 
 
 def ask_for_device(args):
-    devices = sorted(pmb.helpers.devices.list(args))
+    devices = sorted(pmb.helpers.devices.list_codenames(args))
     logging.info("Target device (either an existing one, or a new one for"
                  " porting).")
     logging.info("Available (" + str(len(devices)) + "): " +
