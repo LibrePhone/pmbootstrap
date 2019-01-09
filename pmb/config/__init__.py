@@ -250,7 +250,6 @@ deviceinfo_attributes = [
     "flash_heimdall_partition_initfs",
     "flash_heimdall_partition_system",
     "generate_legacy_uboot_initfs",
-    "write_uboot_spl",
     "kernel_cmdline",
     "generate_bootimg",
     "bootimg_qcdt",
@@ -264,6 +263,8 @@ deviceinfo_attributes = [
     "flash_fastboot_vendor_id",
     "flash_sparse",
     "rootfs_image_sector_size",
+    "sd_embed_firmware",
+    "sd_embed_firmware_step_size",
 
     # weston
     "weston_pixman_type",

@@ -286,22 +286,75 @@ def setup_hostname(args):
     pmb.chroot.root(args, ["sed", "-i", "-e", regex, "/etc/hosts"], suffix)
 
 
-def write_uboot_spl(args):
-    if args.deviceinfo["write_uboot_spl"]:
-        logging.info("Writing the u-boot spl to the SD card with 8KB offset")
+def embed_firmware(args):
+    """
+    This method will embed firmware, located at /usr/share, that are specified
+    by the "sd_embed_firmware" deviceinfo parameter into the SD card image
+    (e.g. u-boot). Binaries that would overwrite the first partition are not
+    accepted, and if multiple binaries are specified then they will be checked
+    for collisions with each other.
+    """
+    if not args.deviceinfo["sd_embed_firmware"]:
+        return
 
-        spl_file = os.path.join("/usr/share/u-boot/", args.deviceinfo["write_uboot_spl"])
-        spl_size = os.path.getsize(args.work + "/chroot_rootfs_" + args.device + spl_file)
+    step = 1024
+    if args.deviceinfo["sd_embed_firmware_step_size"]:
+        try:
+            step = int(args.deviceinfo["sd_embed_firmware_step_size"])
+        except ValueError:
+            raise RuntimeError("Value for "
+                               "deviceinfo_sd_embed_firmware_step_size "
+                               "is not valid: {}".format(step))
 
-        # First partition is at 2048 sectors, spl offset is at 8K
-        spl_max_size = (2048 * 512) - (8 * 1024)
+    device_rootfs = mount_device_rootfs(args)
+    binaries = args.deviceinfo["sd_embed_firmware"].split(",")
 
-        if spl_size > spl_max_size:
-            raise RuntimeError("U-boot SPL image is too big {}B > {}B".format(spl_size, spl_max_size))
+    # Perform three checks prior to writing binaries to disk: 1) that binaries
+    # exist, 2) that binaries do not extend into the first partition, 3) that
+    # binaries do not overlap eachother
+    binary_ranges = {}
+    binary_list = []
+    for binary_offset in binaries:
+        binary, offset = binary_offset.split(':')
+        try:
+            offset = int(offset)
+        except ValueError:
+            raise RuntimeError("Value for firmware binary offset is "
+                               "not valid: {}".format(offset))
+        binary_path = os.path.join(args.work, "chroot_rootfs_" +
+                                   args.device, "usr/share", binary)
+        if not os.path.exists(binary_path):
+            raise RuntimeError("The following firmware binary does not "
+                               "exist in the device rootfs: "
+                               "{}".format("/usr/share/" + binary))
+        # Insure that embedding the firmware will not overrun the
+        # first partition
+        max_size = (2048 * 512) - (offset * step)
+        binary_size = os.path.getsize(binary_path)
+        if binary_size > max_size:
+            raise RuntimeError("The firmware is too big to embed in the "
+                               "disk image {}B > {}B".format(binary_size,
+                                                             max_size))
+        # Insure that the firmware does not conflict with any other firmware
+        # that will be embedded
+        binary_start = offset * step
+        binary_end = binary_start + binary_size
+        for start, end in binary_ranges.items():
+            if ((binary_start >= start and binary_start <= end) or
+                    (binary_end >= start and binary_end <= end)):
+                raise RuntimeError("The firmware overlaps with at least one "
+                                   "other firmware image: {}".format(binary))
+        binary_ranges[binary_start] = binary_end
+        binary_list.append((binary, offset))
 
-        device_rootfs = mount_device_rootfs(args)
-        filename = os.path.join(device_rootfs, spl_file.lstrip("/"))
-        pmb.chroot.root(args, ["dd", "if=" + filename, "of=/dev/install", "bs=1024", "seek=8"])
+    # Write binaries to disk
+    for binary, offset in binary_list:
+        binary_file = os.path.join("/usr/share", binary)
+        logging.info("Embed firmware {} in the SD card image at offset {} with"
+                     " step size {}".format(binary, offset, step))
+        filename = os.path.join(device_rootfs, binary_file.lstrip("/"))
+        pmb.chroot.root(args, ["dd", "if=" + filename, "of=/dev/install",
+                               "bs=" + str(step), "seek=" + str(offset)])
 
 
 def install_system_image(args):
@@ -332,7 +385,7 @@ def install_system_image(args):
     create_home_from_skel(args)
     configure_apk(args)
     copy_ssh_keys(args)
-    write_uboot_spl(args)
+    embed_firmware(args)
     pmb.chroot.shutdown(args, True)
 
     # Convert rootfs to sparse using img2simg
