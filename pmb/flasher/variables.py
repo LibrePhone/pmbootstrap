@@ -24,10 +24,15 @@ def variables(args, flavor, method):
         _cmdline = args.cmdline
 
     if method == "fastboot":
-        _partition_system = "system"
+        _partition_kernel = args.deviceinfo["flash_fastboot_partition_kernel"] or "boot"
+        _partition_system = args.deviceinfo["flash_fastboot_partition_system"] or "system"
     else:
+        _partition_kernel = args.deviceinfo["flash_heimdall_partition_kernel"] or "KERNEL"
         _partition_system = args.deviceinfo["flash_heimdall_partition_system"] or "SYSTEM"
+
     if "partition" in args and args.partition:
+        # Only one of two operations is done at same time so it doesn't matter sharing the arg
+        _partition_kernel = args.partition
         _partition_system = args.partition
 
     vars = {
@@ -36,7 +41,7 @@ def variables(args, flavor, method):
         "$IMAGE": "/home/pmos/rootfs/" + args.device + ".img",
         "$VENDOR_ID": args.deviceinfo["flash_fastboot_vendor_id"],
         "$KERNEL_CMDLINE": _cmdline,
-        "$PARTITION_KERNEL": args.deviceinfo["flash_heimdall_partition_kernel"] or "KERNEL",
+        "$PARTITION_KERNEL": _partition_kernel,
         "$PARTITION_INITFS": args.deviceinfo["flash_heimdall_partition_initfs"] or "RECOVERY",
         "$PARTITION_SYSTEM": _partition_system,
         "$RECOVERY_ZIP": "/mnt/buildroot_" + args.deviceinfo["arch"] +

@@ -249,6 +249,8 @@ deviceinfo_attributes = [
     "flash_heimdall_partition_kernel",
     "flash_heimdall_partition_initfs",
     "flash_heimdall_partition_system",
+    "flash_fastboot_partition_kernel",
+    "flash_fastboot_partition_system",
     "generate_legacy_uboot_initfs",
     "kernel_cmdline",
     "generate_bootimg",
@@ -321,10 +323,11 @@ Flasher abstraction. Allowed variables:
 $BOOT: Path to the /boot partition
 $FLAVOR: Kernel flavor
 $IMAGE: Path to the rootfs image
+$PARTITION_KERNEL: Partition to flash the kernel/boot.img to
 $PARTITION_SYSTEM: Partition to flash the rootfs to
 
 Fastboot specific: $KERNEL_CMDLINE, $VENDOR_ID
-Heimdall specific: $PARTITION_KERNEL, $PARTITION_INITFS
+Heimdall specific: $PARTITION_INITFS
 """
 flashers = {
     "fastboot": {
@@ -336,7 +339,7 @@ flashers = {
                     "flash_rootfs": [["fastboot", "-i", "$VENDOR_ID",
                                       "flash", "$PARTITION_SYSTEM", "$IMAGE"]],
                     "flash_kernel": [["fastboot", "-i", "$VENDOR_ID",
-                                      "flash", "boot", "$BOOT/boot.img-$FLAVOR"]],
+                                      "flash", "$PARTITION_KERNEL", "$BOOT/boot.img-$FLAVOR"]],
                     "boot": [["fastboot", "-i", "$VENDOR_ID",
                               "-c", "$KERNEL_CMDLINE", "boot",
                               "$BOOT/boot.img-$FLAVOR"]],

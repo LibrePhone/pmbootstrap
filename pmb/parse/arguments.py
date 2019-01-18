@@ -67,6 +67,9 @@ def arguments_flasher(subparser):
     flash_kernel = sub.add_parser("flash_kernel", help="flash a kernel")
     for action in [boot, flash_kernel]:
         action.add_argument("--flavor", default=None)
+    flash_kernel.add_argument("--partition", default=None,
+                              help="partition to flash the kernel to (defaults"
+                                   " to deviceinfo_flash_*_partition_kernel)")
 
     # Flash rootfs
     flash_rootfs = sub.add_parser("flash_rootfs", aliases=["flash_system"],
@@ -74,8 +77,9 @@ def arguments_flasher(subparser):
                                   " device (partition layout does not get"
                                   " changed)")
     flash_rootfs.add_argument("--partition", default=None,
-                              help="partition to flash to (Android: default"
-                                   " is 'system', but 'userdata' may have more"
+                              help="partition to flash the rootfs to (defaults"
+                                   " to deviceinfo_flash_*_partition_system,"
+                                   " 'userdata' on Android may have more"
                                    " space)")
 
     # Actions without extra arguments
