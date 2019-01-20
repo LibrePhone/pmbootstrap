@@ -112,7 +112,7 @@ initialize_chroot() {
 		"$gcc_pkgname"-"$deviceinfo_arch" \
 		"$gcc_pkgname" \
 		linux-headers \
-		libressl-dev \
+		openssl-dev \
 		make \
 		musl-dev \
 		ncurses-dev \
