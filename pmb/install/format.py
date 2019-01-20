@@ -69,7 +69,8 @@ def format_and_mount_pm_crypt(args):
         # When changing the options of mkfs.ext4, also change them in the
         # recovery zip code (see 'grep -r mkfs\.ext4')!
         pmb.chroot.root(args, ["mkfs.ext4", "-O", "^metadata_csum", "-F",
-                               "-q", "-L", "pmOS_root", device])
+                               "-q", "-L", "pmOS_root", "-N", "100000",
+                               device])
 
     # Mount
     mountpoint = "/mnt/install"
