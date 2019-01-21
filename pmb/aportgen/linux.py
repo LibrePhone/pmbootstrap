@@ -119,8 +119,11 @@ def generate(args, pkgname):
 
     # Symlink commonly used patches
     pmb.helpers.run.user(args, ["mkdir", "-p", args.work + "/aportgen"])
-    patches = ["gcc7-give-up-on-ilog2-const-optimizations.patch",
-               "gcc8-fix-put-user.patch"]
+    patches = [
+        "gcc7-give-up-on-ilog2-const-optimizations.patch",
+        "gcc8-fix-put-user.patch",
+        "kernel-use-the-gnu89-standard-explicitly.patch",
+    ]
     for patch in patches:
         pmb.helpers.run.user(args, ["ln", "-s",
                                     "../../.shared-patches/linux/" + patch,
