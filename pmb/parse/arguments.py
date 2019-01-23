@@ -243,7 +243,7 @@ def arguments_repo_missing(subparser):
     package = ret.add_argument("package", nargs="?", help="only look at a"
                                " specific package and its dependencies")
     if argcomplete:
-        package.completer = packagecompleter
+        package.completer = package_completer
     ret.add_argument("--arch", choices=pmb.config.build_device_architectures,
                      default=pmb.parse.arch.alpine_native())
     ret.add_argument("--built", action="store_true",
@@ -253,7 +253,7 @@ def arguments_repo_missing(subparser):
     return ret
 
 
-def packagecompleter(prefix, action, parser, parsed_args):
+def package_completer(prefix, action, parser, parsed_args):
     args = parsed_args
     pmb.config.merge_with_args(args)
     pmb.helpers.args.replace_placeholders(args)
@@ -485,7 +485,7 @@ def arguments():
     for action in [checksum, build, aportgen]:
         argument_packages = action.add_argument("packages", nargs="+")
         if argcomplete:
-            argument_packages.completer = packagecompleter
+            argument_packages.completer = package_completer
 
     # Action: apkbuild_parse
     apkbuild_parse = sub.add_parser("apkbuild_parse")
