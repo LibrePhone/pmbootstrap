@@ -257,7 +257,9 @@ def package_completer(prefix, action, parser, parsed_args):
     args = parsed_args
     pmb.config.merge_with_args(args)
     pmb.helpers.args.replace_placeholders(args)
-    packages = set(pmb.helpers.pmaports.get_list(args))
+    packages = set(
+        package for package in pmb.helpers.pmaports.get_list(args)
+        if package.startswith(prefix))
     return packages
 
 
