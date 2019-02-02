@@ -94,7 +94,7 @@ def ask_for_keymaps(args, device):
     options = info["keymaps"].split(' ')
     logging.info("Available keymaps for device (" + str(len(options)) +
                  "): " + ", ".join(options))
-    if args.keymap is "":
+    if args.keymap == "":
         args.keymap = options[0]
 
     while True:

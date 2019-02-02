@@ -10,8 +10,8 @@ def get_changed_files():
         raw = subprocess.check_output(['git', 'diff', '--name-only',
                                        'master...{}'.format(branch)])
     except (KeyError, subprocess.CalledProcessError):
-            raw = subprocess.check_output(['git', 'diff', '--name-only',
-                                           'HEAD~1'])
+        raw = subprocess.check_output(['git', 'diff', '--name-only',
+                                       'HEAD~1'])
     return raw.decode().splitlines()
 
 

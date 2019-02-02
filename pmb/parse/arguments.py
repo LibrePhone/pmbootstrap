@@ -226,7 +226,7 @@ def arguments_kconfig(subparser):
     check.add_argument("--arch", choices=arch_choices, dest="arch")
     check_package = check.add_argument("package", default="", nargs='?')
     if argcomplete:
-            check_package.completer = kernel_completer
+        check_package.completer = kernel_completer
 
     # "pmbootstrap kconfig edit"
     edit = sub.add_parser("edit", help="edit kernel aport config")
