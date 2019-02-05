@@ -18,6 +18,7 @@ along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
 from pmb.parse.arguments import arguments
 from pmb.parse._apkbuild import apkbuild
+from pmb.parse._apkbuild import function_body
 from pmb.parse.binfmt_info import binfmt_info
 from pmb.parse.deviceinfo import deviceinfo
 from pmb.parse.kconfig import check

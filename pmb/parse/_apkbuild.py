@@ -83,6 +83,31 @@ def cut_off_function_names(apkbuild):
     return apkbuild
 
 
+def function_body(path, func):
+    """
+    Get the body of a function in an APKBUILD.
+
+    :param path: full path to the APKBUILD
+    :param func: name of function to get the body of.
+    :returns: function body in an array of strings.
+    """
+    func_body = []
+    in_func = False
+    lines = read_file(path)
+    for line in lines:
+        if in_func:
+            if line.startswith("}"):
+                in_func = False
+                break
+            func_body.append(line)
+            continue
+        else:
+            if line.startswith(func + "() {"):
+                in_func = True
+                continue
+    return func_body
+
+
 def read_file(path):
     """
     Read an APKBUILD file
