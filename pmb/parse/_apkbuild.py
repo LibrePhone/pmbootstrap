@@ -83,6 +83,20 @@ def cut_off_function_names(apkbuild):
     return apkbuild
 
 
+def read_file(path):
+    """
+    Read an APKBUILD file
+
+    :param path: full path to the APKBUILD
+    :returns: contents of an APKBUILD as a list of strings
+    """
+    with open(path, encoding="utf-8") as handle:
+        lines = handle.readlines()
+        if handle.newlines != '\n':
+            raise RuntimeError("Wrong line endings in APKBUILD: " + path)
+    return lines
+
+
 def apkbuild(args, path, check_pkgver=True, check_pkgname=True):
     """
     Parse relevant information out of the APKBUILD file. This is not meant
@@ -103,10 +117,7 @@ def apkbuild(args, path, check_pkgver=True, check_pkgname=True):
         return args.cache["apkbuild"][path]
 
     # Read the file and check line endings
-    with open(path, encoding="utf-8") as handle:
-        lines = handle.readlines()
-        if handle.newlines != '\n':
-            raise RuntimeError("Wrong line endings in APKBUILD: " + path)
+    lines = read_file(path)
 
     # Parse all attributes from the config
     ret = {}
@@ -189,8 +200,7 @@ def subpkgdesc(path, function):
     :returns: the subpackage's pkgdesc
     """
     # Read all lines
-    with open(path, encoding="utf-8") as handle:
-        lines = handle.readlines()
+    lines = read_file(path)
 
     # Prefixes
     prefix_function = function + "() {"
