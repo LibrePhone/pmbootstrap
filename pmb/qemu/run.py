@@ -99,6 +99,29 @@ def command_spice(args):
     return ["remote-viewer", "spice://127.0.0.1?port=" + args.spice_port]
 
 
+def create_gdk_loader_cache(args):
+    """
+    Create a gdk loader cache that can be used for running GTK UIs outside of
+    the chroot.
+    """
+    gdk_cache_dir = "/usr/lib/gdk-pixbuf-2.0/2.10.0/"
+    custom_cache_path = gdk_cache_dir + "loaders-pmos-chroot.cache"
+    rootfs_native = args.work + "/chroot_native"
+    if os.path.isfile(rootfs_native + custom_cache_path):
+        return rootfs_native + custom_cache_path
+
+    cache_path = gdk_cache_dir + "loaders.cache"
+    if not os.path.isfile(rootfs_native + cache_path):
+        raise RuntimeError("gdk pixbuf cache file not found: " + cache_path)
+
+    pmb.chroot.root(args, ["cp", cache_path, custom_cache_path])
+    cmd = ["sed", "-i", "-e",
+           "s@\"" + gdk_cache_dir + "@\"" + rootfs_native + gdk_cache_dir + "@",
+           custom_cache_path]
+    pmb.chroot.root(args, cmd)
+    return rootfs_native + custom_cache_path
+
+
 def command_qemu(args, arch, device, img_path, spice_enabled):
     """
     Generate the full qemu command with arguments to run postmarketOS
@@ -128,6 +151,13 @@ def command_qemu(args, arch, device, img_path, spice_enabled):
         env = {"QEMU_MODULE_DIR": rootfs_native + "/usr/lib/qemu",
                "GBM_DRIVERS_PATH": rootfs_native + "/usr/lib/xorg/modules/dri",
                "LIBGL_DRIVERS_PATH": rootfs_native + "/usr/lib/xorg/modules/dri"}
+
+        if "gtk" in args.qemu_display:
+            gdk_cache = create_gdk_loader_cache(args)
+            env.update({"GTK_THEME": "Default",
+                        "GDK_PIXBUF_MODULE_FILE": gdk_cache,
+                        "XDG_DATA_DIRS": rootfs_native + "/usr/local/share:" +
+                        rootfs_native + "/usr/share"})
 
         command = [rootfs_native + "/lib/ld-musl-" +
                    args.arch_native + ".so.1"]
