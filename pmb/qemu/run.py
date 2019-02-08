@@ -169,6 +169,8 @@ def command_qemu(args, arch, device, img_path, spice_enabled):
         command += ["-cpu", "cortex-a57"]
         command += ["-device", "virtio-gpu-pci"]
         command += ["-device", "virtio-net-device,netdev=net0"]
+        command += ["-usb", "-device", "usb-ehci",
+                    "-device", "usb-kbd", "-device", "usb-mouse"]
 
         # Add storage
         command += ["-device", "virtio-blk-device,drive=system"]
