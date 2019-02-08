@@ -177,6 +177,8 @@ def command_qemu(args, arch, device, img_path, spice_enabled):
     else:
         raise RuntimeError("Architecture {} not supported by this command yet.".format(arch))
 
+    command += ["-smp", str(os.cpu_count())]
+
     # Kernel Virtual Machine (KVM) support
     native = True
     if args.arch:
