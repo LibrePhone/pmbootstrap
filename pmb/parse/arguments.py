@@ -223,6 +223,9 @@ def arguments_kconfig(subparser):
 
     # "pmbootstrap kconfig check"
     check = sub.add_parser("check", help="check kernel aport config")
+    check.add_argument("-f", "--force", action="store_true", help="check all"
+                       " kernels, even the ones that would be ignored by"
+                       " default")
     check.add_argument("--arch", choices=arch_choices, dest="arch")
     check_package = check.add_argument("package", default="", nargs='?')
     if argcomplete:

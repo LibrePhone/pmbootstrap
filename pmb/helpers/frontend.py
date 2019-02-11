@@ -252,8 +252,15 @@ def kconfig(args):
 
         # Iterate over all kernels
         error = False
+        skipped = 0
         packages.sort()
         for package in packages:
+            if not args.force:
+                aport = pmb.helpers.pmaports.find(args, "linux-" + package)
+                apkbuild = pmb.parse.apkbuild(args, aport + "/APKBUILD")
+                if "!pmb:kconfigcheck" in apkbuild["options"]:
+                    skipped += 1
+                    continue
             if not pmb.parse.kconfig.check(args, package, details=True):
                 error = True
 
@@ -261,6 +268,9 @@ def kconfig(args):
         if error:
             raise RuntimeError("kconfig check failed!")
         else:
+            if skipped:
+                logging.info("NOTE: " + str(skipped) + " kernel(s) was skipped"
+                             " (consider 'pmbootstrap kconfig check -f')")
             logging.info("kconfig check succeded!")
     elif args.action_kconfig == "edit":
         pmb.build.menuconfig(args, args.package)
