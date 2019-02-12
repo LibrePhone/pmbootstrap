@@ -28,11 +28,14 @@ def generate(args, pkgname):
     if prefix == "gcc":
         upstream = pmb.aportgen.core.get_upstream_aport(args, "main/gcc")
         based_on = "main/gcc (from Alpine)"
+    elif prefix == "gcc4":
+        upstream = args.aports + "/main/gcc4"
+        based_on = "main/gcc4 (from postmarketOS)"
     elif prefix == "gcc6":
         upstream = args.aports + "/main/gcc6"
         based_on = "main/gcc6 (from postmarketOS)"
     else:
-        raise ValueError("Invalid prefix '" + prefix + "', expected gcc or"
+        raise ValueError("Invalid prefix '" + prefix + "', expected gcc, gcc4 or"
                          " gcc6.")
     pmb.helpers.run.user(args, ["cp", "-r", upstream, args.work + "/aportgen"])
 

@@ -200,7 +200,9 @@ def init_buildenv(args, apkbuild, arch, strict=False, force=False, cross=None,
     # Cross-compiler init
     if cross:
         cross_pkgs = ["ccache-cross-symlinks"]
-        if "gcc6" in depends:
+        if "gcc4" in depends:
+            cross_pkgs += ["gcc4-" + arch]
+        elif "gcc6" in depends:
             cross_pkgs += ["gcc6-" + arch]
         else:
             cross_pkgs += ["gcc-" + arch, "g++-" + arch]
