@@ -28,6 +28,7 @@ def alpine_native():
         "i686": "x86",
         "x86_64": "x86_64",
         "aarch64": "aarch64",
+        "armv6l": "armhf",
         "armv7l": "armv7"
     }
     if machine in mapping:
