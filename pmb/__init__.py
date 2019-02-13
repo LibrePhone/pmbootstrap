@@ -71,6 +71,10 @@ def main():
         logging.info("Done")
 
     except Exception as e:
+        # Dump log to stdout when args (and therefore logging) init failed
+        if not args:
+            logging.getLogger().setLevel(logging.DEBUG)
+
         logging.info("ERROR: " + str(e))
         logging.info("See also: <https://postmarketos.org/troubleshooting>")
         logging.debug(traceback.format_exc())
