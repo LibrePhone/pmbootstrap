@@ -120,7 +120,7 @@ def generate_output_format(args, arch, pkgnames):
                     "depends": ["hello-world"]}] """
     ret = []
     for pkgname in pkgnames:
-        entry = pmb.helpers.package.get(args, pkgname, arch)
+        entry = pmb.helpers.package.get(args, pkgname, arch, True)
         ret += [{"pkgname": entry["pkgname"],
                  "repo": pmb.helpers.pmaports.get_repo(args, pkgname),
                  "version": entry["version"],

@@ -32,7 +32,7 @@ import pmb.helpers.pmaports
 import pmb.helpers.repo
 
 
-def get(args, pkgname, arch):
+def get(args, pkgname, arch, replace_subpkgnames=False):
     """ Find a package in pmaports, and as fallback in the APKINDEXes of the
         binary packages.
         :param pkgname: package name (e.g. "hello-world")
@@ -41,6 +41,8 @@ def get(args, pkgname, arch):
                      arch to see whether the package exists at all. So make
                      sure to check the returned arch against what you wanted
                      with check_arch(). Example: "armhf"
+        :param replace_subpkgnames: replace all subpkgnames with their main
+                                    pkgnames in the depends (see #1733)
         :returns: data from the parsed APKBUILD or APKINDEX in the following
                   format: {"arch": ["noarch"],
                            "depends": ["busybox-extras", "lddtree", ...],
@@ -50,8 +52,9 @@ def get(args, pkgname, arch):
     # Cached result
     cache_key = "pmb.helpers.package.get"
     if (arch in args.cache[cache_key] and
-            pkgname in args.cache[cache_key][arch]):
-        return args.cache[cache_key][arch][pkgname]
+            pkgname in args.cache[cache_key][arch] and
+            replace_subpkgnames in args.cache[cache_key][arch][pkgname]):
+        return args.cache[cache_key][arch][pkgname][replace_subpkgnames]
 
     # Find in pmaports
     ret = None
@@ -59,7 +62,7 @@ def get(args, pkgname, arch):
     if pmaport:
         ret = {"arch": pmaport["arch"],
                "depends": pmb.build._package.get_depends(args, pmaport),
-               "pkgname": pkgname,
+               "pkgname": pmaport["pkgname"],
                "provides": pmaport["provides"],
                "version": pmaport["pkgver"] + "-r" + pmaport["pkgrel"]}
 
@@ -86,11 +89,22 @@ def get(args, pkgname, arch):
     if ret and isinstance(ret["arch"], str):
         ret["arch"] = [ret["arch"]]
 
+    # Replace subpkgnames if desired
+    if replace_subpkgnames:
+        depends_new = []
+        for depend in ret["depends"]:
+            depend = get(args, depend, arch)["pkgname"]
+            if depend not in depends_new:
+                depends_new += [depend]
+        ret["depends"] = depends_new
+
     # Save to cache and return
     if ret:
         if arch not in args.cache[cache_key]:
             args.cache[cache_key][arch] = {}
-        args.cache[cache_key][arch][pkgname] = ret
+        if pkgname not in args.cache[cache_key][arch]:
+            args.cache[cache_key][arch][pkgname] = {}
+        args.cache[cache_key][arch][pkgname][replace_subpkgnames] = ret
         return ret
 
     # Could not find the package
@@ -122,8 +136,10 @@ def depends_recurse(args, pkgname, arch):
         for depend in package["depends"]:
             if depend not in ret:
                 queue += [depend]
-        if pkgname_queue not in ret:
-            ret += [pkgname_queue]
+
+        # Add the pkgname (not possible subpkgname) to ret
+        if package["pkgname"] not in ret:
+            ret += [package["pkgname"]]
     ret.sort()
 
     # Save to cache and return

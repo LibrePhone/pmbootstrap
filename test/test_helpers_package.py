@@ -101,10 +101,10 @@ def test_helpers_package_depends_recurse(args):
     """ Test pmb.helpers.package.depends_recurse() """
 
     # Put fake data into the pmb.helpers.package.get() cache
-    cache = {"a": {"depends": ["b", "c"]},
-             "b": {"depends": []},
-             "c": {"depends": ["d"]},
-             "d": {"depends": ["b"]}}
+    cache = {"a": {False: {"pkgname": "a", "depends": ["b", "c"]}},
+             "b": {False: {"pkgname": "b", "depends": []}},
+             "c": {False: {"pkgname": "c", "depends": ["d"]}},
+             "d": {False: {"pkgname": "d", "depends": ["b"]}}}
     args.cache["pmb.helpers.package.get"]["armhf"] = cache
 
     # Normal runs
@@ -121,22 +121,22 @@ def test_helpers_package_check_arch_package(args):
     """ Test pmb.helpers.package.check_arch(): binary = True """
     # Put fake data into the pmb.helpers.package.get() cache
     func = pmb.helpers.package.check_arch
-    cache = {"a": {"arch": []}}
+    cache = {"a": {False: {"arch": []}}}
     args.cache["pmb.helpers.package.get"]["armhf"] = cache
 
-    cache["a"]["arch"] = ["all !armhf"]
+    cache["a"][False]["arch"] = ["all !armhf"]
     assert func(args, "a", "armhf") is False
 
-    cache["a"]["arch"] = ["all"]
+    cache["a"][False]["arch"] = ["all"]
     assert func(args, "a", "armhf") is True
 
-    cache["a"]["arch"] = ["noarch"]
+    cache["a"][False]["arch"] = ["noarch"]
     assert func(args, "a", "armhf") is True
 
-    cache["a"]["arch"] = ["armhf"]
+    cache["a"][False]["arch"] = ["armhf"]
     assert func(args, "a", "armhf") is True
 
-    cache["a"]["arch"] = ["aarch64"]
+    cache["a"][False]["arch"] = ["aarch64"]
     assert func(args, "a", "armhf") is False
 
 
