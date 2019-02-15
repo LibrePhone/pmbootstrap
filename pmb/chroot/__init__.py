@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
 from pmb.chroot.init import init
-from pmb.chroot.mount import mount
+from pmb.chroot.mount import mount, mount_native_into_foreign
 from pmb.chroot.root import root
 from pmb.chroot.user import user
 from pmb.chroot.user import exists as user_exists

@@ -193,7 +193,7 @@ def init_buildenv(args, apkbuild, arch, strict=False, force=False, cross=None,
     just initialized the build environment for nothing) and then setup the
     whole build environment (abuild, gcc, dependencies, cross-compiler).
 
-    :param cross: None, "native" or "distcc"
+    :param cross: None, "native", "distcc", or "crossdirect"
     :param skip_init_buildenv: can be set to False to avoid initializing the
                                build environment. Use this when building
                                something during initialization of the build
@@ -232,9 +232,15 @@ def init_buildenv(args, apkbuild, arch, strict=False, force=False, cross=None,
             cross_pkgs += ["gcc6-" + arch]
         else:
             cross_pkgs += ["gcc-" + arch, "g++-" + arch]
+        if "clang" in depends or "clang-dev" in depends:
+            cross_pkgs += ["clang"]
+        if cross == "crossdirect":
+            cross_pkgs += ["crossdirect"]
         pmb.chroot.apk.install(args, cross_pkgs)
     if cross == "distcc":
         pmb.chroot.distccd.start(args, arch)
+    if cross == "crossdirect":
+        pmb.chroot.mount_native_into_foreign(args, suffix)
 
     return True
 
@@ -350,7 +356,7 @@ def run_abuild(args, apkbuild, arch, strict=False, force=False, cross=None,
     depending on the cross-compiler method and target architecture), copy
     the aport to the chroot and execute abuild.
 
-    :param cross: None, "native" or "distcc"
+    :param cross: None, "native", "distcc", or "crossdirect"
     :param src: override source used to build the package with a local folder
     :returns: (output, cmd, env), output is the destination apk path relative
               to the package folder ("x86_64/hello-1-r2.apk"). cmd and env are
@@ -391,6 +397,9 @@ def run_abuild(args, apkbuild, arch, strict=False, force=False, cross=None,
             env["DISTCC_FALLBACK"] = "0"
         if args.verbose:
             env["DISTCC_VERBOSE"] = "1"
+    if cross == "crossdirect":
+        env["CCACHE_PATH"] = "/native/usr/lib/crossdirect/" + arch + ":/usr/bin"
+        env["CCACHE_COMPILERCHECK"] = "string:" + get_gcc_version(args, arch)
     if not args.ccache:
         env["CCACHE_DISABLE"] = "1"
 

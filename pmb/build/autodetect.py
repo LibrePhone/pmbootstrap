@@ -92,7 +92,7 @@ def suffix(args, apkbuild, arch):
 
 def crosscompile(args, apkbuild, arch, suffix):
     """
-        :returns: None, "native" or "distcc"
+        :returns: None, "native", "crossdirect" or "distcc"
     """
     if not args.cross:
         return None
@@ -100,4 +100,6 @@ def crosscompile(args, apkbuild, arch, suffix):
         return None
     if suffix == "native":
         return "native"
-    return "distcc"
+    if args.no_crossdirect:
+        return "distcc"
+    return "crossdirect"

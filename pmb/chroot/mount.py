@@ -16,6 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with pmbootstrap.  If not, see <http://www.gnu.org/licenses/>.
 """
+import glob
 import logging
 import os
 import pmb.config
@@ -101,3 +102,15 @@ def mount(args, suffix="native"):
     for source, target in mountpoints.items():
         target_full = args.work + "/chroot_" + suffix + target
         pmb.helpers.mount.bind(args, source, target_full)
+
+
+def mount_native_into_foreign(args, suffix):
+    source = args.work + "/chroot_native"
+    target = args.work + "/chroot_" + suffix + "/native"
+    pmb.helpers.mount.bind(args, source, target)
+
+    musl = os.path.basename(glob.glob(source + "/lib/ld-musl-*.so.1")[0])
+    musl_link = args.work + "/chroot_" + suffix + "/lib/" + musl
+    if not os.path.lexists(musl_link):
+        pmb.helpers.run.root(args, ["ln", "-s", "/native/lib/" + musl,
+                                    musl_link])

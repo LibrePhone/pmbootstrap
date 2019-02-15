@@ -324,6 +324,12 @@ def arguments():
     # Compiler
     parser.add_argument("--ccache-disable", action="store_false",
                         dest="ccache", help="do not cache the compiled output")
+    parser.add_argument("--no-crossdirect", action="store_true",
+                        help="Don't use the new, faster 'crossdirect' method,"
+                             " use the old 'distcc-sshd' method instead. Use"
+                             " if crossdirect broke something. This option"
+                             " and the legacy 'distcc-sshd' code will be"
+                             " removed soon if no problems turn up.")
     parser.add_argument("--distcc-nofallback", action="store_false",
                         help="when using the cross compiler via distcc fails,"
                              "do not fall back to compiling slowly with QEMU",
