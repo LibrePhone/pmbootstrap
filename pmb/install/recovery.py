@@ -40,6 +40,9 @@ def create_zip(args, suffix):
 
     logging.info("(" + suffix + ") create recovery zip")
 
+    for key in vars:
+        pmb.flasher.check_partition_blacklist(args, key, vars[key])
+
     # Create config file for the recovery installer
     options = {
         "DEVICE": args.device,

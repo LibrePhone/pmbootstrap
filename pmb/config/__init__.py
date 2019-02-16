@@ -267,6 +267,7 @@ deviceinfo_attributes = [
     "rootfs_image_sector_size",
     "sd_embed_firmware",
     "sd_embed_firmware_step_size",
+    "partition_blacklist",
 
     # weston
     "weston_pixman_type",

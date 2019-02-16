@@ -20,6 +20,17 @@ import pmb.flasher
 import pmb.chroot.initfs
 
 
+def check_partition_blacklist(args, key, value):
+    if not key.startswith("$PARTITION_"):
+        return
+
+    name = args.deviceinfo["name"]
+    if value in args.deviceinfo["partition_blacklist"].split(","):
+        raise RuntimeError("'" + value + "'" + " partition is blacklisted " +
+                           "from being flashed! See the " + name + " device " +
+                           "wiki page for more information.")
+
+
 def run(args, action, flavor=None):
     pmb.flasher.init(args)
 
@@ -48,6 +59,7 @@ def run(args, action, flavor=None):
                                            " action " + action + " for method " + method + ","
                                            " but the value for this variable is None! Is that"
                                            " missing in your deviceinfo?")
+                    check_partition_blacklist(args, key, value)
                     command[i] = command[i].replace(key, value)
 
         # Run the action
