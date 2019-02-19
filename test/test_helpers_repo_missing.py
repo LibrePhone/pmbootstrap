@@ -141,7 +141,7 @@ def test_get_relevant_packages(args, monkeypatch):
 def test_generate_output_format(args, monkeypatch):
     """ Test ...repo_missing.generate_output_format() """
 
-    def stub(args, pkgname, arch):
+    def stub(args, pkgname, arch, replace_subpkgnames=False):
         return {"pkgname": "hello-world", "version": "1.0-r0",
                 "depends": ["depend1", "depend2"]}
     monkeypatch.setattr(pmb.helpers.package, "get", stub)
