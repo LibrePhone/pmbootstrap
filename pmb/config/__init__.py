@@ -173,6 +173,7 @@ necessary_kconfig_options = {
         "DEVTMPFS": True,
         "DM_CRYPT": True,
         "EXT4_FS": True,
+        "KINETO_GAN": False,
         "PFT": False,
         "SYSVIPC": True,
         "VT": True,
