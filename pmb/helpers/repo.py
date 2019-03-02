@@ -202,10 +202,10 @@ def alpine_apkindex_path(args, repo="main", arch=None):
         raise RuntimeError("Invalid Alpine repository: " + repo)
 
     # Download the file
+    arch = arch or args.arch_native
     update(args, arch)
 
     # Find it on disk
-    arch = arch or args.arch_native
     repo_link = args.mirror_alpine + args.alpine_version + "/" + repo
     cache_folder = args.work + "/cache_apk_" + arch
     return cache_folder + "/APKINDEX." + hash(repo_link) + ".tar.gz"
