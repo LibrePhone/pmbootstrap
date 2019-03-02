@@ -170,6 +170,10 @@ def generate_deviceinfo(args, pkgname, name, manufacturer, arch, has_keyboard,
         deviceinfo_generate_legacy_uboot_initfs="true"
         """
 
+    content_uuu = """\
+        deviceinfo_generate_legacy_uboot_initfs="true"
+        """
+
     if flash_method == "fastboot":
         content += generate_deviceinfo_fastboot_content(args, bootimg)
     elif flash_method == "heimdall-bootimg":
@@ -179,6 +183,8 @@ def generate_deviceinfo(args, pkgname, name, manufacturer, arch, has_keyboard,
         content += content_heimdall_isorec
     elif flash_method == "0xffff":
         content += content_0xffff
+    elif flash_method == "uuu":
+        content += content_uuu
 
     # Write to file
     pmb.helpers.run.user(args, ["mkdir", "-p", args.work + "/aportgen"])

@@ -47,6 +47,8 @@ def variables(args, flavor, method):
         "$RECOVERY_ZIP": "/mnt/buildroot_" + args.deviceinfo["arch"] +
                          "/var/lib/postmarketos-android-recovery-installer"
                          "/pmos-" + args.device + ".zip",
+        "$UUU_SCRIPT": "/mnt/rootfs_" + args.deviceinfo["codename"] +
+                       "/usr/share/uuu/flash_script.lst"
     }
 
     return vars

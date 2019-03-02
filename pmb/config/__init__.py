@@ -308,7 +308,7 @@ install_user_groups = ["wheel", "video", "audio", "input", "plugdev"]
 # FLASH
 #
 
-flash_methods = ["fastboot", "heimdall", "0xffff", "none"]
+flash_methods = ["fastboot", "heimdall", "0xffff", "uuu", "none"]
 
 # These folders will be mounted at the same location into the native
 # chroot, before the flash programs get started.
@@ -330,6 +330,7 @@ $PARTITION_SYSTEM: Partition to flash the rootfs to
 
 Fastboot specific: $KERNEL_CMDLINE, $VENDOR_ID
 Heimdall specific: $PARTITION_INITFS
+uuu specific: $UUU_SCRIPT
 """
 flashers = {
     "fastboot": {
@@ -391,6 +392,18 @@ flashers = {
                               "$RECOVERY_ZIP"]],
             }
     },
+    "uuu": {
+        "depends": ["uuu"],
+        "actions":
+        {
+            "flash_rootfs": [
+                # There's a bug(?) in uuu where it clobbers the path in the cmd
+                # script if the script is not in pwd...
+                ["cp", "$UUU_SCRIPT", "./flash_script.lst"],
+                ["uuu", "flash_script.lst"],
+            ],
+        },
+    }
 }
 
 #
