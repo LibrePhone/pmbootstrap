@@ -95,7 +95,9 @@ def generate(args, pkgname):
             package() {
                 mkdir -p "$pkgdir/usr/$_target"
                 cd "$pkgdir/usr/$_target"
-                tar -xf $srcdir/musl-$pkgver-r$pkgrel-$_arch.apk
+                # Use 'busybox tar' to avoid 'tar: Child returned status 141'
+                # on some machines (builds.sr.ht, gitlab-ci). See pmaports#26.
+                busybox tar -xf $srcdir/musl-$pkgver-r$pkgrel-$_arch.apk
                 rm .PKGINFO .SIGN.*
             }
             package_dev() {
