@@ -102,7 +102,7 @@ def test_get_apkbuild(args):
     assert "Could not find" in str(e.value)
 
 
-def test_check_arch_abort(monkeypatch, args):
+def test_check_build_for_arch(monkeypatch, args):
     # Fake APKBUILD data
     apkbuild = {"pkgname": "testpkgname"}
 
@@ -110,20 +110,27 @@ def test_check_arch_abort(monkeypatch, args):
         return apkbuild
     monkeypatch.setattr(pmb.helpers.pmaports, "get", fake_helpers_pmaports_get)
 
-    # Arch is right
-    func = pmb.build._package.check_arch_abort
+    # pmaport with arch exists
+    func = pmb.build._package.check_build_for_arch
     apkbuild["arch"] = ["armhf"]
-    func(args, "testpkgname", "armhf")
+    assert func(args, "testpkgname", "armhf") is True
     apkbuild["arch"] = ["noarch"]
-    func(args, "testpkgname", "armhf")
+    assert func(args, "testpkgname", "armhf") is True
     apkbuild["arch"] = ["all"]
-    func(args, "testpkgname", "armhf")
+    assert func(args, "testpkgname", "armhf") is True
 
-    # Arch is wrong
+    # No binary package exists and can't build it
     apkbuild["arch"] = ["x86_64"]
     with pytest.raises(RuntimeError) as e:
         func(args, "testpkgname", "armhf")
     assert "Can't build" in str(e.value)
+
+    # pmaport can't be built for x86_64, but binary package exists in Alpine
+    apkbuild = {"pkgname": "mesa",
+                "arch": "armhf",
+                "pkgver": "9999",
+                "pkgrel": "0"}
+    assert func(args, "mesa", "x86_64") is False
 
 
 def test_get_depends(monkeypatch):

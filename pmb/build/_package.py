@@ -69,14 +69,31 @@ def get_apkbuild(args, pkgname, arch):
                        " could not find this package in any APKINDEX!")
 
 
-def check_arch_abort(args, pkgname, arch):
+def check_build_for_arch(args, pkgname, arch):
     """
-    Check if the APKBUILD can be built for a specific architecture and abort
-    with a helpful message if it is not the case.
+    Check if pmaport can be built or exists as binary for a specific arch.
+    :returns: * True when it can be built
+              * False when it can't be built, but exists in a binary repo
+                (e.g. temp/mesa can't be built for x86_64, but Alpine has it)
+    :raises: RuntimeError if the package can't be built for the given arch and
+             does not exist as binary package.
     """
+    # Check for pmaport with arch
     if pmb.helpers.package.check_arch(args, pkgname, arch, False):
-        return
+        return True
 
+    # Check for binary package
+    binary = pmb.parse.apkindex.package(args, pkgname, arch, False)
+    if binary:
+        pmaport = pmb.helpers.pmaports.get(args, pkgname)
+        pmaport_version = pmaport["pkgver"] + "-r" + pmaport["pkgrel"]
+        logging.debug(pkgname + ": found pmaport (" + pmaport_version + ") and"
+                      " binary package (" + binary["version"] + ", from"
+                      " postmarketOS or Alpine), but pmaport can't be built"
+                      " for " + arch + " -> using binary package")
+        return False
+
+    # No binary package exists and can't build it
     logging.info("NOTE: You can edit the 'arch=' line inside the APKBUILD")
     if args.action == "build":
         logging.info("NOTE: Alternatively, use --arch to build for another"
@@ -435,7 +452,8 @@ def package(args, pkgname, arch=None, force=False, strict=False,
         return
 
     # Detect the build environment (skip unnecessary builds)
-    check_arch_abort(args, pkgname, arch)
+    if not check_build_for_arch(args, pkgname, arch):
+        return
     suffix = pmb.build.autodetect.suffix(args, apkbuild, arch)
     cross = pmb.build.autodetect.crosscompile(args, apkbuild, arch, suffix)
     if not init_buildenv(args, apkbuild, arch, strict, force, cross, suffix,
