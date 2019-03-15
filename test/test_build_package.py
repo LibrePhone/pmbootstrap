@@ -174,6 +174,26 @@ def test_build_depends(args, monkeypatch):
     assert func(args, apkbuild, "armhf", False) == (["a", "b"], ["a", "b"])
 
 
+def test_build_depends_no_binary_error(args, monkeypatch):
+    # Shortcut and fake apkbuild
+    func = pmb.build._package.build_depends
+    apkbuild = {"pkgname": "test", "depends": ["some-invalid-package-here"],
+                "makedepends": [], "checkdepends": [], "subpackages": [],
+                "options": []}
+
+    # pmbootstrap build --no-depends
+    args.no_depends = True
+
+    # Missing binary package error
+    with pytest.raises(RuntimeError) as e:
+        func(args, apkbuild, "armhf", True)
+    assert str(e.value).startswith("Missing binary package for dependency")
+
+    # All depends exist
+    apkbuild["depends"] = ["alpine-base"]
+    assert func(args, apkbuild, "armhf", True) == (["alpine-base"], [])
+
+
 def test_is_necessary_warn_depends(args, monkeypatch):
     # Shortcut and fake apkbuild
     func = pmb.build._package.is_necessary_warn_depends

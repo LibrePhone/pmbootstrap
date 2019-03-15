@@ -140,13 +140,22 @@ def build_depends(args, apkbuild, arch, strict):
     logging.verbose(pkgname + ": build/install dependencies: " +
                     ", ".join(depends))
 
-    # Build them
+    # --no-depends: check for binary packages
     depends_built = []
-    for depend in depends:
-        if package(args, depend, arch, strict=strict):
-            depends_built += [depend]
-    logging.verbose(pkgname + ": build dependencies: done, built: " +
-                    ", ".join(depends_built))
+    if "no_depends" in args and args.no_depends:
+        for depend in depends:
+            if not pmb.parse.apkindex.package(args, depend, arch, False):
+                raise RuntimeError("Missing binary package for dependency '" +
+                                   depend + "' of '" + pkgname + "', but"
+                                   " pmbootstrap won't build any depends since"
+                                   " it was started with --no-depends.")
+    else:
+        # Build the dependencies
+        for depend in depends:
+            if package(args, depend, arch, strict=strict):
+                depends_built += [depend]
+        logging.verbose(pkgname + ": build dependencies: done, built: " +
+                        ", ".join(depends_built))
 
     return (depends, depends_built)
 
