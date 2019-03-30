@@ -357,6 +357,15 @@ def embed_firmware(args):
                                "bs=" + str(step), "seek=" + str(offset)])
 
 
+def sanity_check_sdcard(device):
+    device_name = os.path.basename(device)
+    if os.path.isdir('/sys/class/block/{}'.format(device_name)):
+        with open('/sys/class/block/{}/ro'.format(device_name), 'r') as handle:
+            ro = handle.read()
+        if ro == '1\n':
+            raise RuntimeError("{} is read-only, Is the sdcard locked?".format(device))
+
+
 def install_system_image(args):
     # Partition and fill image/sdcard
     logging.info("*** (3/5) PREPARE INSTALL BLOCKDEVICE ***")
@@ -449,6 +458,10 @@ def install_recovery_zip(args):
 
 
 def install(args):
+    # Sanity checks
+    if not args.android_recovery_zip and args.sdcard:
+        sanity_check_sdcard(args.sdcard)
+
     # Number of steps for the different installation methods.
     steps = 4 if args.android_recovery_zip else 5
 
